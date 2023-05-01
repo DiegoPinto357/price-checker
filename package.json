@@ -8,9 +8,13 @@
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "server": "nodemon ./src/server.ts"
+    "server": "nodemon ./src/server.ts",
+    "build-app": "npm run build && cp -r src/nodejs dist/ && npx cap sync",
+    "android": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^4.8.0",
+    "@capacitor/core": "^4.8.0",
     "@fastify/cors": "^8.0.0",
     "axios": "^1.4.0",
     "capacitor-nodejs": "https://github.com/hampoelz/capacitor-nodejs/releases/download/v1.0.0-beta.2/capacitor-nodejs.tgz",
@@ -19,6 +23,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^4.8.0",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
