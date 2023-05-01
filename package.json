@@ -7,9 +7,14 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "nodemon ./src/server.ts"
   },
   "dependencies": {
+    "@fastify/cors": "^8.0.0",
+    "axios": "^1.4.0",
+    "capacitor-nodejs": "https://github.com/hampoelz/capacitor-nodejs/releases/download/v1.0.0-beta.2/capacitor-nodejs.tgz",
+    "fastify": "^4.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -22,6 +27,8 @@
     "eslint": "^8.38.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.3.4",
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.1",
     "typescript": "^5.0.2",
     "vite": "^4.3.0"
   }
