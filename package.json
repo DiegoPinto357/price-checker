@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "server": "nodemon ./src/server.ts",
     "build-app": "npm run build && cp -r src/nodejs dist/ && npx cap sync",
-    "android": "npx cap open android"
+    "android": "npx cap open android",
+    "core": "node ./src/nodejs/index.js"
   },
   "dependencies": {
     "@capacitor/android": "^4.8.0",

@@ -3,8 +3,8 @@
 const { channel } = require('bridge');
 const nfParser = require('./nfParser');
 
-channel.addListener('/items', async key => {
-  console.log('[node] /items event: ' + key);
+channel.addListener('/nf-data', async key => {
+  console.log('[node] /nf-data event: ' + key);
   const data = await nfParser(key);
   console.log(data);
   channel.send('reply', data);

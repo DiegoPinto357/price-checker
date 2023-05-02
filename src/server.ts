@@ -13,16 +13,12 @@ app.setErrorHandler((error, _request, reply) => {
   reply.status(500).send();
 });
 
-app.get('/ping', (_request, reply) => {
-  reply.send({ test: true });
-});
-
 interface IItemsQuerystring {
   key: string;
 }
 
 app.get<{ Querystring: IItemsQuerystring }>(
-  '/items',
+  '/nf-data',
   async (request, reply) => {
     const { key } = request.query;
     const items = await nfParser(key);

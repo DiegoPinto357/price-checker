@@ -5,7 +5,7 @@ import axios from 'axios';
 const platform = Capacitor.getPlatform();
 
 const getNfDataHttp = async (key: string) => {
-  const { data } = await axios.get('http://127.0.0.1:3001/items', {
+  const { data } = await axios.get('http://127.0.0.1:3001/nf-data', {
     params: { key },
   });
   return data;
@@ -15,12 +15,11 @@ const getNfDataIpc = (key: string) =>
   new Promise(resolve => {
     NodeJS.addListener('reply', event => {
       const data = event.args[0];
-      console.log(data);
       resolve(data);
     });
 
     NodeJS.send({
-      eventName: '/items',
+      eventName: '/nf-data',
       args: [key],
     });
   });
