@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useState } from 'react';
+import { NextUIProvider, Container, Button } from '@nextui-org/react';
 import { NodeJS } from 'capacitor-nodejs';
 import core from './core';
 
@@ -23,13 +24,15 @@ const App = () => {
   }, []);
 
   return (
-    <>
-      {!isNodeReady ? 'Awaiting nodejs' : 'Node ready'}
-      <br />
-      <button onClick={onButtonClick}>Parse NF</button>
-      <br />
-      <code>{JSON.stringify(items, null, 2)}</code>
-    </>
+    <NextUIProvider>
+      <Container sm>
+        {!isNodeReady ? 'Awaiting nodejs' : 'Node ready'}
+        <br />
+        <Button onClick={onButtonClick}>Parse NF</Button>
+        <br />
+        <code>{JSON.stringify(items, null, 2)}</code>
+      </Container>
+    </NextUIProvider>
   );
 };
 
