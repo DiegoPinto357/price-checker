@@ -1,11 +1,13 @@
 import { useEffect, useCallback, useState } from 'react';
-import { NextUIProvider, Container, Button } from '@nextui-org/react';
+// import { NextUIProvider, Container, Button } from '@nextui-org/react';
 import { NodeJS } from 'capacitor-nodejs';
+import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import core from './core';
 
 const App = () => {
   const [isNodeReady, setIsNodeReady] = useState<boolean>(false);
-  const [items, setItems] = useState();
+  const [items, setItems] = useState<string>();
+  // const [displayUI, setDisplayUI] = useState<boolean>(true);
 
   useEffect(() => {
     NodeJS.whenReady().then(() => {
@@ -16,23 +18,45 @@ const App = () => {
   }, []);
 
   const onButtonClick = useCallback(async () => {
-    const data = await core.getNfData(
-      '43230401438784002060650050002209661478083301|2|1|1|5a7b0201011ca0acc439ef3ea9358b64131234e4'
-    );
-    console.log(data);
-    setItems(data);
+    await BarcodeScanner.checkPermission({ force: true });
+
+    BarcodeScanner.hideBackground();
+    // setDisplayUI(false);
+
+    const result = await BarcodeScanner.startScan({
+      cameraDirection: 'back',
+      targetedFormats: ['QR_CODE'],
+    });
+
+    BarcodeScanner.showBackground();
+    // setDisplayUI(true);
+
+    if (result.hasContent) {
+      const qrCodeData = result.content.replace('"', '');
+      console.log(qrCodeData);
+
+      const key = qrCodeData.match(/\?p=([^&]*)/)![1];
+
+      const data = await core.getNfData(key);
+      setItems(JSON.stringify(data, null, 2));
+    }
   }, []);
 
+  // const display = displayUI ? 'block' : 'none';
+
   return (
-    <NextUIProvider>
-      <Container sm>
-        {!isNodeReady ? 'Awaiting nodejs' : 'Node ready'}
-        <br />
-        <Button onClick={onButtonClick}>Parse NF</Button>
-        <br />
-        <code>{JSON.stringify(items, null, 2)}</code>
-      </Container>
-    </NextUIProvider>
+    <>
+      {/* <NextUIProvider>
+        <Container sm style={{ display }}> */}
+      {!isNodeReady ? 'Awaiting nodejs' : 'Node ready'}
+      <br />
+      {/* <Button onPress={onButtonClick}>Parse NF</Button> */}
+      <button onClick={onButtonClick}>Parse NF</button>
+      <br />
+      <code>{JSON.stringify(items, null, 2)}</code>
+      {/* </Container>
+      </NextUIProvider> */}
+    </>
   );
 };
 
