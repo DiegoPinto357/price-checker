@@ -1,10 +1,9 @@
 import { useCallback, useEffect } from 'react';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { Button } from '@nextui-org/react';
-import core from './core';
 
 interface QrCodeReaderProps {
-  onClose: (data: object) => void;
+  onClose: (data?: string) => void;
 }
 
 const QrCodeReader = ({ onClose }: QrCodeReaderProps) => {
@@ -24,7 +23,8 @@ const QrCodeReader = ({ onClose }: QrCodeReaderProps) => {
     document.body.style.backgroundColor = 'var(--nextui-colors-background)';
     BarcodeScanner.showBackground();
     BarcodeScanner.stopScan();
-  }, []);
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
     const readQrCode = async () => {
@@ -33,13 +33,10 @@ const QrCodeReader = ({ onClose }: QrCodeReaderProps) => {
 
       if (result.hasContent) {
         const qrCodeData = result.content.replace('"', '');
-        console.log(qrCodeData);
-
-        const key = qrCodeData.match(/\?p=([^&]*)/)![1];
-
-        const data = await core.getNfData(key);
-        onClose(data);
+        return onClose(qrCodeData);
       }
+
+      onClose();
     };
 
     readQrCode();

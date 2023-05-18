@@ -2,6 +2,7 @@ import { useEffect, useCallback, useState } from 'react';
 import { NextUIProvider, Container, Button } from '@nextui-org/react';
 import { NodeJS } from 'capacitor-nodejs';
 import QrCodeReader from './QrCodeReader';
+import core from './core';
 
 const App = () => {
   const [isNodeReady, setIsNodeReady] = useState<boolean>(false);
@@ -22,9 +23,14 @@ const App = () => {
     setRenderQrCode(true);
   }, []);
 
-  const onQrCoreReaderClose = useCallback((data: object) => {
+  const onQrCoreReaderClose = useCallback(async (data?: string) => {
     setRenderQrCode(false);
-    setItems(JSON.stringify(data, null, 2));
+
+    if (data) {
+      const key = data.match(/\?p=([^&]*)/)![1];
+      const nfData = await core.getNfData(key);
+      setItems(JSON.stringify(nfData, null, 2));
+    }
   }, []);
 
   return (
