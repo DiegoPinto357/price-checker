@@ -3,11 +3,12 @@ import { NextUIProvider, Container, Button } from '@nextui-org/react';
 import { NodeJS } from 'capacitor-nodejs';
 import QrCodeReader from './QrCodeReader';
 import core from './core';
+import ItemsList, { ItemsListProps } from './ItemsList';
 
 const App = () => {
   const [isNodeReady, setIsNodeReady] = useState<boolean>(false);
-  const [items, setItems] = useState<string>();
   const [renderQrCode, setRenderQrCode] = useState<boolean>(false);
+  const [items, setItems] = useState<ItemsListProps['items']>([]);
 
   useEffect(() => {
     NodeJS.whenReady().then(() => {
@@ -29,7 +30,7 @@ const App = () => {
     if (data) {
       const key = data.match(/\?p=([^&]*)/)![1];
       const nfData = await core.getNfData(key);
-      setItems(JSON.stringify(nfData, null, 2));
+      setItems(nfData.items);
     }
   }, []);
 
@@ -43,7 +44,7 @@ const App = () => {
           <br />
           <Button onPress={onButtonClick}>Parse NF</Button>
           <br />
-          <code>{JSON.stringify(items, null, 2)}</code>
+          <ItemsList items={items} />
         </Container>
       )}
     </NextUIProvider>
