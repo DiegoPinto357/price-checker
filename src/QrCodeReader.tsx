@@ -6,11 +6,20 @@ interface QrCodeReaderProps {
   onClose: (data?: string) => void;
 }
 
+const overrideBodyCss = () => {
+  document.body.style.position = 'unset';
+  document.body.style.backgroundColor = 'transparent';
+};
+
+const restoreBodyCss = () => {
+  document.body.style.position = 'relative';
+  document.body.style.backgroundColor = 'var(--nextui-colors-background)';
+};
+
 const QrCodeReader = ({ onClose }: QrCodeReaderProps) => {
   const startQrReader = useCallback(async () => {
     await BarcodeScanner.checkPermission({ force: true });
-    document.body.style.position = 'unset';
-    document.body.style.backgroundColor = 'transparent';
+    overrideBodyCss();
     BarcodeScanner.hideBackground();
     return await BarcodeScanner.startScan({
       cameraDirection: 'back',
@@ -19,8 +28,7 @@ const QrCodeReader = ({ onClose }: QrCodeReaderProps) => {
   }, []);
 
   const stopQrReader = useCallback(() => {
-    document.body.style.position = 'relative';
-    document.body.style.backgroundColor = 'var(--nextui-colors-background)';
+    restoreBodyCss();
     BarcodeScanner.showBackground();
     BarcodeScanner.stopScan();
     onClose();
