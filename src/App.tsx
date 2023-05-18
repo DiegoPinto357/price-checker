@@ -1,9 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import { NextUIProvider, Container, Button } from '@nextui-org/react';
 import { NodeJS } from 'capacitor-nodejs';
-import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import QrCodeOverlay from './QrCodeOverlay';
-import core from './core';
+import QrCodeReader from './QrCodeReader';
 
 const App = () => {
   const [isNodeReady, setIsNodeReady] = useState<boolean>(false);
@@ -15,48 +13,24 @@ const App = () => {
       setIsNodeReady(true);
     });
 
-    // return () => NodeJS.removeAllListeners();
-  }, []);
-
-  const startQrReader = useCallback(async () => {
-    await BarcodeScanner.checkPermission({ force: true });
-    document.body.style.position = 'unset';
-    document.body.style.backgroundColor = 'transparent';
-    BarcodeScanner.hideBackground();
-    setRenderQrCode(true);
-    return await BarcodeScanner.startScan({
-      cameraDirection: 'back',
-      targetedFormats: ['QR_CODE'],
-    });
-  }, []);
-
-  const stopQrReader = useCallback(() => {
-    document.body.style.position = 'relative';
-    document.body.style.backgroundColor = 'var(--nextui-colors-background)';
-    BarcodeScanner.showBackground();
-    setRenderQrCode(false);
-    BarcodeScanner.stopScan();
+    return () => {
+      NodeJS.removeAllListeners();
+    };
   }, []);
 
   const onButtonClick = useCallback(async () => {
-    const result = await startQrReader();
-    stopQrReader();
+    setRenderQrCode(true);
+  }, []);
 
-    if (result.hasContent) {
-      const qrCodeData = result.content.replace('"', '');
-      console.log(qrCodeData);
-
-      const key = qrCodeData.match(/\?p=([^&]*)/)![1];
-
-      const data = await core.getNfData(key);
-      setItems(JSON.stringify(data, null, 2));
-    }
-  }, [startQrReader, stopQrReader]);
+  const onQrCoreReaderClose = useCallback((data: object) => {
+    setRenderQrCode(false);
+    setItems(JSON.stringify(data, null, 2));
+  }, []);
 
   return (
     <NextUIProvider>
       {renderQrCode ? (
-        <QrCodeOverlay onCloseButtonClick={stopQrReader} />
+        <QrCodeReader onClose={onQrCoreReaderClose} />
       ) : (
         <Container sm>
           {!isNodeReady ? 'Awaiting nodejs' : 'Node ready'}
