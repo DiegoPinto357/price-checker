@@ -1,30 +1,19 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { NextUIProvider, Container, Button } from '@nextui-org/react';
-import { NodeJS } from 'capacitor-nodejs';
 import QrCodeReader from './QrCodeReader';
-import core from './core';
 import ItemsList, { ItemsListProps } from './ItemsList';
+import NodejsLoader from './NodejsLoader';
+import core from './core';
 
 const App = () => {
-  const [isNodeReady, setIsNodeReady] = useState<boolean>(false);
   const [renderQrCode, setRenderQrCode] = useState<boolean>(false);
   const [items, setItems] = useState<ItemsListProps['items']>([]);
-
-  useEffect(() => {
-    NodeJS.whenReady().then(() => {
-      setIsNodeReady(true);
-    });
-
-    return () => {
-      NodeJS.removeAllListeners();
-    };
-  }, []);
 
   const onButtonClick = useCallback(async () => {
     setRenderQrCode(true);
   }, []);
 
-  const onQrCoreReaderClose = useCallback(async (data?: string) => {
+  const onQrCodeReaderClose = useCallback(async (data?: string) => {
     setRenderQrCode(false);
 
     if (data) {
@@ -37,10 +26,10 @@ const App = () => {
   return (
     <NextUIProvider>
       {renderQrCode ? (
-        <QrCodeReader onClose={onQrCoreReaderClose} />
+        <QrCodeReader onClose={onQrCodeReaderClose} />
       ) : (
         <Container sm>
-          {!isNodeReady ? 'Awaiting nodejs' : 'Node ready'}
+          <NodejsLoader />
           <br />
           <Button onPress={onButtonClick}>Parse NF</Button>
           <br />
