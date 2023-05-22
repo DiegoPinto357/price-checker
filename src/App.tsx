@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { NextUIProvider, Container, Button } from '@nextui-org/react';
 import QrCodeReader from './QrCodeReader';
-import ItemsList, { ItemsListProps } from './ItemsList';
+import QrResults, { QrResultsProps } from './QrResults';
 import NodejsLoader from './NodejsLoader';
 import core from './core';
 
@@ -14,7 +14,7 @@ enum ContentPage {
 
 const App = () => {
   const [contentPage, setContentPage] = useState<ContentPage>(ContentPage.Idle);
-  const [items, setItems] = useState<ItemsListProps['items']>([]);
+  const [items, setItems] = useState<QrResultsProps['items']>([]);
 
   const onButtonClick = useCallback(async () => {
     setContentPage(ContentPage.QrReader);
@@ -32,6 +32,14 @@ const App = () => {
     setContentPage(ContentPage.Idle);
   }, []);
 
+  const onQrResultsSaveClick = useCallback(() => {
+    setContentPage(ContentPage.Idle);
+  }, []);
+
+  const onQrResultsCancelClick = useCallback(() => {
+    setContentPage(ContentPage.Idle);
+  }, []);
+
   const renderContentPage = useCallback(
     (selectedContentPage: ContentPage) => {
       switch (selectedContentPage) {
@@ -45,12 +53,24 @@ const App = () => {
           return <QrCodeReader onClose={onQrCodeReaderClose} />;
 
         case ContentPage.QrResults:
-          return <ItemsList items={items} />;
+          return (
+            <QrResults
+              items={items}
+              onSaveClick={onQrResultsSaveClick}
+              onCancelClick={onQrResultsCancelClick}
+            />
+          );
       }
 
       return null;
     },
-    [items, onButtonClick, onQrCodeReaderClose]
+    [
+      items,
+      onButtonClick,
+      onQrCodeReaderClose,
+      onQrResultsSaveClick,
+      onQrResultsCancelClick,
+    ]
   );
 
   return (
