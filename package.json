@@ -8,6 +8,8 @@
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
     "server": "nodemon ./src/server.ts",
     "build-app": "npm run build && cp -r src/nodejs dist/ && npx cap sync",
     "android": "npx cap open android",
@@ -27,18 +29,23 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^4.8.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^14.0.0",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",
     "@vitejs/plugin-react": "^4.0.0-beta.0",
+    "@vitest/ui": "^0.31.4",
     "concurrently": "^8.0.1",
     "eslint": "^8.38.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.3.4",
+    "jsdom": "^22.1.0",
     "nodemon": "^2.0.22",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.2",
-    "vite": "^4.3.0"
+    "vite": "^4.3.0",
+    "vitest": "^0.31.4"
   }
 }
