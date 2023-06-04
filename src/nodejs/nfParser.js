@@ -27,6 +27,18 @@ const parseQrCode = key => {
   };
 };
 
+const parseStoreData = raw => {
+  const rawArray = raw.split('\n');
+  return {
+    cnpj: rawArray[2].trim(),
+    incricaoEstadual: rawArray[3].match(/:\s(\d+)/)[1],
+  };
+};
+
+const parseStoreAddress = raw => {
+  return raw.replace(/\n(\s+)/gm, ' ');
+};
+
 const parseMetadata = raw => {
   const items = raw.split('\n');
 
@@ -39,8 +51,20 @@ const parseMetadata = raw => {
 
 const parseProtocol = raw => raw.match(/:\s([^]\d*)/)[1];
 
-const parsepage = page => {
+const parsePage = page => {
   const $ = cheerio.load(page);
+
+  const storeTable = $(
+    '#respostaWS > tbody > tr > td > table > tbody > tr:nth-child(3) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td'
+  );
+
+  const storeName = $($(storeTable).find('td')[1]).text();
+  const storeDataRaw = $($(storeTable).find('td')[2]).text();
+  const storeData = parseStoreData(storeDataRaw);
+  const storeAddressRaw = $($(storeTable).find('td')[3]).text();
+  const storeAddress = parseStoreAddress(storeAddressRaw);
+
+  const store = { name: storeName, ...storeData, address: storeAddress };
 
   const infoTable = $(
     '#respostaWS > tbody > tr > td > table > tbody > tr:nth-child(3) > td > table > tbody > tr > td > table > tbody > tr:nth-child(3) > td > table > tbody'
@@ -71,12 +95,13 @@ const parsepage = page => {
     items.push(item);
   });
 
-  return { ...metadata, protocol, items };
+  return { ...metadata, protocol, store, items };
 };
 
 module.exports = async key => {
   const page = await getPage(key);
   const qrCode = parseQrCode(key);
-  const pageData = parsepage(page);
+  const pageData = parsePage(page);
+  console.log({ ...qrCode, ...pageData });
   return { ...qrCode, ...pageData };
 };
