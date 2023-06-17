@@ -1,6 +1,6 @@
 import { Grid, Button } from '@nextui-org/react';
 import ItemsList from './ItemsList';
-import { Product } from './types';
+import { Product } from '../types';
 
 const fullWidthCss = { width: '100%' };
 

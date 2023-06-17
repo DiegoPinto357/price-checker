@@ -3,9 +3,9 @@ import { NextUIProvider, Container, Button } from '@nextui-org/react';
 import QrCodeReader from './QrCodeReader';
 import QrResults from './QrResults';
 import NodejsLoader from './NodejsLoader';
-import { Product } from './types';
-import { storage } from './proxies';
-import core from './core';
+import { Product } from '../types';
+import { storage } from '../proxies';
+import core from '../core';
 
 enum ContentPage {
   Loader,
