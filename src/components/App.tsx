@@ -3,8 +3,8 @@ import { NextUIProvider, Container, Button } from '@nextui-org/react';
 import QrCodeReader from './QrCodeReader';
 import QrResults from './QrResults';
 import NodejsLoader from './NodejsLoader';
+import { saveProducts } from '../products';
 import { Product } from '../types';
-import { storage } from '../proxies';
 import core from '../core';
 
 enum ContentPage {
@@ -35,7 +35,7 @@ const App = () => {
   }, []);
 
   const onQrResultsSaveClick = useCallback(async (products: Product[]) => {
-    await storage.saveProducts(products);
+    await saveProducts(products);
     setContentPage(ContentPage.Idle);
   }, []);
 
