@@ -1,8 +1,10 @@
 import { useCallback, useState } from 'react';
 import { NextUIProvider, Container, Button } from '@nextui-org/react';
 import QrCodeReader from './QrCodeReader';
-import QrResults, { QrResultsProps } from './QrResults';
+import QrResults from './QrResults';
 import NodejsLoader from './NodejsLoader';
+import { Product } from './types';
+import { storage } from './services';
 import core from './core';
 
 enum ContentPage {
@@ -14,7 +16,7 @@ enum ContentPage {
 
 const App = () => {
   const [contentPage, setContentPage] = useState<ContentPage>(ContentPage.Idle);
-  const [items, setItems] = useState<QrResultsProps['items']>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
   const onButtonClick = useCallback(async () => {
     setContentPage(ContentPage.QrReader);
@@ -24,7 +26,7 @@ const App = () => {
     if (data) {
       const key = data.match(/\?p=([^&]*)/)![1];
       const nfData = await core.getNfData(key);
-      setItems(nfData.items);
+      setProducts(nfData.items);
       setContentPage(ContentPage.QrResults);
       return;
     }
@@ -32,7 +34,8 @@ const App = () => {
     setContentPage(ContentPage.Idle);
   }, []);
 
-  const onQrResultsSaveClick = useCallback(() => {
+  const onQrResultsSaveClick = useCallback(async (products: Product[]) => {
+    await storage.saveProducts(products);
     setContentPage(ContentPage.Idle);
   }, []);
 
@@ -55,7 +58,7 @@ const App = () => {
         case ContentPage.QrResults:
           return (
             <QrResults
-              items={items}
+              products={products}
               onSaveClick={onQrResultsSaveClick}
               onCancelClick={onQrResultsCancelClick}
             />
@@ -65,7 +68,7 @@ const App = () => {
       return null;
     },
     [
-      items,
+      products,
       onButtonClick,
       onQrCodeReaderClose,
       onQrResultsSaveClick,

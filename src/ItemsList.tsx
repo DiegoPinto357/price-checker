@@ -1,17 +1,14 @@
-interface Item {
-  description: string;
-  value: number;
-}
+import { Product } from './types';
 
 export interface ItemsListProps {
-  items: Item[];
+  products: Product[];
 }
 
-const ItemsList = ({ items }: ItemsListProps) => {
+const ItemsList = ({ products }: ItemsListProps) => {
   return (
     <ul>
-      {items.map(item => (
-        <li>{`${item.description} - ${item.value}`}</li>
+      {products.map(product => (
+        <li>{`${product.description} - ${product.value}`}</li>
       ))}
     </ul>
   );
