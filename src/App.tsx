@@ -4,7 +4,7 @@ import QrCodeReader from './QrCodeReader';
 import QrResults from './QrResults';
 import NodejsLoader from './NodejsLoader';
 import { Product } from './types';
-import { storage } from './services';
+import { storage } from './proxies';
 import core from './core';
 
 enum ContentPage {
