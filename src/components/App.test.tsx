@@ -18,7 +18,7 @@ vi.mock('./QrCodeReader', () => ({
 }));
 
 describe('App', () => {
-  it('scans qr code and save nf and products data', async () => {
+  it('scans qr code and saves nf and products data', async () => {
     (axios.get as Mock).mockResolvedValue({ data: nfData });
 
     render(<App />);
@@ -29,13 +29,22 @@ describe('App', () => {
     const saveResultsButton = screen.getByRole('button', { name: 'Salvar' });
     await userEvent.click(saveResultsButton);
 
-    expect(axios.post).toBeCalledTimes(nfData.items.length);
+    expect(axios.post).toBeCalledTimes(nfData.items.length + 1);
+
+    expect(axios.post).toBeCalledWith(
+      'http://127.0.0.1:3001/storage/write-file',
+      {
+        filename: `/nfs/${nfData.key}.json`,
+        data: nfData,
+      }
+    );
+
     nfData.items.forEach(item => {
       expect(axios.post).toBeCalledWith(
         'http://127.0.0.1:3001/storage/write-file',
         {
           filename: `/products/${item.code}.json`,
-          data: item,
+          data: { ...item, nfKey: nfData.key },
         }
       );
     });

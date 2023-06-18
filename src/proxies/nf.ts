@@ -26,4 +26,6 @@ const getNfDataIpc = (key: string) =>
 
 const getNfData = platform === 'web' ? getNfDataHttp : getNfDataIpc;
 
-export default { getNfData };
+export default {
+  getNfData,
+};

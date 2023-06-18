@@ -3,9 +3,9 @@ import { NextUIProvider, Container, Button } from '@nextui-org/react';
 import QrCodeReader from './QrCodeReader';
 import QrResults from './QrResults';
 import NodejsLoader from './NodejsLoader';
+import { getNfData, saveNf } from '../nfs';
 import { saveProducts } from '../products';
-import { Product } from '../types';
-import core from '../core';
+import { Nf, Product } from '../types';
 
 enum ContentPage {
   Loader,
@@ -16,7 +16,7 @@ enum ContentPage {
 
 const App = () => {
   const [contentPage, setContentPage] = useState<ContentPage>(ContentPage.Idle);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [nf, setNf] = useState<Nf | null>();
 
   const onButtonClick = useCallback(async () => {
     setContentPage(ContentPage.QrReader);
@@ -25,8 +25,8 @@ const App = () => {
   const onQrCodeReaderClose = useCallback(async (data?: string) => {
     if (data) {
       const key = data.match(/\?p=([^&]*)/)![1];
-      const nfData = await core.getNfData(key);
-      setProducts(nfData.items);
+      const nfData = await getNfData(key);
+      setNf(nfData);
       setContentPage(ContentPage.QrResults);
       return;
     }
@@ -34,10 +34,17 @@ const App = () => {
     setContentPage(ContentPage.Idle);
   }, []);
 
-  const onQrResultsSaveClick = useCallback(async (products: Product[]) => {
-    await saveProducts(products);
-    setContentPage(ContentPage.Idle);
-  }, []);
+  const onQrResultsSaveClick = useCallback(
+    async (products: Product[]) => {
+      if (nf) {
+        await saveNf(nf);
+        await saveProducts(products, nf.key);
+      }
+      setNf(null);
+      setContentPage(ContentPage.Idle);
+    },
+    [nf]
+  );
 
   const onQrResultsCancelClick = useCallback(() => {
     setContentPage(ContentPage.Idle);
@@ -58,7 +65,7 @@ const App = () => {
         case ContentPage.QrResults:
           return (
             <QrResults
-              products={products}
+              products={nf ? nf.items : []}
               onSaveClick={onQrResultsSaveClick}
               onCancelClick={onQrResultsCancelClick}
             />
@@ -68,7 +75,7 @@ const App = () => {
       return null;
     },
     [
-      products,
+      nf,
       onButtonClick,
       onQrCodeReaderClose,
       onQrResultsSaveClick,
