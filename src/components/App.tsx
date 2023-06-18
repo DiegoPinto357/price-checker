@@ -38,7 +38,7 @@ const App = () => {
     async (products: Product[]) => {
       if (nf) {
         await saveNf(nf);
-        await saveProducts(products, nf.key);
+        await saveProducts(products, nf);
       }
       setNf(null);
       setContentPage(ContentPage.Idle);

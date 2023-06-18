@@ -44,7 +44,20 @@ describe('App', () => {
         'http://127.0.0.1:3001/storage/write-file',
         {
           filename: `/products/${item.code}.json`,
-          data: { ...item, nfKey: nfData.key },
+          data: {
+            code: item.code,
+            description: item.description,
+            history: [
+              {
+                nfKey: nfData.key,
+                date: nfData.date,
+                amount: item.amount,
+                unit: item.unit,
+                value: item.value,
+                totalValue: item.totalValue,
+              },
+            ],
+          },
         }
       );
     });

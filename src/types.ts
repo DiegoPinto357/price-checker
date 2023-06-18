@@ -28,4 +28,17 @@ export interface Product {
   totalValue: number;
 }
 
-export type ProductWithNfKey = Product & { nfKey: string };
+interface ProductHistoryItem {
+  nfKey: string;
+  date: string;
+  amount: number;
+  unit: string;
+  value: number;
+  totalValue: number;
+}
+
+export interface ProductHistory {
+  code: string;
+  description: string;
+  history: ProductHistoryItem[];
+}
