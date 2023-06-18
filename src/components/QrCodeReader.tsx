@@ -12,7 +12,7 @@ const restoreBodyCss = () => {
   document.body.style.backgroundColor = 'var(--nextui-colors-background)';
 };
 
-interface QrCodeReaderProps {
+export interface QrCodeReaderProps {
   onClose: (data?: string) => void;
 }
 

@@ -8,7 +8,9 @@ const ItemsList = ({ products }: ItemsListProps) => {
   return (
     <ul>
       {products.map(product => (
-        <li>{`${product.description} - ${product.value}`}</li>
+        <li
+          key={product.code}
+        >{`${product.description} - ${product.value}`}</li>
       ))}
     </ul>
   );
