@@ -6,7 +6,7 @@ const cheerio = require('cheerio');
 const baseUrl =
   'https://www.sefaz.rs.gov.br/ASP/AAE_ROOT/NFE/SAT-WEB-NFE-NFC_QRCODE_1.asp?p=';
 
-// const getKey = url => url.match(/\?p=([^&]*)/)[1];
+const formatDecimal = value => value.replace(',', '.');
 
 const getPage = async key => {
   const url = `${baseUrl}${key}`;
@@ -87,10 +87,10 @@ const parsePage = page => {
     const item = {
       code: $($(element).find('td')[0]).text(),
       description: $($(element).find('td')[1]).text(),
-      amount: $($(element).find('td')[2]).text(),
+      amount: +formatDecimal($($(element).find('td')[2]).text()),
       unit: $($(element).find('td')[3]).text(),
-      value: $($(element).find('td')[4]).text(),
-      totalValue: $($(element).find('td')[5]).text(),
+      value: +formatDecimal($($(element).find('td')[4]).text()),
+      totalValue: +formatDecimal($($(element).find('td')[5]).text()),
     };
     items.push(item);
   });
@@ -102,6 +102,5 @@ module.exports = async key => {
   const page = await getPage(key);
   const qrCode = parseQrCode(key);
   const pageData = parsePage(page);
-  console.log({ ...qrCode, ...pageData });
   return { ...qrCode, ...pageData };
 };

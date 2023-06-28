@@ -18,162 +18,162 @@
     {
       "code": "7896333041307",
       "description": "AG MINERAL TUTTIBLU S/GAS 5L",
-      "amount": "2",
+      "amount": 2,
       "unit": "UN",
-      "value": "5,49",
-      "totalValue": "10,98"
+      "value": 5.49,
+      "totalValue": 10.98
     },
     {
       "code": "7896083800018",
       "description": "AG SANITARIA QBOA 1L",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "4,49",
-      "totalValue": "4,49"
+      "value": 4.49,
+      "totalValue": 4.49
     },
     {
       "code": "7896333041383",
       "description": "P TOALHA UTILO 2X50F",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "5,98",
-      "totalValue": "5,98"
+      "value": 5.98,
+      "totalValue": 5.98
     },
     {
       "code": "7898930672007",
       "description": "FOLHA ALUM WYDA 30CM/10M PROM",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "6,98",
-      "totalValue": "6,98"
+      "value": 6.98,
+      "totalValue": 6.98
     },
     {
       "code": "2405010000008",
       "description": "MORT DEFUMADA SEARA GOURMET AS",
-      "amount": "0,21",
+      "amount": 0.21,
       "unit": "KG",
-      "value": "46,9",
-      "totalValue": "9,85"
+      "value": 46.9,
+      "totalValue": 9.85
     },
     {
       "code": "2064460000008",
       "description": "BIFE COXAO MOLE ATM NOV ZAFFARI",
-      "amount": "0,536",
+      "amount": 0.536,
       "unit": "KG",
-      "value": "61,9",
-      "totalValue": "33,18"
+      "value": 61.9,
+      "totalValue": 33.18
     },
     {
       "code": "2989530000002",
       "description": "FILE TILAPIA",
-      "amount": "0,118",
+      "amount": 0.118,
       "unit": "KG",
-      "value": "57,8",
-      "totalValue": "6,82"
+      "value": 57.8,
+      "totalValue": 6.82
     },
     {
       "code": "7896000929259",
       "description": "SALSICHA PANCHO MINU 350G",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "9,78",
-      "totalValue": "9,78"
+      "value": 9.78,
+      "totalValue": 9.78
     },
     {
       "code": "7891025122432",
       "description": "ACTIVIA SHOT MORANGO 100G",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "3,69",
-      "totalValue": "3,69"
+      "value": 3.69,
+      "totalValue": 3.69
     },
     {
       "code": "7891025114666",
       "description": "ACTIVIA SHOT FRAMB/HIBISCO 100G",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "3,69",
-      "totalValue": "3,69"
+      "value": 3.69,
+      "totalValue": 3.69
     },
     {
       "code": "7891097102387",
       "description": "CREAM CH PRESIDENT 150G",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "9,25",
-      "totalValue": "9,25"
+      "value": 9.25,
+      "totalValue": 9.25
     },
     {
       "code": "5601216120152",
       "description": "AZ POR ANDORINHA EV 500ML",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "29,9",
-      "totalValue": "29,90"
+      "value": 29.9,
+      "totalValue": 29.9
     },
     {
       "code": "7898994521204",
       "description": "BANANA PRATA BABY ORG 500G",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "4,98",
-      "totalValue": "4,98"
+      "value": 4.98,
+      "totalValue": 4.98
     },
     {
       "code": "7899970401657",
       "description": "CHOC HERSHEYS SPE DARK 73% 85G",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "9,48",
-      "totalValue": "9,48"
+      "value": 9.48,
+      "totalValue": 9.48
     },
     {
       "code": "7622210732316",
       "description": "CHOC LACTA INT 60%MIX NUTS 85G",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "7,95",
-      "totalValue": "7,95"
+      "value": 7.95,
+      "totalValue": 7.95
     },
     {
       "code": "7896181700579",
       "description": "AMENDOIM CRI-CRI DACOLONIA 140G",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "4,95",
-      "totalValue": "4,95"
+      "value": 4.95,
+      "totalValue": 4.95
     },
     {
       "code": "7897685912376",
       "description": "PE MOLEQUE S.ANTONIO C/MASC 300G",
-      "amount": "1",
+      "amount": 1,
       "unit": "UN",
-      "value": "7,48",
-      "totalValue": "7,48"
+      "value": 7.48,
+      "totalValue": 7.48
     },
     {
       "code": "2176400000006",
       "description": "PAO CACHORRO ESPECIAL LP",
-      "amount": "0,2338",
+      "amount": 0.2338,
       "unit": "KG",
-      "value": "19,8",
-      "totalValue": "4,63"
+      "value": 19.8,
+      "totalValue": 4.63
     },
     {
       "code": "2352000000008",
       "description": "PAO CACETINHO LP",
-      "amount": "0,4417",
+      "amount": 0.4417,
       "unit": "KG",
-      "value": "13,9",
-      "totalValue": "6,14"
+      "value": 13.9,
+      "totalValue": 6.14
     },
     {
       "code": "2022640000002",
       "description": "CEBOLA ROXA GRANEL",
-      "amount": "0,4236",
+      "amount": 0.4236,
       "unit": "KG",
-      "value": "8,97",
-      "totalValue": "3,80"
+      "value": 8.97,
+      "totalValue": 3.8
     }
   ]
 }

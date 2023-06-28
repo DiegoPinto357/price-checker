@@ -3,10 +3,12 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axios from 'axios';
 import { QrCodeReaderProps } from './QrCodeReader';
+import { storage } from '../proxies';
 import App from './App';
 import nfData from '../../mockData/nf/nfData.json';
 
 vi.mock('axios');
+vi.mock('../proxies/storage');
 
 vi.mock('./QrCodeReader', () => ({
   default: ({ onClose }: QrCodeReaderProps) => {
@@ -29,37 +31,25 @@ describe('App', () => {
     const saveResultsButton = screen.getByRole('button', { name: 'Salvar' });
     await userEvent.click(saveResultsButton);
 
-    expect(axios.post).toBeCalledTimes(nfData.items.length + 1);
+    expect(storage.writeFile).toBeCalledTimes(nfData.items.length + 1);
 
-    expect(axios.post).toBeCalledWith(
-      'http://127.0.0.1:3001/storage/write-file',
-      {
-        filename: `/nfs/${nfData.key}.json`,
-        data: nfData,
-      }
-    );
+    expect(storage.writeFile).toBeCalledWith(`/nfs/${nfData.key}.json`, nfData);
 
     nfData.items.forEach(item => {
-      expect(axios.post).toBeCalledWith(
-        'http://127.0.0.1:3001/storage/write-file',
-        {
-          filename: `/products/${item.code}.json`,
-          data: {
-            code: item.code,
-            description: item.description,
-            history: [
-              {
-                nfKey: nfData.key,
-                date: nfData.date,
-                amount: item.amount,
-                unit: item.unit,
-                value: item.value,
-                totalValue: item.totalValue,
-              },
-            ],
+      expect(storage.writeFile).toBeCalledWith(`/products/${item.code}.json`, {
+        code: item.code,
+        description: item.description,
+        history: [
+          {
+            nfKey: nfData.key,
+            date: nfData.date,
+            amount: item.amount,
+            unit: item.unit,
+            value: item.value,
+            totalValue: item.totalValue,
           },
-        }
-      );
+        ],
+      });
     });
   });
 });

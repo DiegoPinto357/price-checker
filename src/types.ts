@@ -28,7 +28,7 @@ export interface Product {
   totalValue: number;
 }
 
-interface ProductHistoryItem {
+export interface ProductHistoryItem {
   nfKey: string;
   date: string;
   amount: number;

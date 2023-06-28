@@ -41,6 +41,34 @@ app.post<{ Body: WriteFileBody }>(
   }
 );
 
+interface ReadFileParams {
+  filename: string;
+}
+
+interface FsError {
+  code: string;
+}
+
+app.get<{ Params: ReadFileParams }>(
+  '/storage/read-file/:filename',
+  async (request, reply) => {
+    const { filename } = request.params;
+    try {
+      const data = await storage.readFile(decodeURIComponent(filename));
+      reply.send(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        const errorCode = ((<unknown>error) as FsError).code;
+        console.log(errorCode);
+        if (errorCode === 'ENOENT') {
+          return reply.status(404).send();
+        }
+      }
+    }
+    reply.status(500).send();
+  }
+);
+
 app.listen({ port: 3001 }, (err, address) => {
   if (err) throw err;
   console.log(`Server is now listening on ${address}`);
