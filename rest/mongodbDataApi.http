@@ -1,0 +1,15 @@
+@baseUrl = https://sa-east-1.aws.data.mongodb-api.com/app/data-rcjlb/endpoint/data/v1/action
+
+POST {{baseUrl}}/find
+Content-Type: application/json
+apiKey: {{apiKey}}
+
+{
+		"dataSource": "Cluster0",
+		"database": "nfs",
+		"collection": "items"
+}
+
+###
+
+

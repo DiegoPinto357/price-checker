@@ -2,6 +2,7 @@ import fastify from 'fastify';
 import cors from '@fastify/cors';
 import nfParser from './nodejs/nfParser.js';
 import storage from './nodejs/services/storage.js';
+import database from './nodejs/services/database.js';
 
 const app = fastify({
   logger: true,
@@ -66,6 +67,20 @@ app.get<{ Params: ReadFileParams }>(
       }
     }
     reply.status(500).send();
+  }
+);
+
+interface DatabaseFindBody {
+  databaseName: string;
+  collectionName: string;
+}
+
+app.post<{ Body: DatabaseFindBody }>(
+  '/database/find',
+  async (request, reply) => {
+    const { databaseName, collectionName } = request.body;
+    const data = await database.find(databaseName, collectionName);
+    reply.send(data);
   }
 );
 
