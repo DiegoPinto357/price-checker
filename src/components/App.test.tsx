@@ -31,7 +31,7 @@ describe('App', () => {
     const saveResultsButton = screen.getByRole('button', { name: 'Salvar' });
     await userEvent.click(saveResultsButton);
 
-    expect(storage.writeFile).toBeCalledTimes(nfData.items.length + 1);
+    expect(storage.writeFile).toBeCalledTimes(nfData.items.length + 2);
 
     expect(storage.writeFile).toBeCalledWith(`/nfs/${nfData.key}.json`, nfData);
 

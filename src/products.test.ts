@@ -1,3 +1,5 @@
+import fs from 'fs';
+import md5 from 'md5';
 import { storage } from './proxies';
 import { saveProducts } from './products';
 import nfData from '../mockData/nf/nfData.json';
@@ -6,9 +8,19 @@ type MockStorage = typeof storage & { clearFiles: () => void };
 
 vi.mock('./proxies/storage');
 
+const defaultIndexFile = fs.readFileSync(
+  './mockData/products/index.csv',
+  'utf-8'
+);
+
 describe('products', () => {
   describe('saveProducts', () => {
-    beforeEach(() => (storage as MockStorage).clearFiles());
+    beforeEach(() => {
+      vi.useFakeTimers();
+      const date = new Date(2023, 6, 17, 18, 4, 26, 234);
+      vi.setSystemTime(date);
+      (storage as MockStorage).clearFiles();
+    });
 
     it('adds new file for each new product', async () => {
       await saveProducts(nfData.items, nfData);
@@ -32,6 +44,11 @@ describe('products', () => {
           }
         );
       });
+
+      expect(storage.writeFile).toBeCalledWith(
+        '/products/index.csv',
+        defaultIndexFile
+      );
     });
 
     it('appends new item to existing product', async () => {
@@ -65,12 +82,15 @@ describe('products', () => {
 
       await saveProducts(nfData.items, nfData);
 
+      const date = new Date(2023, 6, 20, 10, 2, 14, 357);
+      vi.setSystemTime(date);
+
       const products = additionalNfData.items;
       await saveProducts(products, additionalNfData);
 
       const result = await storage.readFile('/products/5601216120152.json');
 
-      expect(result).toEqual({
+      const expectedResult = {
         code: '5601216120152',
         description: 'AZ POR ANDORINHA EV 500ML',
         history: [
@@ -91,7 +111,20 @@ describe('products', () => {
             totalValue: 31.9,
           },
         ],
-      });
+      };
+
+      expect(result).toEqual(expectedResult);
+
+      const newHash = md5(JSON.stringify(expectedResult));
+      const expectIndexContent = defaultIndexFile.replace(
+        '5601216120152, 1689627866234, cdd192a0f2e645dc6f1f8ff07ff9a861',
+        `5601216120152, 1689858134357, ${newHash}`
+      );
+
+      expect(storage.writeFile).toBeCalledWith(
+        '/products/index.csv',
+        expectIndexContent
+      );
     });
 
     it('does not appends an entry with same nf key', async () => {
