@@ -31,7 +31,8 @@ describe('App', () => {
     const saveResultsButton = screen.getByRole('button', { name: 'Salvar' });
     await userEvent.click(saveResultsButton);
 
-    expect(storage.writeFile).toBeCalledTimes(nfData.items.length + 2);
+    // FIXME remove storage assertions, focus on screens and UI
+    expect(storage.writeFile).toBeCalledTimes(nfData.items.length + 3);
 
     expect(storage.writeFile).toBeCalledWith(`/nfs/${nfData.key}.json`, nfData);
 
