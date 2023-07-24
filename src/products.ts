@@ -1,7 +1,7 @@
-import md5 from 'md5';
 import { storage } from './proxies';
 import { Nf, Product, ProductHistory, ProductHistoryItem } from './types';
 import createCsv from './libs/csv';
+import insertIndexEntry from './libs/insertIndexEntry';
 
 const parseDate = (stringDate: string) => {
   const [date, time] = stringDate.split(' ');
@@ -17,25 +17,9 @@ const parseDate = (stringDate: string) => {
   );
 };
 
-const insertIndexEntry = async (
-  indexFile: Awaited<ReturnType<typeof createCsv>>,
-  newData: ProductHistory,
-  timestamp: number
-) => {
-  const hash = md5(JSON.stringify(newData));
-  const indexEntry = `${newData.code}, ${timestamp}, ${hash}\n`;
-
-  const existingEntryIndex = indexFile.findLineIndex(0, newData.code);
-  if (existingEntryIndex !== -1) {
-    return indexFile.replace(existingEntryIndex, indexEntry);
-  }
-  indexFile.appendLine(indexEntry);
-};
-
 // TODO optimize params - duplication
 export const saveProducts = async (products: Product[], nfData: Nf) => {
   const indexFile = await createCsv('/products/index.csv');
-  const timestamp = Date.now();
 
   for (const product of products) {
     const filename = `/products/${product.code}.json`;
@@ -61,7 +45,9 @@ export const saveProducts = async (products: Product[], nfData: Nf) => {
           (a: ProductHistoryItem, b: ProductHistoryItem) =>
             parseDate(a.date).getTime() - parseDate(b.date).getTime()
         );
-        await insertIndexEntry(indexFile, currentFile, timestamp);
+        await insertIndexEntry<ProductHistory>(indexFile, currentFile, 'code', {
+          overwriteExisting: true,
+        });
         await storage.writeFile<ProductHistory>(filename, currentFile);
       }
     } else {
@@ -80,7 +66,12 @@ export const saveProducts = async (products: Product[], nfData: Nf) => {
         ],
       };
 
-      await insertIndexEntry(indexFile, productHistory, timestamp);
+      await insertIndexEntry<ProductHistory>(
+        indexFile,
+        productHistory,
+        'code',
+        { overwriteExisting: true }
+      );
       await storage.writeFile<ProductHistory>(filename, productHistory);
     }
   }
