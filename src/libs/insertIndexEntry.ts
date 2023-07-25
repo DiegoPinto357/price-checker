@@ -5,7 +5,7 @@ interface Options {
   overwriteExisting: boolean;
 }
 
-export default async <Data>(
+export default <Data>(
   indexFile: Awaited<ReturnType<typeof createCsv>>,
   data: Data,
   idKey: keyof Data,

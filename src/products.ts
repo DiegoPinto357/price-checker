@@ -45,10 +45,10 @@ export const saveProducts = async (products: Product[], nfData: Nf) => {
           (a: ProductHistoryItem, b: ProductHistoryItem) =>
             parseDate(a.date).getTime() - parseDate(b.date).getTime()
         );
-        await insertIndexEntry<ProductHistory>(indexFile, currentFile, 'code', {
+        insertIndexEntry(indexFile, currentFile, 'code', {
           overwriteExisting: true,
         });
-        await storage.writeFile<ProductHistory>(filename, currentFile);
+        await storage.writeFile(filename, currentFile);
       }
     } else {
       const productHistory: ProductHistory = {
@@ -66,13 +66,10 @@ export const saveProducts = async (products: Product[], nfData: Nf) => {
         ],
       };
 
-      await insertIndexEntry<ProductHistory>(
-        indexFile,
-        productHistory,
-        'code',
-        { overwriteExisting: true }
-      );
-      await storage.writeFile<ProductHistory>(filename, productHistory);
+      insertIndexEntry(indexFile, productHistory, 'code', {
+        overwriteExisting: true,
+      });
+      await storage.writeFile(filename, productHistory);
     }
   }
 

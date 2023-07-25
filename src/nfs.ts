@@ -8,7 +8,7 @@ export const getNfData = nf.getNfData as (key: string) => Promise<Nf>;
 export const saveNf = async (nf: Nf) => {
   const indexFile = await createCsv('/nfs/index.csv');
 
-  const { existingEntry } = await insertIndexEntry<Nf>(indexFile, nf, 'key');
+  const { existingEntry } = insertIndexEntry(indexFile, nf, 'key');
 
   const filename = `/nfs/${nf.key}.json`;
   await storage.writeFile(filename, nf);
