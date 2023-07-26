@@ -1,0 +1,9 @@
+POST http://localhost:3001/database/find
+Content-Type: application/json
+
+{
+		"databaseName": "nfs",
+		"collectionName": "items"
+}
+
+###

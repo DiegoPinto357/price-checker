@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "server": "nodemon ./src/server.ts",
+    "server": "nodemon ./src/server/index.ts",
     "build-app": "npm run build && cp -r src/nodejs dist/ && npx cap sync",
     "android": "npx cap open android",
     "core": "node ./src/nodejs/index.js"

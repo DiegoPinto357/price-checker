@@ -2,7 +2,7 @@
 
 POST {{baseUrl}}/find
 Content-Type: application/json
-apiKey: {{apiKey}}
+apiKey: {{mongodbDataApiKey}}
 
 {
 		"dataSource": "Cluster0",

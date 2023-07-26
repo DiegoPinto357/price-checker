@@ -1,0 +1,3 @@
+GET http://localhost:3001/storage/read-file/products%2F7622210689573.json
+
+###
