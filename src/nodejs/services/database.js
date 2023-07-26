@@ -11,25 +11,54 @@ const headers = {
   apiKey: process.env.MONGODB_DATA_API_KEY,
 };
 
-const find = async (
-  database,
-  collection
-  // filter: object,
-  // options: object
-) => {
+const dataSource = 'Cluster0';
+
+const find = async (database, collection, filter) => {
   const url = `${baseUrl}/find`;
   const { data } = await axios.post(
     url,
     {
-      dataSource: 'Cluster0',
+      dataSource,
       database,
       collection,
+      filter,
     },
     { headers }
   );
   return data.documents;
 };
 
+const insertOne = async (database, collection, document) => {
+  const url = `${baseUrl}/insertOne`;
+  return await axios.post(
+    url,
+    {
+      dataSource,
+      database,
+      collection,
+      document,
+    },
+    { headers }
+  );
+};
+
+const updateOne = async (database, collection, filter, update) => {
+  const url = `${baseUrl}/updateOne`;
+  return await axios.post(
+    url,
+    {
+      dataSource,
+      database,
+      collection,
+      filter,
+      update,
+    },
+    { headers }
+  );
+};
+
 module.exports = {
   find,
+  insertOne,
+  updateOne,
 };

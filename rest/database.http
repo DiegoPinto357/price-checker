@@ -3,7 +3,37 @@ Content-Type: application/json
 
 {
 		"databaseName": "nfs",
-		"collectionName": "items"
+		"collectionName": "items",
+		"filter": {
+			"number": "1262739"
+		}
 }
 
 ###
+
+POST http://localhost:3001/database/insertOne
+Content-Type: application/json
+
+{
+		"databaseName": "nfs",
+		"collectionName": "index",
+		"document": {
+			"batata": "38"
+		}
+}
+
+###
+
+POST http://localhost:3001/database/updateOne
+Content-Type: application/json
+
+{
+		"databaseName": "nfs",
+		"collectionName": "index",
+		"filter": {
+			"batata": "38"
+		},
+		"update": {
+			"batata": 357
+		}
+}
