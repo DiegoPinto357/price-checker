@@ -11,6 +11,19 @@ Content-Type: application/json
 
 ###
 
+POST http://localhost:3001/database/findOne
+Content-Type: application/json
+
+{
+		"databaseName": "nfs",
+		"collectionName": "items",
+		"filter": {
+			"number": "1262739"
+		}
+}
+
+###
+
 POST http://localhost:3001/database/insertOne
 Content-Type: application/json
 

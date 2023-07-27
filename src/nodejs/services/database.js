@@ -28,6 +28,21 @@ const find = async (database, collection, filter) => {
   return data.documents;
 };
 
+const findOne = async (database, collection, filter) => {
+  const url = `${baseUrl}/findOne`;
+  const { data } = await axios.post(
+    url,
+    {
+      dataSource,
+      database,
+      collection,
+      filter,
+    },
+    { headers }
+  );
+  return data.document;
+};
+
 const insertOne = async (database, collection, document) => {
   const url = `${baseUrl}/insertOne`;
   return await axios.post(
@@ -59,6 +74,7 @@ const updateOne = async (database, collection, filter, update) => {
 
 module.exports = {
   find,
+  findOne,
   insertOne,
   updateOne,
 };

@@ -16,6 +16,12 @@ export default async (app: FastifyInstance) => {
     reply.send(data);
   });
 
+  app.post<{ Body: FindBody }>('/database/findOne', async (request, reply) => {
+    const { databaseName, collectionName, filter } = request.body;
+    const data = await database.findOne(databaseName, collectionName, filter);
+    reply.send(data);
+  });
+
   interface InserOneBody extends DefaultBody {
     document: object;
   }
