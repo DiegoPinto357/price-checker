@@ -1,5 +1,5 @@
 import axios from 'axios';
-import storage from './storage';
+import storage from '.';
 import { Mock } from 'vitest';
 
 vi.mock('axios');
