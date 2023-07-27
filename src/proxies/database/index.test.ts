@@ -31,5 +31,57 @@ describe('database proxy', () => {
         filter,
       });
     });
+
+    it('calls findOne server endpoint', async () => {
+      //FIXME vi.clearAllMocks not working
+      (axios.post as Mock).mockClear();
+
+      const filter = { code: '52472544243' };
+      await databaseProxy.findOne(databaseName, collectionName, filter);
+
+      expect(axios.post).toBeCalledTimes(1);
+      expect(axios.post).toBeCalledWith(`${serverHost}/database/findOne`, {
+        databaseName,
+        collectionName,
+        filter,
+      });
+    });
+
+    it('calls insertOne server endpoint', async () => {
+      //FIXME vi.clearAllMocks not working
+      (axios.post as Mock).mockClear();
+
+      const document = { code: '52472544243' };
+      await databaseProxy.insertOne(databaseName, collectionName, document);
+
+      expect(axios.post).toBeCalledTimes(1);
+      expect(axios.post).toBeCalledWith(`${serverHost}/database/insertOne`, {
+        databaseName,
+        collectionName,
+        document,
+      });
+    });
+
+    it('calls updateOne server endpoint', async () => {
+      //FIXME vi.clearAllMocks not working
+      (axios.post as Mock).mockClear();
+
+      const filter = { code: '52472544243', banana: false };
+      const update = { banana: true };
+      await databaseProxy.updateOne(
+        databaseName,
+        collectionName,
+        filter,
+        update
+      );
+
+      expect(axios.post).toBeCalledTimes(1);
+      expect(axios.post).toBeCalledWith(`${serverHost}/database/updateOne`, {
+        databaseName,
+        collectionName,
+        filter,
+        update,
+      });
+    });
   });
 });
