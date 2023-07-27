@@ -1,23 +1,12 @@
-import axios from 'axios';
+import { Capacitor } from '@capacitor/core';
 
-const writeFile = async <T>(filename: string, data: T) =>
-  await axios.post('http://127.0.0.1:3001/storage/write-file', {
-    filename,
-    data,
-  });
+const platform = Capacitor.getPlatform();
 
-const readFile = async <T>(filename: string) => {
-  try {
-    const { data } = await axios.get(
-      `http://127.0.0.1:3001/storage/read-file/${encodeURIComponent(filename)}`
-    );
-    return data as T;
-  } catch (error) {
-    return;
-  }
-};
+export interface StorageProxy {
+  writeFile: <T>(filename: string, data: T) => Promise<void>;
+  readFile: <T>(filename: string) => Promise<T>;
+}
 
-export default {
-  writeFile,
-  readFile,
-};
+export default platform === 'web'
+  ? ((await import('./storageHttp')).default as unknown as StorageProxy)
+  : ((await import('./storageIpc')).default as unknown as StorageProxy);
