@@ -5,7 +5,7 @@ const serverHost = 'http://127.0.0.1:3001';
 const find = async <T>(
   databaseName: string,
   collectionName: string,
-  filter: object
+  filter?: object
 ): Promise<T[]> => {
   try {
     const { data } = await axios.post(`${serverHost}/database/find`, {

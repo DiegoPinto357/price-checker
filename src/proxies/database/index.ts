@@ -6,13 +6,19 @@ export interface DatabaseProxy {
   find: <T>(
     databaseName: string,
     collectionName: string,
-    filter: object
+    filter?: object
   ) => Promise<T[]>;
   findOne: <T>(
     databaseName: string,
     collectionName: string,
     filter: object
   ) => Promise<T | null>;
+  // TODO implement on backend
+  insert: <T>(
+    databaseName: string,
+    collectionName: string,
+    documents: T[]
+  ) => Promise<{ insertedId: string }>;
   insertOne: <T>(
     databaseName: string,
     collectionName: string,

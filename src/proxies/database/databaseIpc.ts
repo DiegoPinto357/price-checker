@@ -3,7 +3,7 @@ import { NodeJS } from 'capacitor-nodejs';
 const find = async <T>(
   databaseName: string,
   collectionName: string,
-  filter: object
+  filter?: object
 ): Promise<T[]> =>
   new Promise(resolve => {
     NodeJS.addListener('reply-db', event => {
