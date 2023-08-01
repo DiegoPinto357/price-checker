@@ -2,6 +2,7 @@ import fs from 'fs';
 import { parseCsv } from './libs/csv';
 import { storage, database } from './proxies';
 import dataSync from './dataSync';
+import { Mock } from 'vitest';
 
 vi.mock('./proxies/storage');
 vi.mock('./proxies/database');
@@ -17,13 +18,51 @@ const removeItemsFromIndex = (
   return lines.join('\n');
 };
 
-const setRemoteIndex = async (
+const setupRemote = async (
   databaseName: string,
   collectionName: string,
   indexContent: string
 ) => {
-  const entries = parseCsv(indexContent, ['id', 'timestamp', 'hash']);
-  return await database.insert(databaseName, collectionName, entries);
+  const rawEntries = parseCsv<{ id: string; timestamp: string; hash: string }>(
+    indexContent,
+    ['id', 'timestamp', 'hash']
+  );
+  const entries = rawEntries.map(entry => ({
+    ...entry,
+    timestamp: parseInt(entry.timestamp),
+  }));
+  await database.insert(databaseName, collectionName, entries);
+
+  const remoteFiles = entries.map(({ id }) => ({
+    code: id,
+    description: '',
+    history: [],
+  }));
+  await database.insert(databaseName, 'items', remoteFiles);
+};
+
+const setupLocal = async (indexContent: string) => {
+  await storage.writeFile('/products/index.csv', indexContent);
+
+  const rawIndexEntries = parseCsv<{
+    id: string;
+    timestamp: string;
+    hash: string;
+  }>(indexContent, ['id', 'timestamp', 'hash']);
+  const indexEntries = rawIndexEntries.map(entry => ({
+    ...entry,
+    timestamp: parseInt(entry.timestamp),
+  }));
+
+  const files = indexEntries.map(({ id }) => ({
+    code: id,
+    description: '',
+    history: [],
+  }));
+
+  for (const file of files) {
+    await storage.writeFile(`/products/${file.code}.json`, file);
+  }
 };
 
 describe('dataSync', () => {
@@ -31,17 +70,37 @@ describe('dataSync', () => {
     const remoteIndex = indexFile;
     const localIndex = removeItemsFromIndex(indexFile, [0, 4, 6, 9]);
 
-    await setRemoteIndex('products', 'index', remoteIndex);
-    await storage.writeFile('/products/index.csv', localIndex);
+    await setupRemote('products', 'index', remoteIndex);
+    await setupLocal(localIndex);
 
-    const { missingLocalFiles, missingRemoteFiles } =
-      await dataSync.getMissingFiles();
-    console.log(missingLocalFiles);
-    console.log(missingRemoteFiles);
+    (storage.writeFile as Mock).mockClear();
 
-    // assert
-    // local and remote indexes should be equal
-    // localshould have the missing files
+    await dataSync.startSync();
+
+    const missingIds = [
+      '7896333041307',
+      '2064460000008',
+      '7891025122432',
+      '7898994521204',
+    ];
+
+    expect(storage.writeFile).toBeCalledTimes(missingIds.length + 1);
+    expect(database.findOne).toBeCalledTimes(missingIds.length);
+
+    missingIds.forEach(missingId => {
+      expect(database.findOne).toBeCalledWith('products', 'items', {
+        code: missingId,
+      });
+      expect(storage.writeFile).toBeCalledWith(`/products/${missingId}.json`, {
+        code: missingId,
+        description: '',
+        history: [],
+      });
+    });
+    expect(storage.writeFile).toBeCalledWith(
+      '/products/index.csv',
+      expect.any(String)
+    );
   });
 
   // describe('pushes missing data in remote', () => {});

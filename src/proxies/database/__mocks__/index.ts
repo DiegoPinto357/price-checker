@@ -46,7 +46,21 @@ const find = vi.fn(
   }
 );
 
-const findOne = vi.fn();
+const findOne = vi.fn(
+  async <T>(databaseName: string, collectionName: string, filter?: object) => {
+    const collection = getCollection(databaseName, collectionName) as T[];
+
+    if (!filter) {
+      return collection;
+    }
+
+    return collection.find(item =>
+      Object.entries(filter).every(([key, value]) => {
+        return item[key as keyof T] === value;
+      })
+    );
+  }
+);
 
 const insert = vi.fn(
   async <T>(databaseName: string, collectionName: string, documents: T[]) => {

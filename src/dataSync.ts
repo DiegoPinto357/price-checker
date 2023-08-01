@@ -1,5 +1,7 @@
+import { saveProductRecords } from './products';
 import { parseCsv } from './libs/csv';
 import { storage, database } from './proxies';
+import { ProductHistory } from './types';
 
 interface IndexEntry {
   id: string;
@@ -13,11 +15,15 @@ const getMissingFiles = async () => {
     storage.readFile<string>('/products/index.csv'),
     database.find<IndexEntry>('products', 'index'),
   ]);
-  const localIndex = parseCsv<IndexEntry>(rawLocalIndex, [
+  const parsedLocalIndex = parseCsv<IndexEntry>(rawLocalIndex, [
     'id',
     'timestamp',
     'hash',
   ]);
+  const localIndex = parsedLocalIndex.map(entry => ({
+    ...entry,
+    timestamp: parseInt(entry.timestamp),
+  }));
 
   const missingLocalFiles = remoteIndex.filter(
     remoteEntry =>
@@ -32,6 +38,31 @@ const getMissingFiles = async () => {
   return { missingLocalFiles, missingRemoteFiles };
 };
 
+const pullFromRemote = async (idList: string[]) => {
+  const records = await Promise.all(
+    idList.map(id =>
+      database.findOne<ProductHistory>('products', 'items', { code: id })
+    )
+  );
+
+  const validRecords = records.filter(
+    (record): record is ProductHistory => !!record
+  )!;
+
+  if (validRecords.length) {
+    await saveProductRecords(validRecords);
+  }
+};
+
+const startSync = async () => {
+  const { missingLocalFiles, missingRemoteFiles } = await getMissingFiles();
+  if (missingLocalFiles.length) {
+    await pullFromRemote(missingLocalFiles.map(({ id }) => id));
+  }
+  console.log(missingLocalFiles);
+  console.log(missingRemoteFiles);
+};
+
 export default {
-  getMissingFiles,
+  startSync,
 };
