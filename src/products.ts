@@ -17,61 +17,69 @@ const parseDate = (stringDate: string) => {
   );
 };
 
+const buildHistoryItem = (product: Product, nfData: Nf) => {
+  return {
+    nfKey: nfData.key,
+    date: nfData.date,
+    amount: product.amount,
+    unit: product.unit,
+    value: product.value,
+    totalValue: product.totalValue,
+  };
+};
+
+export const saveProductRecords = async (records: ProductHistory[]) => {
+  if (!records.length) return;
+
+  const indexFile = await createCsv('/products/index.csv');
+
+  for (const record of records) {
+    insertIndexEntry(indexFile, record, 'code', {
+      overwriteExisting: true,
+    });
+
+    const filename = `/products/${record.code}.json`;
+    await storage.writeFile(filename, record);
+  }
+
+  await indexFile.save();
+};
+
 // TODO optimize params - duplication
 export const saveProducts = async (products: Product[], nfData: Nf) => {
-  const indexFile = await createCsv('/products/index.csv');
+  const filesToSave: ProductHistory[] = [];
 
   for (const product of products) {
     const filename = `/products/${product.code}.json`;
 
     const currentFile = await storage.readFile<ProductHistory>(filename);
+
     if (currentFile) {
       const entryAlreadyExists = currentFile.history.find(
         ({ nfKey }) => nfKey === nfData.key
       );
 
       if (!entryAlreadyExists) {
-        const historyItem = {
-          nfKey: nfData.key,
-          date: nfData.date,
-          amount: product.amount,
-          unit: product.unit,
-          value: product.value,
-          totalValue: product.totalValue,
-        };
+        const historyItem = buildHistoryItem(product, nfData);
 
         currentFile.history.push(historyItem);
         currentFile.history = currentFile.history.sort(
           (a: ProductHistoryItem, b: ProductHistoryItem) =>
             parseDate(a.date).getTime() - parseDate(b.date).getTime()
         );
-        insertIndexEntry(indexFile, currentFile, 'code', {
-          overwriteExisting: true,
-        });
-        await storage.writeFile(filename, currentFile);
+
+        filesToSave.push(currentFile);
       }
     } else {
       const productHistory: ProductHistory = {
         code: product.code,
         description: product.description,
-        history: [
-          {
-            nfKey: nfData.key,
-            date: nfData.date,
-            amount: product.amount,
-            unit: product.unit,
-            value: product.value,
-            totalValue: product.totalValue,
-          },
-        ],
+        history: [buildHistoryItem(product, nfData)],
       };
 
-      insertIndexEntry(indexFile, productHistory, 'code', {
-        overwriteExisting: true,
-      });
-      await storage.writeFile(filename, productHistory);
+      filesToSave.push(productHistory);
     }
   }
 
-  await indexFile.save();
+  await saveProductRecords(filesToSave);
 };

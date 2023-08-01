@@ -1,3 +1,4 @@
+import { Mock } from 'vitest';
 import fs from 'fs';
 import md5 from 'md5';
 import { storage } from './proxies';
@@ -20,11 +21,13 @@ describe('products', () => {
       const date = new Date(2023, 6, 17, 18, 4, 26, 234);
       vi.setSystemTime(date);
       (storage as MockStorage).clearFiles();
+      vi.clearAllMocks();
     });
 
     it('adds new file for each new product', async () => {
       await saveProducts(nfData.items, nfData);
 
+      expect(storage.writeFile).toBeCalledTimes(nfData.items.length + 1);
       nfData.items.forEach(item => {
         expect(storage.writeFile).toBeCalledWith(
           `/products/${item.code}.json`,
@@ -85,6 +88,7 @@ describe('products', () => {
       const date = new Date(2023, 6, 20, 10, 2, 14, 357);
       vi.setSystemTime(date);
 
+      (storage.writeFile as Mock).mockClear();
       const products = additionalNfData.items;
       await saveProducts(products, additionalNfData);
 
@@ -121,6 +125,7 @@ describe('products', () => {
         `5601216120152, 1689858134357, ${newHash}`
       );
 
+      expect(storage.writeFile).toBeCalledTimes(2);
       expect(storage.writeFile).toBeCalledWith(
         '/products/index.csv',
         expectIndexContent
@@ -158,11 +163,13 @@ describe('products', () => {
 
       await saveProducts(nfData.items, nfData);
 
+      (storage.writeFile as Mock).mockClear();
       const products = additionalNfData.items;
       await saveProducts(products, additionalNfData);
 
       const result = await storage.readFile('/products/5601216120152.json');
 
+      expect(storage.writeFile).not.toBeCalled();
       expect(result).toEqual({
         code: '5601216120152',
         description: 'AZ POR ANDORINHA EV 500ML',
@@ -210,11 +217,13 @@ describe('products', () => {
 
       await saveProducts(nfData.items, nfData);
 
+      (storage.writeFile as Mock).mockClear();
       const products = additionalNfData.items;
       await saveProducts(products, additionalNfData);
 
       const result = await storage.readFile('/products/5601216120152.json');
 
+      expect(storage.writeFile).toBeCalledTimes(2);
       expect(result).toEqual({
         code: '5601216120152',
         description: 'AZ POR ANDORINHA EV 500ML',
