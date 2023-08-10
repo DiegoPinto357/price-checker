@@ -1,9 +1,16 @@
 import { saveProductRecords } from './products';
 import { parseCsv } from './libs/csv';
+import { getIndexEntry } from './libs/insertIndexEntry';
 import { storage, database } from './proxies';
 import { ProductHistory } from './types';
 
 interface IndexEntry {
+  id: string;
+  timestamp: number;
+  hash: string;
+}
+
+interface StringIndexEntry {
   id: string;
   timestamp: string;
   hash: string;
@@ -15,7 +22,7 @@ const getMissingFiles = async () => {
     storage.readFile<string>('/products/index.csv'),
     database.find<IndexEntry>('products', 'index'),
   ]);
-  const parsedLocalIndex = parseCsv<IndexEntry>(rawLocalIndex, [
+  const parsedLocalIndex = parseCsv<StringIndexEntry>(rawLocalIndex, [
     'id',
     'timestamp',
     'hash',
@@ -38,9 +45,9 @@ const getMissingFiles = async () => {
   return { missingLocalFiles, missingRemoteFiles };
 };
 
-const pullFromRemote = async (idList: string[]) => {
+const pullFromRemote = async (entriesList: IndexEntry[]) => {
   const records = await Promise.all(
-    idList.map(id =>
+    entriesList.map(({ id }) =>
       database.findOne<ProductHistory>('products', 'items', { code: id })
     )
   );
@@ -50,17 +57,44 @@ const pullFromRemote = async (idList: string[]) => {
   )!;
 
   if (validRecords.length) {
-    await saveProductRecords(validRecords);
+    const indexMetadata = entriesList.map(({ timestamp, hash }) => ({
+      timestamp,
+      hash,
+    }));
+    await saveProductRecords(validRecords, indexMetadata);
   }
+};
+
+const pushToRemote = async (entriesList: IndexEntry[]) => {
+  const files = await Promise.all(
+    entriesList.map(({ id }) =>
+      storage.readFile<ProductHistory>(`/products/${id}.json`)
+    )
+  );
+
+  await Promise.all(
+    files.map(async (file, index) => {
+      await database.insertOne<ProductHistory>('products', 'items', file);
+
+      const indexEntry = entriesList[index];
+      await database.insertOne<IndexEntry>('products', 'index', indexEntry);
+    })
+  );
 };
 
 const startSync = async () => {
   const { missingLocalFiles, missingRemoteFiles } = await getMissingFiles();
+
   if (missingLocalFiles.length) {
-    await pullFromRemote(missingLocalFiles.map(({ id }) => id));
+    await pullFromRemote(missingLocalFiles);
   }
-  console.log(missingLocalFiles);
-  console.log(missingRemoteFiles);
+
+  if (missingRemoteFiles.length) {
+    await pushToRemote(missingRemoteFiles);
+  }
+
+  // console.log(missingLocalFiles);
+  // console.log(missingRemoteFiles);
 };
 
 export default {

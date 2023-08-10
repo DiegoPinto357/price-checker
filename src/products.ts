@@ -28,14 +28,18 @@ const buildHistoryItem = (product: Product, nfData: Nf) => {
   };
 };
 
-export const saveProductRecords = async (records: ProductHistory[]) => {
+export const saveProductRecords = async (
+  records: ProductHistory[],
+  indexMetadata?: { timestamp: number; hash: string }[]
+) => {
   if (!records.length) return;
 
   const indexFile = await createCsv('/products/index.csv');
 
-  for (const record of records) {
+  for (const [index, record] of records.entries()) {
     insertIndexEntry(indexFile, record, 'code', {
       overwriteExisting: true,
+      ...indexMetadata?.[index],
     });
 
     const filename = `/products/${record.code}.json`;

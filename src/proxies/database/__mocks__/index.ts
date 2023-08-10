@@ -7,7 +7,7 @@ interface DatabaseEntry {
   data: unknown;
 }
 
-const dataBuffer: DatabaseEntry[] = [];
+let dataBuffer: DatabaseEntry[] = [];
 
 const getCollection = (databaseName: string, collectionName: string) =>
   dataBuffer
@@ -84,10 +84,14 @@ const insertOne = vi.fn(
 
 const updateOne = vi.fn();
 
+const clearRecords = () => (dataBuffer = []);
+
 export default {
   find,
   findOne,
   insert,
   insertOne,
   updateOne,
+
+  clearRecords,
 };

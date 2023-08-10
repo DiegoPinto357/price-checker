@@ -7,7 +7,7 @@ export const parseCsvLine = <T>(csvLine: string, headers: Array<keyof T>) => {
   return headers.reduce((obj, header, index) => {
     obj[header] = items[index];
     return obj;
-  }, {} as Record<keyof T, string>) as T;
+  }, {} as Record<keyof T, string>);
 };
 
 export const parseCsv = <T>(content: string, headers: Array<keyof T>) =>

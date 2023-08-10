@@ -1,7 +1,23 @@
 import md5 from 'md5';
 import createCsv from './csv';
 
-interface Options {
+interface GetIndexEntryOptions {
+  timestamp?: number;
+  hash?: string;
+}
+
+export const getIndexEntry = <Data>(
+  data: Data,
+  idKey: keyof Data,
+  options?: GetIndexEntryOptions
+) => {
+  const id = data[idKey] as string;
+  const timestamp = options?.timestamp ? options.timestamp : Date.now();
+  const hash = options?.hash ? options?.hash : md5(JSON.stringify(data));
+  return { id, timestamp, hash };
+};
+
+interface Options extends GetIndexEntryOptions {
   overwriteExisting: boolean;
 }
 
@@ -11,9 +27,12 @@ export default <Data>(
   idKey: keyof Data,
   options?: Options
 ) => {
-  const timestamp = Date.now();
-  const hash = md5(JSON.stringify(data));
-  const indexEntry = `${data[idKey]}, ${timestamp}, ${hash}\n`;
+  const { id, timestamp, hash } = getIndexEntry<Data>(data, idKey, {
+    timestamp: options?.timestamp,
+    hash: options?.hash,
+  });
+
+  const indexEntry = `${id}, ${timestamp}, ${hash}\n`;
 
   const existingEntryIndex = indexFile.findLineIndex(0, data[idKey] as string);
   if (existingEntryIndex !== -1) {
