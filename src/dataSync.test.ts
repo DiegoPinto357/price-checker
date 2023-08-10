@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { parseCsv, parseCsvLine } from './libs/csv';
+import { parseCsv } from './libs/csv';
 import { storage, database } from './proxies';
 import dataSync from './dataSync';
 import { Mock } from 'vitest';
@@ -16,45 +16,25 @@ interface IndexEntry {
   hash: string;
 }
 
-const indexFile = fs.readFileSync('./mockData/products/index.csv', 'utf-8');
-
-const removeItemsFromIndex = (
-  indexContent: string,
-  linesToRemove: number[]
-) => {
-  const lines = indexContent.split('\n');
-  // linesToRemove.forEach(index => lines.splice(index, 1));
-  const filteredLines = lines.filter(
-    (_line, index) => !linesToRemove.includes(index)
-  );
-  return filteredLines.join('\n');
-};
-
-const getIndexEntryFromCsv = (indexCsvLine: string) => {
-  const parsedEntry = parseCsvLine<IndexEntry>(indexCsvLine, [
+const parseCsvIndex = (indexContent: string) => {
+  const parsedIndex = parseCsv<Record<keyof IndexEntry, string>>(indexContent, [
     'id',
     'timestamp',
     'hash',
   ]);
-  return { ...parsedEntry, timestamp: parseInt(parsedEntry.timestamp) };
+  return parsedIndex.map(entry => ({
+    ...entry,
+    timestamp: parseInt(entry.timestamp),
+  }));
 };
 
-const getEntriesFromIndex = (indexContent: string, entriesIndex: number[]) => {
-  const lines = indexContent.split('\n');
-  const selectedEntries = lines.filter((_line, index) =>
-    entriesIndex.includes(index)
-  );
-  return selectedEntries.map(line => getIndexEntryFromCsv(line));
-};
+const removeItemsFromIndex = (
+  indexEntries: IndexEntry[],
+  itemsToRemove: number[]
+) => indexEntries.filter((_line, index) => !itemsToRemove.includes(index));
 
-const hasIndexEntryCsv = (indexContent: string, entry: IndexEntry) => {
-  const lines = indexContent.split('\n');
-  const entries = lines.map(line => getIndexEntryFromCsv(line));
-  return entries.some(
-    ({ id, timestamp, hash }) =>
-      id === entry.id && timestamp === entry.timestamp && hash === entry.hash
-  );
-};
+const getEntriesFromIndex = (entries: IndexEntry[], entriesIndex: number[]) =>
+  entries.filter((_entry, index) => entriesIndex.includes(index));
 
 const hasIndexEntry = (entries: IndexEntry[], entry: IndexEntry) => {
   return entries.some(
@@ -63,18 +43,13 @@ const hasIndexEntry = (entries: IndexEntry[], entry: IndexEntry) => {
   );
 };
 
-const setupRemote = async (databaseName: string, indexContent: string) => {
-  const rawEntries = parseCsv<{ id: string; timestamp: string; hash: string }>(
-    indexContent,
-    ['id', 'timestamp', 'hash']
-  );
-  const entries = rawEntries.map(entry => ({
-    ...entry,
-    timestamp: parseInt(entry.timestamp),
-  }));
-  await database.insert(databaseName, 'index', entries);
+const setupRemote = async (
+  databaseName: string,
+  indexEntries: IndexEntry[]
+) => {
+  await database.insert(databaseName, 'index', indexEntries);
 
-  const remoteFiles = entries.map(({ id }) => ({
+  const remoteFiles = indexEntries.map(({ id }) => ({
     code: id,
     description: '',
     history: [],
@@ -82,18 +57,14 @@ const setupRemote = async (databaseName: string, indexContent: string) => {
   await database.insert(databaseName, 'items', remoteFiles);
 };
 
-const setupLocal = async (dataFolder: string, indexContent: string) => {
-  await storage.writeFile('/products/index.csv', indexContent);
-
-  const rawIndexEntries = parseCsv<{
-    id: string;
-    timestamp: string;
-    hash: string;
-  }>(indexContent, ['id', 'timestamp', 'hash']);
-  const indexEntries = rawIndexEntries.map(entry => ({
-    ...entry,
-    timestamp: parseInt(entry.timestamp),
-  }));
+const setupLocal = async (dataFolder: string, indexEntries: IndexEntry[]) => {
+  const csvIndex =
+    indexEntries.reduce(
+      (csvContent, { id, timestamp, hash }) =>
+        `${csvContent}\n${id}, ${timestamp}, ${hash}`,
+      ''
+    ) + '\n';
+  await storage.writeFile('/products/index.csv', csvIndex);
 
   const files = indexEntries.map(({ id }) => ({
     code: id,
@@ -106,6 +77,10 @@ const setupLocal = async (dataFolder: string, indexContent: string) => {
   }
 };
 
+const baseIndex = parseCsvIndex(
+  fs.readFileSync('./mockData/products/index.csv', 'utf-8')
+);
+
 describe('dataSync', () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -117,10 +92,10 @@ describe('dataSync', () => {
   });
 
   it('pulls missing data from remote', async () => {
-    const remoteIndex = indexFile;
-    const linesToRemove = [0, 4, 6, 9];
-    const localIndex = removeItemsFromIndex(indexFile, linesToRemove);
-    const missingEntries = getEntriesFromIndex(indexFile, linesToRemove);
+    const remoteIndex = baseIndex;
+    const entriesToRemove = [0, 4, 6, 9];
+    const localIndex = removeItemsFromIndex(remoteIndex, entriesToRemove);
+    const missingEntries = getEntriesFromIndex(baseIndex, entriesToRemove);
 
     await setupRemote('products', remoteIndex);
     await setupLocal('products', localIndex);
@@ -132,7 +107,9 @@ describe('dataSync', () => {
     expect(storage.writeFile).toBeCalledTimes(missingEntries.length + 1);
     expect(database.findOne).toBeCalledTimes(missingEntries.length);
 
-    const newLocalIndex = await storage.readFile<string>('/products/index.csv');
+    const newLocalIndex = parseCsvIndex(
+      await storage.readFile<string>('/products/index.csv')
+    );
 
     missingEntries.forEach(missingEntry => {
       expect(database.findOne).toBeCalledWith('products', 'items', {
@@ -148,15 +125,15 @@ describe('dataSync', () => {
         }
       );
 
-      expect(hasIndexEntryCsv(newLocalIndex, missingEntry)).toBeTruthy();
+      expect(hasIndexEntry(newLocalIndex, missingEntry)).toBeTruthy();
     });
   });
 
   it('pushes missing data to remote', async () => {
-    const linesToRemove = [0, 4, 6, 9];
-    const remoteIndex = removeItemsFromIndex(indexFile, [0, 4, 6, 9]);
-    const localIndex = indexFile;
-    const missingEntries = getEntriesFromIndex(indexFile, linesToRemove);
+    const entriesToRemove = [0, 4, 6, 9];
+    const remoteIndex = removeItemsFromIndex(baseIndex, [0, 4, 6, 9]);
+    const localIndex = baseIndex;
+    const missingEntries = getEntriesFromIndex(baseIndex, entriesToRemove);
 
     await setupRemote('products', remoteIndex);
     await setupLocal('products', localIndex);
