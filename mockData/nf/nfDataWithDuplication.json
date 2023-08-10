@@ -1,0 +1,43 @@
+{
+  "key": "43230892665611016766651020000148761271084179",
+  "version": "2",
+  "env": "1",
+  "csc": "1",
+  "hash": "6d2517babccee3e70cafe1ecd4857ab3ccaadde3",
+  "number": "14876",
+  "series": "102",
+  "date": "09/08/2023 17:09:15",
+  "protocol": "143231288998122",
+  "store": {
+    "name": "DIMED S/A DISTRIBUIDORA DE MEDICAMENTOS F. 139 POA",
+    "cnpj": "92.665.611/0167-66",
+    "incricaoEstadual": "0962717835",
+    "address": "IPIRANGA, 5200, AZENHA, PORTO ALEGRE, RS"
+  },
+  "items": [
+    {
+      "code": "107686",
+      "description": "CELECOXIBE 200MG 10 CAPSULAS RANBAXY GENERICO C1",
+      "amount": 1,
+      "unit": "CAIXA",
+      "value": 48.47,
+      "totalValue": 48.47
+    },
+    {
+      "code": "872640",
+      "description": "LAMITOR CD 25MG 30 COMPRIMIDOS DISPERSIVEIS C1",
+      "amount": 1,
+      "unit": "CAIXA",
+      "value": 39.47,
+      "totalValue": 39.47
+    },
+    {
+      "code": "872640",
+      "description": "LAMITOR CD 25MG 30 COMPRIMIDOS DISPERSIVEIS C1",
+      "amount": 1,
+      "unit": "CAIXA",
+      "value": 39.47,
+      "totalValue": 39.47
+    }
+  ]
+}
