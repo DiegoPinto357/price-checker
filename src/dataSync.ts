@@ -1,6 +1,5 @@
 import { saveProductRecords } from './products';
 import { parseCsv } from './libs/csv';
-import { getIndexEntry } from './libs/insertIndexEntry';
 import { storage, database } from './proxies';
 import { ProductHistory } from './types';
 
@@ -92,9 +91,6 @@ const startSync = async () => {
   if (missingRemoteFiles.length) {
     await pushToRemote(missingRemoteFiles);
   }
-
-  // console.log(missingLocalFiles);
-  // console.log(missingRemoteFiles);
 };
 
 export default {

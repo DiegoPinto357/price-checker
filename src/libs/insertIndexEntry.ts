@@ -6,7 +6,7 @@ interface GetIndexEntryOptions {
   hash?: string;
 }
 
-export const getIndexEntry = <Data>(
+const getIndexEntry = <Data>(
   data: Data,
   idKey: keyof Data,
   options?: GetIndexEntryOptions
