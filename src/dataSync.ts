@@ -71,14 +71,10 @@ const pushToRemote = async (entriesList: IndexEntry[]) => {
     )
   );
 
-  await Promise.all(
-    files.map(async (file, index) => {
-      await database.insertOne<ProductHistory>('products', 'items', file);
-
-      const indexEntry = entriesList[index];
-      await database.insertOne<IndexEntry>('products', 'index', indexEntry);
-    })
-  );
+  await Promise.all([
+    database.insert<ProductHistory>('products', 'items', files),
+    database.insert<IndexEntry>('products', 'index', entriesList),
+  ]);
 };
 
 const startSync = async () => {

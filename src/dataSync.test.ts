@@ -139,29 +139,28 @@ describe('dataSync', () => {
     await setupLocal('products', localIndex);
 
     (storage.writeFile as Mock).mockClear();
+    (database.insert as Mock).mockClear();
 
     await dataSync.startSync();
 
     expect(storage.readFile).toBeCalledTimes(missingEntries.length + 1);
-    expect(database.insertOne).toBeCalledTimes(2 * missingEntries.length);
+    expect(database.insert).toBeCalledTimes(2);
+    expect(database.insert).toBeCalledWith('products', 'index', missingEntries);
+    expect(database.insert).toBeCalledWith(
+      'products',
+      'items',
+      missingEntries.map(({ id }) => ({
+        code: id,
+        description: '',
+        history: [],
+      }))
+    );
 
     const newRemoteIndex = await database.find<IndexEntry>('products', 'index');
 
     missingEntries.forEach(missingEntry => {
       expect(storage.readFile).toBeCalledWith(
         `/products/${missingEntry.id}.json`
-      );
-
-      expect(database.insertOne).toBeCalledWith('products', 'items', {
-        code: missingEntry.id,
-        description: '',
-        history: [],
-      });
-
-      expect(database.insertOne).toBeCalledWith(
-        'products',
-        'index',
-        missingEntry
       );
 
       expect(hasIndexEntry(newRemoteIndex, missingEntry)).toBeTruthy();
