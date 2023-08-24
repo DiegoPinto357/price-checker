@@ -1,7 +1,14 @@
-import { storage } from './proxies';
+import { storage, database } from './proxies';
 import { Nf, Product, ProductHistory, ProductHistoryItem } from './types';
 import createCsv from './libs/csv';
-import insertIndexEntry from './libs/insertIndexEntry';
+import insertIndexEntry, { getIndexEntry } from './libs/insertIndexEntry';
+
+// TODO possible duplication
+interface IndexEntry {
+  id: string;
+  timestamp: number;
+  hash: string;
+}
 
 const parseDate = (stringDate: string) => {
   const [date, time] = stringDate.split(' ');
@@ -28,7 +35,7 @@ const buildHistoryItem = (product: Product, nfData: Nf) => {
   };
 };
 
-export const saveProductRecords = async (
+export const saveProductsOnLocal = async (
   records: ProductHistory[],
   indexMetadata?: { timestamp: number; hash: string }[]
 ) => {
@@ -47,6 +54,22 @@ export const saveProductRecords = async (
   }
 
   await indexFile.save();
+};
+
+export const saveProductsOnRemote = async (
+  records: ProductHistory[],
+  indexMetadata?: { timestamp: number; hash: string }[]
+) => {
+  if (!records.length) return;
+
+  const indexEntries = records.map((record, index) =>
+    getIndexEntry(record, 'code', indexMetadata?.[index])
+  );
+
+  await Promise.all([
+    database.insert<ProductHistory>('products', 'items', records),
+    database.insert<IndexEntry>('products', 'index', indexEntries),
+  ]);
 };
 
 // TODO optimize params - duplication
@@ -85,5 +108,8 @@ export const saveProducts = async (products: Product[], nfData: Nf) => {
     }
   }
 
-  await saveProductRecords(filesToSave);
+  await Promise.all([
+    saveProductsOnLocal(filesToSave),
+    saveProductsOnRemote(filesToSave),
+  ]);
 };

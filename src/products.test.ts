@@ -1,16 +1,22 @@
 import { Mock } from 'vitest';
 import fs from 'fs';
 import md5 from 'md5';
-import { storage } from './proxies';
+import { storage, database } from './proxies';
 import { saveProducts } from './products';
 import nfData from '../mockData/nf/nfData.json';
+import remoteIndexFile from '../mockData/products/remoteIndex.json';
 
 type MockStorage = typeof storage & { clearFiles: () => void };
+type MockDatabase = typeof database & { clearRecords: () => void };
+
+const mockStorage = storage as MockStorage;
+const mockDatabase = database as MockDatabase;
 
 vi.mock('./proxies/storage');
+vi.mock('./proxies/database');
 
-const defaultIndexFile = fs.readFileSync(
-  './mockData/products/index.csv',
+const localIndexFile = fs.readFileSync(
+  './mockData/products/localIndex.csv',
   'utf-8'
 );
 
@@ -20,38 +26,52 @@ describe('products', () => {
       vi.useFakeTimers();
       const date = new Date(2023, 6, 17, 18, 4, 26, 234);
       vi.setSystemTime(date);
-      (storage as MockStorage).clearFiles();
+      mockStorage.clearFiles();
+      mockDatabase.clearRecords();
       vi.clearAllMocks();
     });
 
     it('adds new file for each new product', async () => {
       await saveProducts(nfData.items, nfData);
 
-      expect(storage.writeFile).toBeCalledTimes(nfData.items.length + 1);
-      nfData.items.forEach(item => {
-        expect(storage.writeFile).toBeCalledWith(
-          `/products/${item.code}.json`,
+      const expectedProductsHistory = nfData.items.map(item => ({
+        code: item.code,
+        description: item.description,
+        history: [
           {
-            code: item.code,
-            description: item.description,
-            history: [
-              {
-                nfKey: nfData.key,
-                date: nfData.date,
-                amount: item.amount,
-                unit: item.unit,
-                value: item.value,
-                totalValue: item.totalValue,
-              },
-            ],
-          }
-        );
-      });
+            nfKey: nfData.key,
+            date: nfData.date,
+            amount: item.amount,
+            unit: item.unit,
+            value: item.value,
+            totalValue: item.totalValue,
+          },
+        ],
+      }));
 
+      expect(database.insert).toBeCalledTimes(2);
+      expect(database.insert).toBeCalledWith(
+        'products',
+        'index',
+        remoteIndexFile
+      );
+      expect(database.insert).toBeCalledWith(
+        'products',
+        'items',
+        expectedProductsHistory
+      );
+
+      expect(storage.writeFile).toBeCalledTimes(nfData.items.length + 1);
       expect(storage.writeFile).toBeCalledWith(
         '/products/index.csv',
-        defaultIndexFile
+        localIndexFile
       );
+      nfData.items.forEach((item, index) => {
+        expect(storage.writeFile).toBeCalledWith(
+          `/products/${item.code}.json`,
+          expectedProductsHistory[index]
+        );
+      });
     });
 
     it('appends new item to existing product', async () => {
@@ -89,10 +109,16 @@ describe('products', () => {
       vi.setSystemTime(date);
 
       (storage.writeFile as Mock).mockClear();
+      (database.insert as Mock).mockClear();
       const products = additionalNfData.items;
       await saveProducts(products, additionalNfData);
 
-      const result = await storage.readFile('/products/5601216120152.json');
+      const localResult = await storage.readFile(
+        '/products/5601216120152.json'
+      );
+      const remoteResult = await database.findOne('products', 'items', {
+        code: '5601216120152',
+      });
 
       const expectedResult = {
         code: '5601216120152',
@@ -117,10 +143,11 @@ describe('products', () => {
         ],
       };
 
-      expect(result).toEqual(expectedResult);
+      expect(localResult).toEqual(expectedResult);
+      expect(remoteResult).toEqual(expectedResult);
 
       const newHash = md5(JSON.stringify(expectedResult));
-      const expectIndexContent = defaultIndexFile.replace(
+      const expectLocalIndexContent = localIndexFile.replace(
         '5601216120152, 1689627866234, cdd192a0f2e645dc6f1f8ff07ff9a861',
         `5601216120152, 1689858134357, ${newHash}`
       );
@@ -128,8 +155,17 @@ describe('products', () => {
       expect(storage.writeFile).toBeCalledTimes(2);
       expect(storage.writeFile).toBeCalledWith(
         '/products/index.csv',
-        expectIndexContent
+        expectLocalIndexContent
       );
+
+      expect(database.insert).toBeCalledTimes(2);
+      expect(database.insert).toBeCalledWith('products', 'index', [
+        {
+          id: '5601216120152',
+          timestamp: 1689858134357,
+          hash: newHash,
+        },
+      ]);
     });
 
     it('does not appends an entry with same nf key', async () => {
@@ -164,13 +200,21 @@ describe('products', () => {
       await saveProducts(nfData.items, nfData);
 
       (storage.writeFile as Mock).mockClear();
+      (database.insert as Mock).mockClear();
       const products = additionalNfData.items;
       await saveProducts(products, additionalNfData);
 
-      const result = await storage.readFile('/products/5601216120152.json');
-
       expect(storage.writeFile).not.toBeCalled();
-      expect(result).toEqual({
+      expect(database.insert).not.toBeCalled();
+
+      const localResult = await storage.readFile(
+        '/products/5601216120152.json'
+      );
+      const remoteResult = await database.findOne('products', 'items', {
+        code: '5601216120152',
+      });
+
+      const expectedResult = {
         code: '5601216120152',
         description: 'AZ POR ANDORINHA EV 500ML',
         history: [
@@ -183,7 +227,10 @@ describe('products', () => {
             totalValue: 29.9,
           },
         ],
-      });
+      };
+
+      expect(localResult).toEqual(expectedResult);
+      expect(remoteResult).toEqual(expectedResult);
     });
 
     it('sorts product history data as it is appended', async () => {
@@ -218,13 +265,21 @@ describe('products', () => {
       await saveProducts(nfData.items, nfData);
 
       (storage.writeFile as Mock).mockClear();
+      (database.insert as Mock).mockClear();
       const products = additionalNfData.items;
       await saveProducts(products, additionalNfData);
 
-      const result = await storage.readFile('/products/5601216120152.json');
+      const localResult = await storage.readFile(
+        '/products/5601216120152.json'
+      );
+      const remoteResult = await database.findOne('products', 'items', {
+        code: '5601216120152',
+      });
 
       expect(storage.writeFile).toBeCalledTimes(2);
-      expect(result).toEqual({
+      expect(database.insert).toBeCalledTimes(2);
+
+      const expectedResult = {
         code: '5601216120152',
         description: 'AZ POR ANDORINHA EV 500ML',
         history: [
@@ -245,7 +300,10 @@ describe('products', () => {
             totalValue: 29.9,
           },
         ],
-      });
+      };
+
+      expect(localResult).toEqual(expectedResult);
+      expect(remoteResult).toEqual(expectedResult);
     });
   });
 });

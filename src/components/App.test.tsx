@@ -9,6 +9,7 @@ import nfData from '../../mockData/nf/nfData.json';
 
 vi.mock('axios');
 vi.mock('../proxies/storage');
+vi.mock('../proxies/database');
 
 vi.mock('./QrCodeReader', () => ({
   default: ({ onClose }: QrCodeReaderProps) => {
