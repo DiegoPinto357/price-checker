@@ -14,7 +14,7 @@ vi.mock('./proxies/nf');
 vi.mock('./proxies/storage');
 vi.mock('./proxies/database');
 
-const indexEntryToCvsLine = (entry: {
+const indexEntryToCsvLine = (entry: {
   id: string;
   timestamp: number;
   hash: string;
@@ -75,7 +75,7 @@ describe('nfs', () => {
       );
       expect(storage.writeFile).toBeCalledWith(
         '/nfs/index.csv',
-        indexEntryToCvsLine(indexEntry)
+        indexEntryToCsvLine(indexEntry)
       );
 
       expect(database.insertOne).toBeCalledWith('nfs', 'index', indexEntry);
@@ -84,7 +84,7 @@ describe('nfs', () => {
 
     it('does not add index entry if it already exists', async () => {
       const indexFilname = '/nfs/index.csv';
-      const currentLocalIndexContent = indexEntryToCvsLine(indexEntry);
+      const currentLocalIndexContent = indexEntryToCsvLine(indexEntry);
       await storage.writeFile(indexFilname, currentLocalIndexContent);
 
       const currentRemoteIndexContent = indexEntry;
