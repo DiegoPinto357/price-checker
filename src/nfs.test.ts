@@ -1,17 +1,32 @@
 import { Mock } from 'vitest';
-import { nf, storage } from './proxies';
+import { nf, storage, database } from './proxies';
 import { getNfData, saveNf } from './nfs';
 import nfData from '../mockData/nf/nfData.json';
 import nfDataWithDuplication from '../mockData/nf/nfDataWithDuplication.json';
 
+type MockStorage = typeof storage & { clearFiles: () => void };
+type MockDatabase = typeof database & { clearRecords: () => void };
+
+const mockStorage = storage as MockStorage;
+const mockDatabase = database as MockDatabase;
+
 vi.mock('./proxies/nf');
 vi.mock('./proxies/storage');
+vi.mock('./proxies/database');
+
+const indexEntryToCvsLine = (entry: {
+  id: string;
+  timestamp: number;
+  hash: string;
+}) => `${entry.id}, ${entry.timestamp}, ${entry.hash}\n`;
 
 describe('nfs', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     const date = new Date(2023, 6, 17, 18, 4, 26, 234);
+    mockStorage.clearFiles();
+    mockDatabase.clearRecords();
     vi.setSystemTime(date);
   });
 
@@ -45,6 +60,12 @@ describe('nfs', () => {
   });
 
   describe('saveNf', () => {
+    const indexEntry = {
+      id: '43230693015006003210651210008545221815897062',
+      timestamp: 1689627866234,
+      hash: 'a85bcdc4b11f56ebce0eea5fd6a9c6ed',
+    };
+
     it('save nf file', async () => {
       await saveNf(nfData);
 
@@ -54,20 +75,30 @@ describe('nfs', () => {
       );
       expect(storage.writeFile).toBeCalledWith(
         '/nfs/index.csv',
-        '43230693015006003210651210008545221815897062, 1689627866234, a85bcdc4b11f56ebce0eea5fd6a9c6ed\n'
+        indexEntryToCvsLine(indexEntry)
       );
+
+      expect(database.insertOne).toBeCalledWith('nfs', 'index', indexEntry);
+      expect(database.insertOne).toBeCalledWith('nfs', 'items', nfData);
     });
 
     it('does not add index entry if it already exists', async () => {
-      const indefFilname = '/nfs/index.csv';
-      const currentIndeFileContent =
-        '43230693015006003210651210008545221815897062, 1689627665234, a85bcdc4b11f56ebce0eea5fd6a9c6ed\n';
-      await storage.writeFile(indefFilname, currentIndeFileContent);
+      const indexFilname = '/nfs/index.csv';
+      const currentLocalIndexContent = indexEntryToCvsLine(indexEntry);
+      await storage.writeFile(indexFilname, currentLocalIndexContent);
+
+      const currentRemoteIndexContent = indexEntry;
+      await database.insertOne('nfs', 'index', currentRemoteIndexContent);
 
       await saveNf(nfData);
 
-      const newIndexFileContent = await storage.readFile<string>(indefFilname);
-      expect(newIndexFileContent).toBe(currentIndeFileContent);
+      const newLocalIndexContent = await storage.readFile<string>(indexFilname);
+      const newRemoteIndexContent = await database.find('nfs', 'index', {
+        id: indexEntry.id,
+      });
+
+      expect(newLocalIndexContent).toBe(currentLocalIndexContent);
+      expect(newRemoteIndexContent).toEqual([currentRemoteIndexContent]);
     });
   });
 });

@@ -5,8 +5,8 @@ interface GetIndexEntryOptions {
   timestamp?: number;
   hash?: string;
 }
-
-const getIndexEntry = <Data>(
+// TODO refactor module interface/exports
+export const getIndexEntry = <Data>(
   data: Data,
   idKey: keyof Data,
   options?: GetIndexEntryOptions

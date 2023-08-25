@@ -3,13 +3,6 @@ import { Nf, Product, ProductHistory, ProductHistoryItem } from './types';
 import createCsv from './libs/csv';
 import insertIndexEntry, { getIndexEntry } from './libs/insertIndexEntry';
 
-// TODO possible duplication
-interface IndexEntry {
-  id: string;
-  timestamp: number;
-  hash: string;
-}
-
 const parseDate = (stringDate: string) => {
   const [date, time] = stringDate.split(' ');
   const dateParts = date.split('/');
@@ -68,7 +61,11 @@ export const saveProductsOnRemote = async (
 
   await Promise.all([
     database.insert<ProductHistory>('products', 'items', records),
-    database.insert<IndexEntry>('products', 'index', indexEntries),
+    database.insert<(typeof indexEntries)[0]>(
+      'products',
+      'index',
+      indexEntries
+    ),
   ]);
 };
 

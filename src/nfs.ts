@@ -1,6 +1,6 @@
-import { nf, storage } from './proxies';
+import { nf, storage, database } from './proxies';
 import createCsv from './libs/csv';
-import insertIndexEntry from './libs/insertIndexEntry';
+import insertIndexEntry, { getIndexEntry } from './libs/insertIndexEntry';
 import { Nf } from './types';
 
 const mergeProducts = (products: Nf['items']) =>
@@ -16,20 +16,37 @@ const mergeProducts = (products: Nf['items']) =>
     return merged;
   }, [] as typeof products);
 
+const saveNfOnLocal = async (nf: Nf) => {
+  const indexFile = await createCsv('/nfs/index.csv');
+
+  const { existingEntry } = insertIndexEntry(indexFile, nf, 'key');
+
+  if (existingEntry) return;
+
+  const filename = `/nfs/${nf.key}.json`;
+  await storage.writeFile(filename, nf);
+  await indexFile.save();
+};
+
+const saveNfOnRemote = async (nf: Nf) => {
+  const existingEntry = await database.findOne('nfs', 'index', {
+    id: nf.key,
+  });
+
+  if (existingEntry) return;
+
+  const indexEntry = getIndexEntry(nf, 'key');
+  await Promise.all([
+    database.insertOne('nfs', 'index', indexEntry),
+    database.insertOne('nfs', 'items', nf),
+  ]);
+};
+
 export const getNfData = async (key: string) => {
   const nfData = await nf.getNfData(key);
   return { ...nfData, items: mergeProducts(nfData.items) };
 };
 
 export const saveNf = async (nf: Nf) => {
-  const indexFile = await createCsv('/nfs/index.csv');
-
-  const { existingEntry } = insertIndexEntry(indexFile, nf, 'key');
-
-  const filename = `/nfs/${nf.key}.json`;
-  await storage.writeFile(filename, nf);
-
-  if (!existingEntry) {
-    await indexFile.save();
-  }
+  await Promise.all([saveNfOnLocal(nf), saveNfOnRemote(nf)]);
 };
