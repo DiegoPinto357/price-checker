@@ -36,6 +36,23 @@ const findOne = async <T>(
   }
 };
 
+const insert = async <T>(
+  databaseName: string,
+  collectionName: string,
+  documents: T[]
+) => {
+  try {
+    const { data } = await axios.post(`${serverHost}/database/insert`, {
+      databaseName,
+      collectionName,
+      documents,
+    });
+    return data;
+  } catch (error) {
+    return;
+  }
+};
+
 const insertOne = async <T>(
   databaseName: string,
   collectionName: string,
@@ -75,6 +92,7 @@ const updateOne = async <T>(
 export default {
   find,
   findOne,
+  insert,
   insertOne,
   updateOne,
 };

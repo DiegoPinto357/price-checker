@@ -47,6 +47,20 @@ const findOne = async (database, collection, filter) => {
   return data.document;
 };
 
+const insert = async (database, collection, documents) => {
+  const url = `${baseUrl}/insertMany`;
+  return await axios.post(
+    url,
+    {
+      dataSource,
+      database: getDatabaseName(database),
+      collection,
+      documents,
+    },
+    { headers }
+  );
+};
+
 const insertOne = async (database, collection, document) => {
   const url = `${baseUrl}/insertOne`;
   return await axios.post(
@@ -79,6 +93,7 @@ const updateOne = async (database, collection, filter, update) => {
 module.exports = {
   find,
   findOne,
+  insert,
   insertOne,
   updateOne,
 };

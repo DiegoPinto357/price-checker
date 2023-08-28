@@ -22,6 +22,20 @@ export default async (app: FastifyInstance) => {
     reply.send(data);
   });
 
+  interface InserBody extends DefaultBody {
+    documents: object[];
+  }
+
+  app.post<{ Body: InserBody }>('/database/insert', async (request, reply) => {
+    const { databaseName, collectionName, documents } = request.body;
+    const { data } = await database.insert(
+      databaseName,
+      collectionName,
+      documents
+    );
+    reply.send(data);
+  });
+
   interface InserOneBody extends DefaultBody {
     document: object;
   }

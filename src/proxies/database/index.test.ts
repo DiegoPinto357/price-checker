@@ -47,6 +47,25 @@ describe('database proxy', () => {
       });
     });
 
+    it('calls insert server endpoint', async () => {
+      //FIXME vi.clearAllMocks not working
+      (axios.post as Mock).mockClear();
+
+      const documents = [
+        { code: '52472544243' },
+        { code: '52467542623' },
+        { code: '12467542582' },
+      ];
+      await databaseProxy.insert(databaseName, collectionName, documents);
+
+      expect(axios.post).toBeCalledTimes(1);
+      expect(axios.post).toBeCalledWith(`${serverHost}/database/insert`, {
+        databaseName,
+        collectionName,
+        documents,
+      });
+    });
+
     it('calls insertOne server endpoint', async () => {
       //FIXME vi.clearAllMocks not working
       (axios.post as Mock).mockClear();
