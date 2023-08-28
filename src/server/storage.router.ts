@@ -30,7 +30,7 @@ export default async (app: FastifyInstance) => {
       const { filename } = request.params;
       try {
         const data = await storage.readFile(decodeURIComponent(filename));
-        reply.send(data);
+        return reply.send(data);
       } catch (error) {
         if (error instanceof Error) {
           const errorCode = ((<unknown>error) as FsError).code;
