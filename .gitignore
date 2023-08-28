@@ -27,3 +27,4 @@ dist-ssr
 src/nodejs/env.json
 
 userData
+userData-sandbox

@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 require('../loadEnv');
 const axios = require('axios');
+const { sandboxMode } = require('../config');
 
 const baseUrl =
   'https://sa-east-1.aws.data.mongodb-api.com/app/data-rcjlb/endpoint/data/v1/action';
@@ -13,13 +14,16 @@ const headers = {
 
 const dataSource = 'Cluster0';
 
+const getDatabaseName = database =>
+  sandboxMode ? `${database}-sandbox` : sandboxMode;
+
 const find = async (database, collection, filter) => {
   const url = `${baseUrl}/find`;
   const { data } = await axios.post(
     url,
     {
       dataSource,
-      database,
+      database: getDatabaseName(database),
       collection,
       filter,
     },
@@ -34,7 +38,7 @@ const findOne = async (database, collection, filter) => {
     url,
     {
       dataSource,
-      database,
+      database: getDatabaseName(database),
       collection,
       filter,
     },
@@ -49,7 +53,7 @@ const insertOne = async (database, collection, document) => {
     url,
     {
       dataSource,
-      database,
+      database: getDatabaseName(database),
       collection,
       document,
     },
@@ -63,7 +67,7 @@ const updateOne = async (database, collection, filter, update) => {
     url,
     {
       dataSource,
-      database,
+      database: getDatabaseName(database),
       collection,
       filter,
       update,
