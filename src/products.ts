@@ -102,11 +102,11 @@ export const saveProductsOnRemote = async (
 ) => {
   if (!records.length) return;
 
-  const indexEntries: IndexEntry[] = [];
+  const indexEntriesToInsert: IndexEntry[] = [];
   const recordsToInsert: ProductHistory[] = [];
 
   for (const [index, record] of records.entries()) {
-    const existingRecord = await database.findOne<ProductHistory>(
+    const existingItem = await database.findOne<ProductHistory>(
       'products',
       'items',
       {
@@ -114,46 +114,57 @@ export const saveProductsOnRemote = async (
       }
     );
 
-    if (existingRecord) {
-      const recordToUpdate = mergeHistory(existingRecord, record.history[0]);
+    let recordToUpdate: ProductHistory | null = record;
+
+    if (existingItem) {
+      recordToUpdate = mergeHistory(existingItem, record.history[0]);
       if (recordToUpdate) {
-        await Promise.all([
-          database.updateOne<IndexEntry>(
-            'products',
-            'index',
-            { id: recordToUpdate.code },
-            {
-              $set: {
-                ...getIndexEntry(
-                  recordToUpdate,
-                  'code',
-                  indexMetadata?.[index]
-                ),
-              },
-            }
-          ),
-          database.updateOne<ProductHistory>(
-            'products',
-            'items',
-            { code: recordToUpdate.code },
-            {
-              $set: {
-                history: recordToUpdate.history,
-              },
-            }
-          ),
-        ]);
+        await database.updateOne<ProductHistory>(
+          'products',
+          'items',
+          { code: recordToUpdate.code },
+          {
+            $set: {
+              history: recordToUpdate.history,
+            },
+          }
+        );
       }
-      continue;
+    } else {
+      recordsToInsert.push(record);
     }
 
-    indexEntries.push(getIndexEntry(record, 'code', indexMetadata?.[index]));
-    recordsToInsert.push(record);
+    const existingIndex = await database.findOne<IndexEntry>(
+      'products',
+      'index',
+      {
+        id: record.code,
+      }
+    );
+
+    if (existingIndex) {
+      if (recordToUpdate) {
+        await database.updateOne<IndexEntry>(
+          'products',
+          'index',
+          { id: recordToUpdate.code },
+          {
+            $set: {
+              ...getIndexEntry(recordToUpdate, 'code', indexMetadata?.[index]),
+            },
+          }
+        );
+      }
+    } else {
+      indexEntriesToInsert.push(
+        getIndexEntry(record, 'code', indexMetadata?.[index])
+      );
+    }
   }
 
   await Promise.all([
-    indexEntries.length
-      ? database.insert<IndexEntry>('products', 'index', indexEntries)
+    indexEntriesToInsert.length
+      ? database.insert<IndexEntry>('products', 'index', indexEntriesToInsert)
       : null,
     recordsToInsert.length
       ? database.insert<ProductHistory>('products', 'items', recordsToInsert)
