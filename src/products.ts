@@ -96,6 +96,43 @@ export const saveProductsOnLocal = async (
   }
 };
 
+const getRemoteProductItem = (code: string) =>
+  database.findOne<ProductHistory>('products', 'items', {
+    code,
+  });
+
+const getRemoteProductIndex = (id: string) =>
+  database.findOne<IndexEntry>('products', 'index', {
+    id,
+  });
+
+const updateRemoteProductItem = async (item: ProductHistory) =>
+  database.updateOne<ProductHistory>(
+    'products',
+    'items',
+    { code: item.code },
+    {
+      $set: {
+        history: item.history,
+      },
+    }
+  );
+
+const updateRemoteProductIndex = async (
+  item: ProductHistory,
+  indexMetadata?: { timestamp: number; hash: string }
+) =>
+  database.updateOne<IndexEntry>(
+    'products',
+    'index',
+    { id: item.code },
+    {
+      $set: {
+        ...getIndexEntry(item, 'code', indexMetadata),
+      },
+    }
+  );
+
 export const saveProductsOnRemote = async (
   records: ProductHistory[],
   indexMetadata?: { timestamp: number; hash: string }[]
@@ -106,54 +143,24 @@ export const saveProductsOnRemote = async (
   const recordsToInsert: ProductHistory[] = [];
 
   for (const [index, record] of records.entries()) {
-    const existingItem = await database.findOne<ProductHistory>(
-      'products',
-      'items',
-      {
-        code: record.code,
-      }
-    );
+    const existingItem = await getRemoteProductItem(record.code);
 
     let recordToUpdate: ProductHistory | null = record;
 
     if (existingItem) {
       recordToUpdate = mergeHistory(existingItem, record.history[0]);
       if (recordToUpdate) {
-        await database.updateOne<ProductHistory>(
-          'products',
-          'items',
-          { code: recordToUpdate.code },
-          {
-            $set: {
-              history: recordToUpdate.history,
-            },
-          }
-        );
+        await updateRemoteProductItem(recordToUpdate);
       }
     } else {
       recordsToInsert.push(record);
     }
 
-    const existingIndex = await database.findOne<IndexEntry>(
-      'products',
-      'index',
-      {
-        id: record.code,
-      }
-    );
+    const existingIndex = await getRemoteProductIndex(record.code);
 
     if (existingIndex) {
       if (recordToUpdate) {
-        await database.updateOne<IndexEntry>(
-          'products',
-          'index',
-          { id: recordToUpdate.code },
-          {
-            $set: {
-              ...getIndexEntry(recordToUpdate, 'code', indexMetadata?.[index]),
-            },
-          }
-        );
+        await updateRemoteProductIndex(recordToUpdate, indexMetadata?.[index]);
       }
     } else {
       indexEntriesToInsert.push(
