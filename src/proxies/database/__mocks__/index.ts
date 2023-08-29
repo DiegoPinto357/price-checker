@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
+import { UpdateOneOptions } from '../types';
 
 interface DatabaseEntry {
   databaseName: string;
@@ -93,12 +94,18 @@ const updateOne = vi.fn(
     databaseName: string,
     collectionName: string,
     filter: Partial<T>,
-    update: Record<string, Partial<T>>
+    update: Record<string, Partial<T>>,
+    options?: UpdateOneOptions
   ) => {
-    const record = await findOne(databaseName, collectionName, filter);
+    let record = await findOne(databaseName, collectionName, filter);
 
     if (!record) {
-      return { matchedCount: 0 };
+      if (!options?.upsert) {
+        return { matchedCount: 0 };
+      }
+
+      record = {};
+      setDocument(databaseName, collectionName, record);
     }
 
     const operations = Object.entries(update);
@@ -106,12 +113,19 @@ const updateOne = vi.fn(
       Object.entries(params).forEach(([key, value]) => {
         switch (operation) {
           case '$set':
-            _.set(record, key, value);
+            _.set(record as object, key, value);
             break;
 
           case '$inc': {
             const currentValue = _.get(record, key);
-            _.set(record, key, currentValue + value);
+            _.set(record as object, key, currentValue + value);
+            break;
+          }
+
+          case '$setOnInsert': {
+            if (options?.upsert) {
+              _.set(record as object, key, value);
+            }
             break;
           }
         }

@@ -56,17 +56,20 @@ export default async (app: FastifyInstance) => {
   interface UpdateOneBody extends DefaultBody {
     filter: object;
     update: object;
+    options?: object;
   }
 
   app.post<{ Body: UpdateOneBody }>(
     '/database/updateOne',
     async (request, reply) => {
-      const { databaseName, collectionName, filter, update } = request.body;
+      const { databaseName, collectionName, filter, update, options } =
+        request.body;
       const { data } = await database.updateOne(
         databaseName,
         collectionName,
         filter,
-        update
+        update,
+        options
       );
       reply.send(data);
     }

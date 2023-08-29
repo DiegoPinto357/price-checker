@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { UpdateOneOptions } from './types';
 
 const serverHost = 'http://127.0.0.1:3001';
 
@@ -74,7 +75,8 @@ const updateOne = async <T>(
   databaseName: string,
   collectionName: string,
   filter: Partial<T>,
-  update: Record<string, Partial<T>>
+  update: Record<string, Partial<T>>,
+  options?: UpdateOneOptions
 ): Promise<{ insertId: string } | undefined> => {
   try {
     const { data } = await axios.post(`${serverHost}/database/updateOne`, {
@@ -82,6 +84,7 @@ const updateOne = async <T>(
       collectionName,
       filter,
       update,
+      options,
     });
     return data;
   } catch (error) {

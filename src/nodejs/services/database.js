@@ -75,7 +75,7 @@ const insertOne = async (database, collection, document) => {
   );
 };
 
-const updateOne = async (database, collection, filter, update) => {
+const updateOne = async (database, collection, filter, update, options) => {
   const url = `${baseUrl}/updateOne`;
   return await axios.post(
     url,
@@ -85,6 +85,7 @@ const updateOne = async (database, collection, filter, update) => {
       collection,
       filter,
       update,
+      options,
     },
     { headers }
   );

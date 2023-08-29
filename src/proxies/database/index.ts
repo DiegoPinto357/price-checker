@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { UpdateOneOptions } from './types';
 
 const platform = Capacitor.getPlatform();
 
@@ -28,7 +29,8 @@ export interface DatabaseProxy {
     databaseName: string,
     collectionName: string,
     filter: Partial<T>,
-    update: Record<string, Partial<T>>
+    update: Record<string, Partial<T>>,
+    options?: UpdateOneOptions
   ) => Promise<{
     matchedCount: number;
     modifiedCount: number;
