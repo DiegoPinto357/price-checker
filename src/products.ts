@@ -1,7 +1,15 @@
+import _ from 'lodash';
 import { storage, database } from './proxies';
 import { Nf, Product, ProductHistory, ProductHistoryItem } from './types';
 import createCsv from './libs/csv';
 import insertIndexEntry, { getIndexEntry } from './libs/insertIndexEntry';
+
+// TODO possible duplication
+interface IndexEntry {
+  id: string;
+  timestamp: number;
+  hash: string;
+}
 
 const parseDate = (stringDate: string) => {
   const [date, time] = stringDate.split(' ');
@@ -28,6 +36,29 @@ const buildHistoryItem = (product: Product, nfData: Nf) => {
   };
 };
 
+const mergeHistory = (
+  currentRecord: ProductHistory,
+  newProductHistoryItem: ProductHistoryItem
+) => {
+  const existingEntry = currentRecord.history.find(
+    ({ nfKey }) => nfKey === newProductHistoryItem.nfKey
+  );
+
+  if (!existingEntry) {
+    const mergedEntry = _.cloneDeep(currentRecord);
+
+    mergedEntry.history.push(newProductHistoryItem);
+    mergedEntry.history = mergedEntry.history.sort(
+      (a: ProductHistoryItem, b: ProductHistoryItem) =>
+        parseDate(a.date).getTime() - parseDate(b.date).getTime()
+    );
+
+    return mergedEntry;
+  }
+
+  return null;
+};
+
 export const saveProductsOnLocal = async (
   records: ProductHistory[],
   indexMetadata?: { timestamp: number; hash: string }[]
@@ -36,17 +67,33 @@ export const saveProductsOnLocal = async (
 
   const indexFile = await createCsv('/products/index.csv');
 
+  let hasNewData = false;
   for (const [index, record] of records.entries()) {
-    insertIndexEntry(indexFile, record, 'code', {
-      overwriteExisting: true,
-      ...indexMetadata?.[index],
-    });
-
     const filename = `/products/${record.code}.json`;
-    await storage.writeFile(filename, record);
+    const currentFile = await storage.readFile<ProductHistory>(filename);
+
+    let dataToSave: ProductHistory | null;
+
+    if (currentFile) {
+      dataToSave = mergeHistory(currentFile, record.history[0]);
+    } else {
+      dataToSave = record;
+    }
+
+    if (dataToSave) {
+      insertIndexEntry(indexFile, dataToSave, 'code', {
+        overwriteExisting: true,
+        ...indexMetadata?.[index],
+      });
+
+      await storage.writeFile(filename, dataToSave);
+      hasNewData = true;
+    }
   }
 
-  await indexFile.save();
+  if (hasNewData) {
+    await indexFile.save();
+  }
 };
 
 export const saveProductsOnRemote = async (
@@ -55,58 +102,75 @@ export const saveProductsOnRemote = async (
 ) => {
   if (!records.length) return;
 
-  const indexEntries = records.map((record, index) =>
-    getIndexEntry(record, 'code', indexMetadata?.[index])
-  );
+  const indexEntries: IndexEntry[] = [];
+  const recordsToInsert: ProductHistory[] = [];
+
+  for (const [index, record] of records.entries()) {
+    const existingRecord = await database.findOne<ProductHistory>(
+      'products',
+      'items',
+      {
+        code: record.code,
+      }
+    );
+
+    if (existingRecord) {
+      const recordToUpdate = mergeHistory(existingRecord, record.history[0]);
+      if (recordToUpdate) {
+        await Promise.all([
+          database.updateOne<IndexEntry>(
+            'products',
+            'index',
+            { id: recordToUpdate.code },
+            {
+              $set: {
+                ...getIndexEntry(
+                  recordToUpdate,
+                  'code',
+                  indexMetadata?.[index]
+                ),
+              },
+            }
+          ),
+          database.updateOne<ProductHistory>(
+            'products',
+            'items',
+            { code: recordToUpdate.code },
+            {
+              $set: {
+                history: recordToUpdate.history,
+              },
+            }
+          ),
+        ]);
+      }
+      continue;
+    }
+
+    indexEntries.push(getIndexEntry(record, 'code', indexMetadata?.[index]));
+    recordsToInsert.push(record);
+  }
 
   await Promise.all([
-    database.insert<ProductHistory>('products', 'items', records),
-    database.insert<(typeof indexEntries)[0]>(
-      'products',
-      'index',
-      indexEntries
-    ),
+    indexEntries.length
+      ? database.insert<IndexEntry>('products', 'index', indexEntries)
+      : null,
+    recordsToInsert.length
+      ? database.insert<ProductHistory>('products', 'items', recordsToInsert)
+      : null,
   ]);
 };
 
 // TODO optimize params - duplication
 export const saveProducts = async (products: Product[], nfData: Nf) => {
-  const filesToSave: ProductHistory[] = [];
-
-  for (const product of products) {
-    const filename = `/products/${product.code}.json`;
-
-    const currentFile = await storage.readFile<ProductHistory>(filename);
-
-    if (currentFile) {
-      const entryAlreadyExists = currentFile.history.find(
-        ({ nfKey }) => nfKey === nfData.key
-      );
-
-      if (!entryAlreadyExists) {
-        const historyItem = buildHistoryItem(product, nfData);
-
-        currentFile.history.push(historyItem);
-        currentFile.history = currentFile.history.sort(
-          (a: ProductHistoryItem, b: ProductHistoryItem) =>
-            parseDate(a.date).getTime() - parseDate(b.date).getTime()
-        );
-
-        filesToSave.push(currentFile);
-      }
-    } else {
-      const productHistory: ProductHistory = {
-        code: product.code,
-        description: product.description,
-        history: [buildHistoryItem(product, nfData)],
-      };
-
-      filesToSave.push(productHistory);
-    }
-  }
+  const mappedProducts = products.map(product => ({
+    code: product.code,
+    description: product.description,
+    history: [buildHistoryItem(product, nfData)],
+  }));
 
   await Promise.all([
-    saveProductsOnLocal(filesToSave),
-    saveProductsOnRemote(filesToSave),
+    saveProductsOnLocal(mappedProducts),
+    saveProductsOnRemote(mappedProducts),
   ]);
 };

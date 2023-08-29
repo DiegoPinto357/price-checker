@@ -1,4 +1,5 @@
 import { v4 as uuid } from 'uuid';
+import _ from 'lodash';
 
 interface DatabaseEntry {
   databaseName: string;
@@ -24,7 +25,12 @@ const setDocument = <T>(
   data: T
 ) => {
   const _id = uuid();
-  dataBuffer.push({ databaseName, collectionName, _id, data });
+  dataBuffer.push({
+    databaseName,
+    collectionName,
+    _id,
+    data: _.cloneDeep(data),
+  });
   return { insertId: _id };
 };
 
@@ -82,7 +88,39 @@ const insertOne = vi.fn(
   }
 );
 
-const updateOne = vi.fn();
+const updateOne = vi.fn(
+  async <T>(
+    databaseName: string,
+    collectionName: string,
+    filter: Partial<T>,
+    update: Record<string, Partial<T>>
+  ) => {
+    const record = await findOne(databaseName, collectionName, filter);
+
+    if (!record) {
+      return { matchedCount: 0 };
+    }
+
+    const operations = Object.entries(update);
+    operations.forEach(([operation, params]) => {
+      Object.entries(params).forEach(([key, value]) => {
+        switch (operation) {
+          case '$set':
+            _.set(record, key, value);
+            break;
+
+          case '$inc': {
+            const currentValue = _.get(record, key);
+            _.set(record, key, currentValue + value);
+            break;
+          }
+        }
+      });
+    });
+
+    return { matchedCount: 1 };
+  }
+);
 
 const clearRecords = () => (dataBuffer = []);
 

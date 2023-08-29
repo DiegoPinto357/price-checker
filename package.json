@@ -24,6 +24,7 @@
     "axios": "^1.4.0",
     "capacitor-nodejs": "https://github.com/hampoelz/capacitor-nodejs/releases/download/v1.0.0-beta.2/capacitor-nodejs.tgz",
     "fastify": "^4.15.0",
+    "lodash": "^4.17.21",
     "md5": "^2.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -33,6 +34,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
+    "@types/lodash": "^4.14.197",
     "@types/md5": "^2.3.2",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",

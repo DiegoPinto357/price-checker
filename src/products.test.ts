@@ -74,6 +74,7 @@ describe('products', () => {
       });
     });
 
+    // TODO update test to merge multiple products
     it('appends new item to existing product', async () => {
       const additionalNfData = {
         key: '43230693015006003210651210008545221815898394',
@@ -110,14 +111,19 @@ describe('products', () => {
 
       (storage.writeFile as Mock).mockClear();
       (database.insert as Mock).mockClear();
+      (database.updateOne as Mock).mockClear();
+
       const products = additionalNfData.items;
       await saveProducts(products, additionalNfData);
 
       const localResult = await storage.readFile(
         '/products/5601216120152.json'
       );
-      const remoteResult = await database.findOne('products', 'items', {
+      const remoteResult = await database.find('products', 'items', {
         code: '5601216120152',
+      });
+      const remoteIndex = await database.find('products', 'index', {
+        id: '5601216120152',
       });
 
       const expectedResult = {
@@ -143,9 +149,6 @@ describe('products', () => {
         ],
       };
 
-      expect(localResult).toEqual(expectedResult);
-      expect(remoteResult).toEqual(expectedResult);
-
       const newHash = md5(JSON.stringify(expectedResult));
       const expectLocalIndexContent = localIndexFile.replace(
         '5601216120152, 1689627866234, cdd192a0f2e645dc6f1f8ff07ff9a861',
@@ -157,15 +160,18 @@ describe('products', () => {
         '/products/index.csv',
         expectLocalIndexContent
       );
+      expect(localResult).toEqual(expectedResult);
 
-      expect(database.insert).toBeCalledTimes(2);
-      expect(database.insert).toBeCalledWith('products', 'index', [
-        {
-          id: '5601216120152',
-          timestamp: 1689858134357,
-          hash: newHash,
-        },
-      ]);
+      expect(database.insert).not.toBeCalled();
+      expect(database.updateOne).toBeCalledTimes(2);
+      expect(remoteResult).toHaveLength(1);
+      expect(remoteResult[0]).toEqual(expectedResult);
+      expect(remoteIndex).toHaveLength(1);
+      expect(remoteIndex[0]).toEqual({
+        id: '5601216120152',
+        timestamp: 1689858134357,
+        hash: newHash,
+      });
     });
 
     it('does not appends an entry with same nf key', async () => {
@@ -201,11 +207,13 @@ describe('products', () => {
 
       (storage.writeFile as Mock).mockClear();
       (database.insert as Mock).mockClear();
+      (database.updateOne as Mock).mockClear();
       const products = additionalNfData.items;
       await saveProducts(products, additionalNfData);
 
       expect(storage.writeFile).not.toBeCalled();
       expect(database.insert).not.toBeCalled();
+      expect(database.updateOne).not.toBeCalled();
 
       const localResult = await storage.readFile(
         '/products/5601216120152.json'
@@ -265,7 +273,7 @@ describe('products', () => {
       await saveProducts(nfData.items, nfData);
 
       (storage.writeFile as Mock).mockClear();
-      (database.insert as Mock).mockClear();
+      (database.updateOne as Mock).mockClear();
       const products = additionalNfData.items;
       await saveProducts(products, additionalNfData);
 
@@ -277,7 +285,7 @@ describe('products', () => {
       });
 
       expect(storage.writeFile).toBeCalledTimes(2);
-      expect(database.insert).toBeCalledTimes(2);
+      expect(database.updateOne).toBeCalledTimes(2);
 
       const expectedResult = {
         code: '5601216120152',

@@ -28,7 +28,7 @@ export interface DatabaseProxy {
     databaseName: string,
     collectionName: string,
     filter: Partial<T>,
-    update: Partial<T>
+    update: Record<string, Partial<T>>
   ) => Promise<{
     matchedCount: number;
     modifiedCount: number;

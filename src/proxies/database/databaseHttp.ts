@@ -74,7 +74,7 @@ const updateOne = async <T>(
   databaseName: string,
   collectionName: string,
   filter: Partial<T>,
-  update: Partial<T>
+  update: Record<string, Partial<T>>
 ): Promise<{ insertId: string } | undefined> => {
   try {
     const { data } = await axios.post(`${serverHost}/database/updateOne`, {
