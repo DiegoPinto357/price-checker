@@ -8,13 +8,11 @@ interface GetIndexEntryOptions {
 // TODO refactor module interface/exports
 export const getIndexEntry = <Data>(
   data: Data,
-  idKey: keyof Data,
   options?: GetIndexEntryOptions
 ) => {
-  const id = data[idKey] as string;
   const timestamp = options?.timestamp ? options.timestamp : Date.now();
   const hash = options?.hash ? options?.hash : md5(JSON.stringify(data));
-  return { id, timestamp, hash };
+  return { timestamp, hash };
 };
 
 interface Options extends GetIndexEntryOptions {
@@ -27,12 +25,12 @@ export default <Data>(
   idKey: keyof Data,
   options?: Options
 ) => {
-  const { id, timestamp, hash } = getIndexEntry<Data>(data, idKey, {
+  const { timestamp, hash } = getIndexEntry<Data>(data, {
     timestamp: options?.timestamp,
     hash: options?.hash,
   });
 
-  const indexEntry = `${id}, ${timestamp}, ${hash}\n`;
+  const indexEntry = `${data[idKey]}, ${timestamp}, ${hash}\n`;
 
   const existingEntryIndex = indexFile.findLineIndex(0, data[idKey] as string);
   if (existingEntryIndex !== -1) {

@@ -1,15 +1,14 @@
 import _ from 'lodash';
 import { storage, database } from './proxies';
-import { Nf, Product, ProductHistory, ProductHistoryItem } from './types';
+import {
+  Nf,
+  Product,
+  ProductHistory,
+  ProductHistoryItem,
+  ProductHistoryWithIndex,
+} from './types';
 import createCsv from './libs/csv';
 import insertIndexEntry, { getIndexEntry } from './libs/insertIndexEntry';
-
-// TODO possible duplication
-interface IndexEntry {
-  id: string;
-  timestamp: number;
-  hash: string;
-}
 
 const parseDate = (stringDate: string) => {
   const [date, time] = stringDate.split(' ');
@@ -36,8 +35,8 @@ const buildHistoryItem = (product: Product, nfData: Nf) => {
   };
 };
 
-const mergeHistory = (
-  currentRecord: ProductHistory,
+const mergeHistory = <T extends ProductHistory>(
+  currentRecord: T,
   newProductHistoryItem: ProductHistoryItem
 ) => {
   const existingEntry = currentRecord.history.find(
@@ -97,38 +96,20 @@ export const saveProductsOnLocal = async (
 };
 
 const getRemoteProductItem = (code: string) =>
-  database.findOne<ProductHistory>('products', 'items', {
+  database.findOne<ProductHistoryWithIndex>('items', 'products', {
     code,
   });
 
-const getRemoteProductIndex = (id: string) =>
-  database.findOne<IndexEntry>('products', 'index', {
-    id,
-  });
-
-const updateRemoteProductItem = async (item: ProductHistory) =>
-  database.updateOne<ProductHistory>(
-    'products',
+const updateRemoteProductItem = async (item: ProductHistoryWithIndex) =>
+  database.updateOne<ProductHistoryWithIndex>(
     'items',
+    'products',
     { code: item.code },
     {
       $set: {
+        timestamp: item.timestamp,
+        hash: item.hash,
         history: item.history,
-      },
-    }
-  );
-
-const updateRemoteProductIndex = async (
-  item: ProductHistory,
-  indexMetadata?: { timestamp: number; hash: string }
-) =>
-  database.updateOne<IndexEntry>(
-    'products',
-    'index',
-    { id: item.code },
-    {
-      $set: {
-        ...getIndexEntry(item, 'code', indexMetadata),
       },
     }
   );
@@ -139,44 +120,39 @@ export const saveProductsOnRemote = async (
 ) => {
   if (!records.length) return;
 
-  const indexEntriesToInsert: IndexEntry[] = [];
-  const recordsToInsert: ProductHistory[] = [];
+  const recordsToInsert: ProductHistoryWithIndex[] = [];
 
   for (const [index, record] of records.entries()) {
-    const existingItem = await getRemoteProductItem(record.code);
+    const existingRecord = await getRemoteProductItem(record.code);
 
-    let recordToUpdate: ProductHistory | null = record;
-
-    if (existingItem) {
-      recordToUpdate = mergeHistory(existingItem, record.history[0]);
-      if (recordToUpdate) {
-        await updateRemoteProductItem(recordToUpdate);
+    if (existingRecord) {
+      const mergedRecord = mergeHistory(existingRecord, record.history[0]);
+      if (mergedRecord) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { timestamp, hash, ...mergedRecordWithoutIndex } = mergedRecord;
+        const recordWithIndex = {
+          ...mergedRecordWithoutIndex,
+          ...getIndexEntry(mergedRecordWithoutIndex, indexMetadata?.[index]),
+        };
+        await updateRemoteProductItem(recordWithIndex);
       }
-    } else {
-      recordsToInsert.push(record);
+
+      continue;
     }
 
-    const existingIndex = await getRemoteProductIndex(record.code);
-
-    if (existingIndex) {
-      if (recordToUpdate) {
-        await updateRemoteProductIndex(recordToUpdate, indexMetadata?.[index]);
-      }
-    } else {
-      indexEntriesToInsert.push(
-        getIndexEntry(record, 'code', indexMetadata?.[index])
-      );
-    }
+    recordsToInsert.push({
+      ...record,
+      ...getIndexEntry(record, indexMetadata?.[index]),
+    });
   }
 
-  await Promise.all([
-    indexEntriesToInsert.length
-      ? database.insert<IndexEntry>('products', 'index', indexEntriesToInsert)
-      : null,
-    recordsToInsert.length
-      ? database.insert<ProductHistory>('products', 'items', recordsToInsert)
-      : null,
-  ]);
+  if (recordsToInsert.length) {
+    await database.insert<ProductHistoryWithIndex>(
+      'items',
+      'products',
+      recordsToInsert
+    );
+  }
 };
 
 // TODO optimize params - duplication
