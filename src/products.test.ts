@@ -49,28 +49,26 @@ describe('products', () => {
         ],
       }));
 
-      expect(database.insert).toBeCalledTimes(2);
-      expect(database.insert).toBeCalledWith(
-        'products',
-        'index',
-        remoteIndexFile
-      );
-      expect(database.insert).toBeCalledWith(
-        'products',
-        'items',
-        expectedProductsHistory
-      );
+      const localIndexResult = await storage.readFile('/products/index.csv');
 
-      expect(storage.writeFile).toBeCalledTimes(nfData.items.length + 1);
-      expect(storage.writeFile).toBeCalledWith(
-        '/products/index.csv',
-        localIndexFile
-      );
-      nfData.items.forEach((item, index) => {
-        expect(storage.writeFile).toBeCalledWith(
-          `/products/${item.code}.json`,
-          expectedProductsHistory[index]
+      expect(localIndexResult).toBe(localIndexFile);
+
+      nfData.items.forEach(async (item, index) => {
+        const localItemsResult = await storage.readFile(
+          `/products/${item.code}.json`
         );
+
+        const remoteIndexResult = await database.findOne('products', 'index', {
+          id: item.code,
+        });
+
+        const remoteItemResult = await database.findOne('products', 'items', {
+          code: item.code,
+        });
+
+        expect(localItemsResult).toEqual(expectedProductsHistory[index]);
+        expect(remoteIndexResult).toEqual(remoteIndexFile[index]);
+        expect(remoteItemResult).toEqual(expectedProductsHistory[index]);
       });
     });
 
