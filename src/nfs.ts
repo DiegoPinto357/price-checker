@@ -29,9 +29,14 @@ const saveNfOnLocal = async (nf: Nf) => {
 };
 
 const saveNfOnRemote = async (nf: Nf) => {
-  const existingEntry = await database.findOne('items', 'nfs', {
-    key: nf.key,
-  });
+  const existingEntry = await database.findOne(
+    'items',
+    'nfs',
+    {
+      key: nf.key,
+    },
+    { projection: { _id: 0 } }
+  );
 
   if (existingEntry) return;
 

@@ -1,12 +1,14 @@
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
-import { UpdateOneOptions } from '../types';
+import { FindOptions, FindOneOptions, UpdateOneOptions } from '../types';
+
+type WithId<T> = { _id: string } & T;
 
 interface DatabaseEntry {
   databaseName: string;
   collectionName: string;
   _id: string;
-  data: unknown;
+  data: WithId<object>;
 }
 
 let dataBuffer: DatabaseEntry[] = [];
@@ -20,7 +22,7 @@ const getCollection = (databaseName: string, collectionName: string) =>
     )
     .map(item => item.data);
 
-const setDocument = <T>(
+const insertDocument = <T>(
   databaseName: string,
   collectionName: string,
   data: T
@@ -30,42 +32,99 @@ const setDocument = <T>(
     databaseName,
     collectionName,
     _id,
-    data: _.cloneDeep(data),
+    data: { _id, ..._.cloneDeep(data) },
   });
   return { insertId: _id };
 };
 
+const setDocument = <T>(id: string, data: T) => {
+  const index = dataBuffer.findIndex(({ _id }) => _id === id);
+  if (index === -1) return;
+  dataBuffer[index].data = { _id: id, ...data };
+};
+
+// TODO return _id
 const find = vi.fn(
-  async <T>(databaseName: string, collectionName: string, filter?: object) => {
+  async <T>(
+    databaseName: string,
+    collectionName: string,
+    filter?: object,
+    options?: FindOptions<T>
+  ) => {
     const collection = getCollection(databaseName, collectionName) as T[];
 
     if (!filter) {
       return collection;
     }
 
-    return [
-      ...collection.filter(item =>
+    const filteredData = _.cloneDeep(
+      collection.filter(item =>
         Object.entries(filter).every(
           ([key, value]) => item[key as keyof T] === value
         )
-      ),
-    ];
+      )
+    );
+
+    if (!options?.projection) {
+      return filteredData;
+    }
+
+    return filteredData.map(item => {
+      const projectionEntries = Object.entries(options?.projection) as [
+        keyof T,
+        0 | 1
+      ][];
+      projectionEntries.forEach(([key, value]) => {
+        if (value === 0) {
+          delete item[key];
+        }
+      });
+      return { ...item };
+    });
   }
 );
 
+// TODO return _id
 const findOne = vi.fn(
-  async <T>(databaseName: string, collectionName: string, filter?: object) => {
+  async <T>(
+    databaseName: string,
+    collectionName: string,
+    filter?: object,
+    options?: FindOneOptions<T>
+  ) => {
     const collection = getCollection(databaseName, collectionName) as T[];
 
     if (!filter) {
-      return collection;
+      return collection[0];
     }
 
-    return collection.find(item =>
-      Object.entries(filter).every(([key, value]) => {
-        return item[key as keyof T] === value;
-      })
+    const record = _.cloneDeep(
+      collection.find(item =>
+        Object.entries(filter).every(([key, value]) => {
+          return item[key as keyof T] === value;
+        })
+      )
     );
+
+    if (!record) {
+      return;
+    }
+
+    if (!options?.projection) {
+      return record;
+    }
+
+    const projectionEntries = Object.entries(options?.projection) as [
+      keyof T,
+      0 | 1
+    ][];
+    projectionEntries.forEach(([key, value]) => {
+      if (value === 0) {
+        delete record[key];
+      }
+    });
+
+    return record;
   }
 );
 
@@ -73,7 +132,7 @@ const insert = vi.fn(
   async <T>(databaseName: string, collectionName: string, documents: T[]) => {
     return Promise.resolve(
       documents.map(document =>
-        setDocument(databaseName, collectionName, document)
+        insertDocument(databaseName, collectionName, document)
       )
     );
   }
@@ -85,7 +144,9 @@ const insertOne = vi.fn(
     collectionName: string,
     document: T
   ): Promise<{ insertId: string } | undefined> => {
-    return Promise.resolve(setDocument(databaseName, collectionName, document));
+    return Promise.resolve(
+      insertDocument(databaseName, collectionName, document)
+    );
   }
 );
 
@@ -97,15 +158,19 @@ const updateOne = vi.fn(
     update: Record<string, Partial<T>>,
     options?: UpdateOneOptions
   ) => {
-    let record = await findOne(databaseName, collectionName, filter);
+    let record = (await findOne(
+      databaseName,
+      collectionName,
+      filter
+    )) as WithId<DatabaseEntry>;
 
     if (!record) {
       if (!options?.upsert) {
         return { matchedCount: 0 };
       }
 
-      record = {};
-      setDocument(databaseName, collectionName, record);
+      const { insertId } = insertDocument(databaseName, collectionName, {});
+      record = { _id: insertId } as WithId<DatabaseEntry>;
     }
 
     const operations = Object.entries(update);
@@ -113,24 +178,26 @@ const updateOne = vi.fn(
       Object.entries(params).forEach(([key, value]) => {
         switch (operation) {
           case '$set':
-            _.set(record as object, key, value);
+            _.set(record, key, value);
             break;
 
           case '$inc': {
             const currentValue = _.get(record, key);
-            _.set(record as object, key, currentValue + value);
+            _.set(record, key, currentValue + value);
             break;
           }
 
           case '$setOnInsert': {
             if (options?.upsert) {
-              _.set(record as object, key, value);
+              _.set(record, key, value);
             }
             break;
           }
         }
       });
     });
+
+    setDocument(record._id, record);
 
     return { matchedCount: 1 };
   }

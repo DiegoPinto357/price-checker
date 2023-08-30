@@ -57,9 +57,14 @@ describe('products', () => {
           `/products/${item.code}.json`
         );
 
-        const remoteItemResult = await database.find('items', 'products', {
-          code: item.code,
-        });
+        const remoteItemResult = await database.find(
+          'items',
+          'products',
+          {
+            code: item.code,
+          },
+          { projection: { _id: 0 } }
+        );
 
         expect(localItemsResult).toEqual(expectedProductsHistory[index]);
         expect(remoteItemResult).toHaveLength(1);
@@ -116,9 +121,14 @@ describe('products', () => {
       const localItemResult = await storage.readFile(
         '/products/5601216120152.json'
       );
-      const remoteItemResult = await database.find('items', 'products', {
-        code: '5601216120152',
-      });
+      const remoteItemResult = await database.find(
+        'items',
+        'products',
+        {
+          code: '5601216120152',
+        },
+        { projection: { _id: 0 } }
+      );
 
       const expectedResult = {
         code: '5601216120152',
@@ -201,9 +211,14 @@ describe('products', () => {
       const localItemResult = await storage.readFile(
         '/products/5601216120152.json'
       );
-      const remoteItemResult = await database.find('items', 'products', {
-        code: '5601216120152',
-      });
+      const remoteItemResult = await database.find(
+        'items',
+        'products',
+        {
+          code: '5601216120152',
+        },
+        { projection: { _id: 0 } }
+      );
 
       const expectedResult = {
         code: '5601216120152',
@@ -270,9 +285,14 @@ describe('products', () => {
       const localItemResult = await storage.readFile(
         '/products/5601216120152.json'
       );
-      const remoteItemResult = await database.findOne('items', 'products', {
-        code: '5601216120152',
-      });
+      const remoteItemResult = await database.findOne(
+        'items',
+        'products',
+        {
+          code: '5601216120152',
+        },
+        { projection: { _id: 0 } }
+      );
 
       const expectedResult = {
         code: '5601216120152',

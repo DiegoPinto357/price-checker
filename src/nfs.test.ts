@@ -71,7 +71,12 @@ describe('nfs', () => {
       const localIndexResult = await storage.readFile('/nfs/index.csv');
       const localItemResult = await storage.readFile(`/nfs/${nfData.key}.json`);
 
-      const remoteItemResult = await database.find('items', 'nfs');
+      const remoteItemResult = await database.find(
+        'items',
+        'nfs',
+        {},
+        { projection: { _id: 0 } }
+      );
 
       expect(localIndexResult).toBe(
         indexEntryToCsvLine({
@@ -101,9 +106,14 @@ describe('nfs', () => {
       await saveNf(nfData);
 
       const newLocalIndexContent = await storage.readFile<string>(indexFilname);
-      const newRemoteItemContent = await database.find('items', 'nfs', {
-        key: nfData.key,
-      });
+      const newRemoteItemContent = await database.find(
+        'items',
+        'nfs',
+        {
+          key: nfData.key,
+        },
+        { projection: { _id: 0 } }
+      );
 
       expect(newLocalIndexContent).toBe(currentLocalIndexContent);
       expect(newRemoteItemContent).toHaveLength(1);

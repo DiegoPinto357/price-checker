@@ -10,6 +10,8 @@ import {
 import createCsv from './libs/csv';
 import insertIndexEntry, { getIndexEntry } from './libs/insertIndexEntry';
 
+type WithId<T> = { _id: string } & T;
+
 const parseDate = (stringDate: string) => {
   const [date, time] = stringDate.split(' ');
   const dateParts = date.split('/');
@@ -96,9 +98,14 @@ export const saveProductsOnLocal = async (
 };
 
 const getRemoteProductItem = (code: string) =>
-  database.findOne<ProductHistoryWithIndex>('items', 'products', {
-    code,
-  });
+  database.findOne<WithId<ProductHistoryWithIndex>>(
+    'items',
+    'products',
+    {
+      code,
+    },
+    { projection: { _id: 0 } }
+  );
 
 const updateRemoteProductItem = async (item: ProductHistoryWithIndex) =>
   database.updateOne<ProductHistoryWithIndex>(
@@ -127,6 +134,7 @@ export const saveProductsOnRemote = async (
 
       if (existingRecord) {
         const mergedRecord = mergeHistory(existingRecord, record.history[0]);
+
         if (mergedRecord) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { index, ...mergedRecordWithoutIndex } = mergedRecord;
@@ -137,6 +145,7 @@ export const saveProductsOnRemote = async (
               indexMetadata?.[loopIndex]
             ),
           };
+
           await updateRemoteProductItem(recordWithIndex);
         }
 

@@ -8,17 +8,28 @@ export default async (app: FastifyInstance) => {
   }
   interface FindBody extends DefaultBody {
     filter: object;
+    options: object;
   }
 
   app.post<{ Body: FindBody }>('/database/find', async (request, reply) => {
-    const { databaseName, collectionName, filter } = request.body;
-    const data = await database.find(databaseName, collectionName, filter);
+    const { databaseName, collectionName, filter, options } = request.body;
+    const data = await database.find(
+      databaseName,
+      collectionName,
+      filter,
+      options
+    );
     reply.send(data);
   });
 
   app.post<{ Body: FindBody }>('/database/findOne', async (request, reply) => {
-    const { databaseName, collectionName, filter } = request.body;
-    const data = await database.findOne(databaseName, collectionName, filter);
+    const { databaseName, collectionName, filter, options } = request.body;
+    const data = await database.findOne(
+      databaseName,
+      collectionName,
+      filter,
+      options
+    );
     reply.send(data);
   });
 

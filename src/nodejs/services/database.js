@@ -17,7 +17,7 @@ const dataSource = 'Cluster0';
 const getDatabaseName = database =>
   sandboxMode ? `${database}-sandbox` : sandboxMode;
 
-const find = async (database, collection, filter) => {
+const find = async (database, collection, filter, options) => {
   const url = `${baseUrl}/find`;
   const { data } = await axios.post(
     url,
@@ -26,13 +26,14 @@ const find = async (database, collection, filter) => {
       database: getDatabaseName(database),
       collection,
       filter,
+      options,
     },
     { headers }
   );
   return data.documents;
 };
 
-const findOne = async (database, collection, filter) => {
+const findOne = async (database, collection, filter, options) => {
   const url = `${baseUrl}/findOne`;
   const { data } = await axios.post(
     url,
@@ -41,6 +42,7 @@ const findOne = async (database, collection, filter) => {
       database: getDatabaseName(database),
       collection,
       filter,
+      options,
     },
     { headers }
   );
