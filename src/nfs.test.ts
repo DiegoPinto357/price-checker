@@ -61,7 +61,6 @@ describe('nfs', () => {
 
   describe('saveNf', () => {
     const indexEntry = {
-      id: '43230693015006003210651210008545221815897062',
       timestamp: 1689627866234,
       hash: 'a85bcdc4b11f56ebce0eea5fd6a9c6ed',
     };
@@ -69,36 +68,46 @@ describe('nfs', () => {
     it('save nf file', async () => {
       await saveNf(nfData);
 
-      expect(storage.writeFile).toBeCalledWith(
-        `/nfs/${nfData.key}.json`,
-        nfData
-      );
-      expect(storage.writeFile).toBeCalledWith(
-        '/nfs/index.csv',
-        indexEntryToCsvLine(indexEntry)
-      );
+      const localIndexResult = await storage.readFile('/nfs/index.csv');
+      const localItemResult = await storage.readFile(`/nfs/${nfData.key}.json`);
 
-      expect(database.insertOne).toBeCalledWith('nfs', 'index', indexEntry);
-      expect(database.insertOne).toBeCalledWith('nfs', 'items', nfData);
+      const remoteItemResult = await database.find('items', 'nfs');
+
+      expect(localIndexResult).toBe(
+        indexEntryToCsvLine({
+          id: '43230693015006003210651210008545221815897062',
+          ...indexEntry,
+        })
+      );
+      expect(localItemResult).toBe(nfData);
+
+      expect(remoteItemResult).toHaveLength(1);
+      expect(remoteItemResult[0]).toEqual({ ...nfData, index: indexEntry });
     });
 
     it('does not add index entry if it already exists', async () => {
       const indexFilname = '/nfs/index.csv';
-      const currentLocalIndexContent = indexEntryToCsvLine(indexEntry);
+      const currentLocalIndexContent = indexEntryToCsvLine({
+        id: '43230693015006003210651210008545221815897062',
+        ...indexEntry,
+      });
       await storage.writeFile(indexFilname, currentLocalIndexContent);
 
-      const currentRemoteIndexContent = indexEntry;
-      await database.insertOne('nfs', 'index', currentRemoteIndexContent);
+      await database.insertOne('items', 'nfs', {
+        ...nfData,
+        index: indexEntry,
+      });
 
       await saveNf(nfData);
 
       const newLocalIndexContent = await storage.readFile<string>(indexFilname);
-      const newRemoteIndexContent = await database.find('nfs', 'index', {
-        id: indexEntry.id,
+      const newRemoteItemContent = await database.find('items', 'nfs', {
+        key: nfData.key,
       });
 
       expect(newLocalIndexContent).toBe(currentLocalIndexContent);
-      expect(newRemoteIndexContent).toEqual([currentRemoteIndexContent]);
+      expect(newRemoteItemContent).toHaveLength(1);
+      expect(newRemoteItemContent[0]).toEqual({ ...nfData, index: indexEntry });
     });
   });
 });

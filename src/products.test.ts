@@ -64,8 +64,10 @@ describe('products', () => {
         expect(localItemsResult).toEqual(expectedProductsHistory[index]);
         expect(remoteItemResult).toHaveLength(1);
         expect(remoteItemResult[0]).toEqual({
-          timestamp: remoteIndexFile[index].timestamp,
-          hash: remoteIndexFile[index].hash,
+          index: {
+            timestamp: remoteIndexFile[index].timestamp,
+            hash: remoteIndexFile[index].hash,
+          },
           ...expectedProductsHistory[index],
         });
       });
@@ -152,8 +154,10 @@ describe('products', () => {
 
       expect(remoteItemResult).toHaveLength(1);
       expect(remoteItemResult[0]).toEqual({
-        timestamp: 1689858134357,
-        hash: newHash,
+        index: {
+          timestamp: 1689858134357,
+          hash: newHash,
+        },
         ...expectedResult,
       });
     });
@@ -221,8 +225,10 @@ describe('products', () => {
 
       expect(remoteItemResult).toHaveLength(1);
       expect(remoteItemResult[0]).toEqual({
-        timestamp: 1689627866234,
-        hash: 'cdd192a0f2e645dc6f1f8ff07ff9a861',
+        index: {
+          timestamp: 1689627866234,
+          hash: 'cdd192a0f2e645dc6f1f8ff07ff9a861',
+        },
         ...expectedResult,
       });
     });
@@ -293,8 +299,10 @@ describe('products', () => {
 
       expect(localItemResult).toEqual(expectedResult);
       expect(remoteItemResult).toEqual({
-        timestamp: 1689627866234,
-        hash: '97b9ccdbb33fc756336af07f61e6300b',
+        index: {
+          timestamp: 1689627866234,
+          hash: '97b9ccdbb33fc756336af07f61e6300b',
+        },
         ...expectedResult,
       });
     });

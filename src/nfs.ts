@@ -29,17 +29,13 @@ const saveNfOnLocal = async (nf: Nf) => {
 };
 
 const saveNfOnRemote = async (nf: Nf) => {
-  const existingEntry = await database.findOne('nfs', 'index', {
-    id: nf.key,
+  const existingEntry = await database.findOne('items', 'nfs', {
+    key: nf.key,
   });
 
   if (existingEntry) return;
 
-  const indexEntry = getIndexEntry(nf, 'key');
-  await Promise.all([
-    database.insertOne('nfs', 'index', indexEntry),
-    database.insertOne('nfs', 'items', nf),
-  ]);
+  await database.insertOne('items', 'nfs', { ...nf, index: getIndexEntry(nf) });
 };
 
 export const getNfData = async (key: string) => {

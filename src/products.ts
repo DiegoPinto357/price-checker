@@ -107,8 +107,7 @@ const updateRemoteProductItem = async (item: ProductHistoryWithIndex) =>
     { code: item.code },
     {
       $set: {
-        timestamp: item.timestamp,
-        hash: item.hash,
+        index: item.index,
         history: item.history,
       },
     }
@@ -122,17 +121,20 @@ export const saveProductsOnRemote = async (
 
   const recordsToInsert: ProductHistoryWithIndex[] = [];
 
-  for (const [index, record] of records.entries()) {
+  for (const [loopIndex, record] of records.entries()) {
     const existingRecord = await getRemoteProductItem(record.code);
 
     if (existingRecord) {
       const mergedRecord = mergeHistory(existingRecord, record.history[0]);
       if (mergedRecord) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { timestamp, hash, ...mergedRecordWithoutIndex } = mergedRecord;
+        const { index, ...mergedRecordWithoutIndex } = mergedRecord;
         const recordWithIndex = {
           ...mergedRecordWithoutIndex,
-          ...getIndexEntry(mergedRecordWithoutIndex, indexMetadata?.[index]),
+          index: getIndexEntry(
+            mergedRecordWithoutIndex,
+            indexMetadata?.[loopIndex]
+          ),
         };
         await updateRemoteProductItem(recordWithIndex);
       }
@@ -142,7 +144,7 @@ export const saveProductsOnRemote = async (
 
     recordsToInsert.push({
       ...record,
-      ...getIndexEntry(record, indexMetadata?.[index]),
+      index: getIndexEntry(record, indexMetadata?.[loopIndex]),
     });
   }
 

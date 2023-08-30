@@ -44,6 +44,8 @@ export interface ProductHistory {
 }
 
 export interface ProductHistoryWithIndex extends ProductHistory {
-  timestamp: number;
-  hash: string;
+  index: {
+    timestamp: number;
+    hash: string;
+  };
 }
