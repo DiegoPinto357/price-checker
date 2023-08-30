@@ -2,7 +2,6 @@ import fs from 'fs';
 import { parseCsv } from './libs/csv';
 import { storage, database } from './proxies';
 import dataSync from './dataSync';
-import { Mock } from 'vitest';
 
 vi.mock('./proxies/storage');
 vi.mock('./proxies/database');
@@ -44,17 +43,19 @@ const hasIndexEntry = (entries: IndexEntry[], entry: IndexEntry) => {
 };
 
 const setupRemote = async (
-  databaseName: string,
+  collectionName: string,
   indexEntries: IndexEntry[]
 ) => {
-  await database.insert(databaseName, 'index', indexEntries);
-
-  const remoteFiles = indexEntries.map(({ id }) => ({
+  const remoteFiles = indexEntries.map(({ id, timestamp, hash }) => ({
     code: id,
+    index: {
+      timestamp,
+      hash,
+    },
     description: '',
     history: [],
   }));
-  await database.insert(databaseName, 'items', remoteFiles);
+  await database.insert('items', collectionName, remoteFiles);
 };
 
 const setupLocal = async (dataFolder: string, indexEntries: IndexEntry[]) => {
@@ -78,7 +79,7 @@ const setupLocal = async (dataFolder: string, indexEntries: IndexEntry[]) => {
 };
 
 const baseIndex = parseCsvIndex(
-  fs.readFileSync('./mockData/products/index.csv', 'utf-8')
+  fs.readFileSync('./mockData/products/localIndex.csv', 'utf-8')
 );
 
 describe('dataSync', () => {
@@ -100,30 +101,22 @@ describe('dataSync', () => {
     await setupRemote('products', remoteIndex);
     await setupLocal('products', localIndex);
 
-    (storage.writeFile as Mock).mockClear();
-
     await dataSync.startSync();
-
-    expect(storage.writeFile).toBeCalledTimes(missingEntries.length + 1);
-    expect(database.findOne).toBeCalledTimes(missingEntries.length);
 
     const newLocalIndex = parseCsvIndex(
       await storage.readFile<string>('/products/index.csv')
     );
 
-    missingEntries.forEach(missingEntry => {
-      expect(database.findOne).toBeCalledWith('products', 'items', {
-        code: missingEntry.id,
-      });
-
-      expect(storage.writeFile).toBeCalledWith(
-        `/products/${missingEntry.id}.json`,
-        {
-          code: missingEntry.id,
-          description: '',
-          history: [],
-        }
+    missingEntries.forEach(async missingEntry => {
+      const localItem = await storage.readFile(
+        `/products/${missingEntry.id}.json`
       );
+
+      expect(localItem).toEqual({
+        code: missingEntry.id,
+        description: '',
+        history: [],
+      });
 
       expect(hasIndexEntry(newLocalIndex, missingEntry)).toBeTruthy();
     });
@@ -138,36 +131,33 @@ describe('dataSync', () => {
     await setupRemote('products', remoteIndex);
     await setupLocal('products', localIndex);
 
-    (storage.writeFile as Mock).mockClear();
-    (database.insert as Mock).mockClear();
-
     await dataSync.startSync();
 
-    expect(storage.readFile).toBeCalledTimes(missingEntries.length + 1);
-    expect(database.insert).toBeCalledTimes(2);
-    expect(database.insert).toBeCalledWith('products', 'index', missingEntries);
-    expect(database.insert).toBeCalledWith(
-      'products',
-      'items',
-      missingEntries.map(({ id }) => ({
-        code: id,
-        description: '',
-        history: [],
-      }))
-    );
-
-    const newRemoteIndex = await database.find<IndexEntry>('products', 'index');
-
-    missingEntries.forEach(missingEntry => {
-      expect(storage.readFile).toBeCalledWith(
-        `/products/${missingEntry.id}.json`
+    missingEntries.forEach(async missingEntry => {
+      const remoteItem = await database.find(
+        'items',
+        'products',
+        {
+          code: missingEntry.id,
+        },
+        { projection: { _id: 0 } }
       );
 
-      expect(hasIndexEntry(newRemoteIndex, missingEntry)).toBeTruthy();
+      expect(remoteItem).toHaveLength(1);
+      expect(remoteItem[0]).toEqual({
+        code: missingEntry.id,
+        index: {
+          timestamp: missingEntry.timestamp,
+          hash: missingEntry.hash,
+        },
+        description: '',
+        history: [],
+      });
     });
   });
 
   // describe('merges product history data', () => {});
 
   // describe('resolves conflicts on product history', () => {});
+  // rebuild local index (missing file OR index entry)
 });

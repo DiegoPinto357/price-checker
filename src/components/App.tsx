@@ -6,6 +6,7 @@ import NodejsLoader from './NodejsLoader';
 import { getNfData, saveNf } from '../nfs';
 import { saveProducts } from '../products';
 import { Nf, Product } from '../types';
+import dataSync from '../dataSync';
 
 enum ContentPage {
   Loader,
@@ -18,8 +19,13 @@ const App = () => {
   const [contentPage, setContentPage] = useState<ContentPage>(ContentPage.Idle);
   const [nf, setNf] = useState<Nf | null>();
 
-  const onButtonClick = useCallback(async () => {
+  const onParseButtonClick = useCallback(async () => {
     setContentPage(ContentPage.QrReader);
+  }, []);
+
+  const onSyncButtonClick = useCallback(async () => {
+    console.log('SYNC!');
+    await dataSync.startSync();
   }, []);
 
   const onQrCodeReaderClose = useCallback(async (data?: string) => {
@@ -57,7 +63,13 @@ const App = () => {
           break;
 
         case ContentPage.Idle:
-          return <Button onPress={onButtonClick}>Parse NF</Button>;
+          return (
+            <div>
+              <Button onPress={onParseButtonClick}>Parse NF</Button>
+              <br />
+              <Button onPress={onSyncButtonClick}>DB Sync</Button>
+            </div>
+          );
 
         case ContentPage.QrReader:
           return <QrCodeReader onClose={onQrCodeReaderClose} />;
@@ -76,7 +88,8 @@ const App = () => {
     },
     [
       nf,
-      onButtonClick,
+      onParseButtonClick,
+      onSyncButtonClick,
       onQrCodeReaderClose,
       onQrResultsSaveClick,
       onQrResultsCancelClick,
