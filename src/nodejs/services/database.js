@@ -26,7 +26,7 @@ const find = async (database, collection, filter, options) => {
       database: getDatabaseName(database),
       collection,
       filter,
-      options,
+      projection: options?.projection,
     },
     { headers }
   );
@@ -42,7 +42,7 @@ const findOne = async (database, collection, filter, options) => {
       database: getDatabaseName(database),
       collection,
       filter,
-      options,
+      projection: options?.projection,
     },
     { headers }
   );
