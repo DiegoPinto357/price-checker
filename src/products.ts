@@ -121,32 +121,34 @@ export const saveProductsOnRemote = async (
 
   const recordsToInsert: ProductHistoryWithIndex[] = [];
 
-  for (const [loopIndex, record] of records.entries()) {
-    const existingRecord = await getRemoteProductItem(record.code);
+  await Promise.all(
+    records.map(async (record, loopIndex) => {
+      const existingRecord = await getRemoteProductItem(record.code);
 
-    if (existingRecord) {
-      const mergedRecord = mergeHistory(existingRecord, record.history[0]);
-      if (mergedRecord) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { index, ...mergedRecordWithoutIndex } = mergedRecord;
-        const recordWithIndex = {
-          ...mergedRecordWithoutIndex,
-          index: getIndexEntry(
-            mergedRecordWithoutIndex,
-            indexMetadata?.[loopIndex]
-          ),
-        };
-        await updateRemoteProductItem(recordWithIndex);
+      if (existingRecord) {
+        const mergedRecord = mergeHistory(existingRecord, record.history[0]);
+        if (mergedRecord) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { index, ...mergedRecordWithoutIndex } = mergedRecord;
+          const recordWithIndex = {
+            ...mergedRecordWithoutIndex,
+            index: getIndexEntry(
+              mergedRecordWithoutIndex,
+              indexMetadata?.[loopIndex]
+            ),
+          };
+          await updateRemoteProductItem(recordWithIndex);
+        }
+
+        return;
       }
 
-      continue;
-    }
-
-    recordsToInsert.push({
-      ...record,
-      index: getIndexEntry(record, indexMetadata?.[loopIndex]),
-    });
-  }
+      recordsToInsert.push({
+        ...record,
+        index: getIndexEntry(record, indexMetadata?.[loopIndex]),
+      });
+    })
+  );
 
   if (recordsToInsert.length) {
     await database.insert<ProductHistoryWithIndex>(
