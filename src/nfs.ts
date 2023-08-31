@@ -1,6 +1,6 @@
 import { nf, storage, database } from './proxies';
-import createCsv from './libs/csv';
-import insertIndexEntry, { getIndexEntry } from './libs/insertIndexEntry';
+import createStorageIndex from './storageIndex';
+import generateIndexEntry from './libs/generateIndexEntry';
 import { Nf } from './types';
 
 const mergeProducts = (products: Nf['items']) =>
@@ -17,15 +17,15 @@ const mergeProducts = (products: Nf['items']) =>
   }, [] as typeof products);
 
 const saveNfOnLocal = async (nf: Nf) => {
-  const indexFile = await createCsv('/nfs/index.csv');
+  const localIndex = await createStorageIndex('/nfs/index.csv');
 
-  const { existingEntry } = insertIndexEntry(indexFile, nf, 'key');
+  if (localIndex.get(nf.key)) return;
 
-  if (existingEntry) return;
+  localIndex.set(nf.key, generateIndexEntry(nf));
 
   const filename = `/nfs/${nf.key}.json`;
   await storage.writeFile(filename, nf);
-  await indexFile.save();
+  await localIndex.save();
 };
 
 const saveNfOnRemote = async (nf: Nf) => {
@@ -40,7 +40,10 @@ const saveNfOnRemote = async (nf: Nf) => {
 
   if (existingEntry) return;
 
-  await database.insertOne('items', 'nfs', { ...nf, index: getIndexEntry(nf) });
+  await database.insertOne('items', 'nfs', {
+    ...nf,
+    index: generateIndexEntry(nf),
+  });
 };
 
 export const getNfData = async (key: string) => {

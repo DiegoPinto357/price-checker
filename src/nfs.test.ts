@@ -103,6 +103,9 @@ describe('nfs', () => {
         index: indexEntry,
       });
 
+      (storage.writeFile as Mock).mockClear();
+      (database.insertOne as Mock).mockClear();
+
       await saveNf(nfData);
 
       const newLocalIndexContent = await storage.readFile<string>(indexFilname);
@@ -115,6 +118,8 @@ describe('nfs', () => {
         { projection: { _id: 0 } }
       );
 
+      expect(storage.writeFile).not.toBeCalled();
+      expect(database.insertOne).not.toBeCalled();
       expect(newLocalIndexContent).toBe(currentLocalIndexContent);
       expect(newRemoteItemContent).toHaveLength(1);
       expect(newRemoteItemContent[0]).toEqual({ ...nfData, index: indexEntry });

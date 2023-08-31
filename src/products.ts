@@ -7,8 +7,8 @@ import {
   ProductHistoryItem,
   ProductHistoryWithIndex,
 } from './types';
-import createCsv from './libs/csv';
-import insertIndexEntry, { getIndexEntry } from './libs/insertIndexEntry';
+import createStorageIndex from './storageIndex';
+import generateIndexEntry from './libs/generateIndexEntry';
 
 type WithId<T> = { _id: string } & T;
 
@@ -66,7 +66,7 @@ export const saveProductsOnLocal = async (
 ) => {
   if (!records.length) return;
 
-  const indexFile = await createCsv('/products/index.csv');
+  const localIndex = await createStorageIndex('/products/index.csv');
 
   let hasNewData = false;
   for (const [index, record] of records.entries()) {
@@ -82,10 +82,10 @@ export const saveProductsOnLocal = async (
     }
 
     if (dataToSave) {
-      insertIndexEntry(indexFile, dataToSave, 'code', {
-        overwriteExisting: true,
-        ...indexMetadata?.[index],
-      });
+      localIndex.set(
+        dataToSave.code,
+        generateIndexEntry(dataToSave, indexMetadata?.[index])
+      );
 
       await storage.writeFile(filename, dataToSave);
       hasNewData = true;
@@ -93,7 +93,7 @@ export const saveProductsOnLocal = async (
   }
 
   if (hasNewData) {
-    await indexFile.save();
+    await localIndex.save();
   }
 };
 
@@ -140,7 +140,7 @@ export const saveProductsOnRemote = async (
           const { index, ...mergedRecordWithoutIndex } = mergedRecord;
           const recordWithIndex = {
             ...mergedRecordWithoutIndex,
-            index: getIndexEntry(
+            index: generateIndexEntry(
               mergedRecordWithoutIndex,
               indexMetadata?.[loopIndex]
             ),
@@ -154,7 +154,7 @@ export const saveProductsOnRemote = async (
 
       recordsToInsert.push({
         ...record,
-        index: getIndexEntry(record, indexMetadata?.[loopIndex]),
+        index: generateIndexEntry(record, indexMetadata?.[loopIndex]),
       });
     })
   );
