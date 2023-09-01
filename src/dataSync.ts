@@ -1,19 +1,9 @@
+import createStorageIndex from './storageIndex';
 import { saveProductsOnLocal, saveProductsOnRemote } from './products';
-import { parseCsv } from './libs/csv';
 import { storage, database } from './proxies';
 import { ProductHistory, ProductHistoryWithIndex } from './types';
 
-interface IndexEntry {
-  id: string;
-  timestamp: number;
-  hash: string;
-}
-
-interface StringIndexEntry {
-  id: string;
-  timestamp: string;
-  hash: string;
-}
+type IndexEntry = [string, { timestamp: number; hash: string }];
 
 // TODO use a type decorator to add _id to existing types
 interface ProductHistoryWithIndexFromDB extends ProductHistoryWithIndex {
@@ -21,9 +11,9 @@ interface ProductHistoryWithIndexFromDB extends ProductHistoryWithIndex {
 }
 
 const getMissingFiles = async () => {
-  const [rawLocalIndex, remoteItems] = await Promise.all([
+  const [localIndex, remoteItems] = await Promise.all([
     // TODO use csv module to load the file
-    storage.readFile<string>('/products/index.csv'),
+    createStorageIndex('/products/index.csv'),
     database.find<ProductHistoryWithIndexFromDB>(
       'items',
       'products',
@@ -31,32 +21,17 @@ const getMissingFiles = async () => {
       { projection: { _id: 0, description: 0, history: 0 } }
     ),
   ]);
-  const parsedLocalIndex = parseCsv<StringIndexEntry>(rawLocalIndex, [
-    'id',
-    'timestamp',
-    'hash',
+
+  const remoteIndex: IndexEntry[] = remoteItems.map(item => [
+    item.code,
+    item.index,
   ]);
-  const localIndex = parsedLocalIndex.map(entry => ({
-    ...entry,
-    timestamp: parseInt(entry.timestamp),
-  }));
 
-  const remoteIndex = remoteItems.map(item => ({
-    id: item.code,
-    ...item.index,
-  }));
+  const missingLocalFiles = remoteIndex.filter(([id]) => !localIndex.get(id));
 
-  console.log({ localIndex, remoteIndex });
-
-  const missingLocalFiles = remoteIndex.filter(
-    remoteEntry =>
-      !localIndex.find(localEntry => localEntry.id === remoteEntry.id)
-  );
-
-  const missingRemoteFiles = localIndex.filter(
-    localEntry =>
-      !remoteIndex.find(remoteEntry => remoteEntry.id === localEntry.id)
-  );
+  const missingRemoteFiles = localIndex
+    .getEntries()
+    .filter(([id]) => !remoteIndex.find(remoteEntry => remoteEntry[0] === id));
 
   return { missingLocalFiles, missingRemoteFiles };
 };
@@ -64,7 +39,7 @@ const getMissingFiles = async () => {
 const pullFromRemote = async (entriesList: IndexEntry[]) => {
   // TODO method to get mising files already found the records, it can be passed to this method
   const records = (await Promise.all(
-    entriesList.map(({ id }) =>
+    entriesList.map(([id]) =>
       database.findOne<ProductHistoryWithIndexFromDB>(
         'items',
         'products',
@@ -79,27 +54,25 @@ const pullFromRemote = async (entriesList: IndexEntry[]) => {
   )!;
 
   if (validRecords.length) {
-    const indexMetadata = entriesList.map(({ timestamp, hash }) => ({
-      timestamp,
-      hash,
-    }));
+    const indexMetadata = entriesList.map(entry => entry[1]);
     await saveProductsOnLocal(validRecords, indexMetadata);
   }
 };
 
 const pushToRemote = async (entriesList: IndexEntry[]) => {
   const files = await Promise.all(
-    entriesList.map(({ id }) =>
+    entriesList.map(([id]) =>
       storage.readFile<ProductHistory>(`/products/${id}.json`)
     )
   );
 
-  await saveProductsOnRemote(files, entriesList);
+  const indexMetadata = entriesList.map(entry => entry[1]);
+  await saveProductsOnRemote(files, indexMetadata);
 };
 
 const startSync = async () => {
   const { missingLocalFiles, missingRemoteFiles } = await getMissingFiles();
-  console.log({ missingLocalFiles, missingRemoteFiles });
+  console.dir({ missingLocalFiles, missingRemoteFiles }, { depth: null });
 
   if (missingLocalFiles.length) {
     await pullFromRemote(missingLocalFiles);

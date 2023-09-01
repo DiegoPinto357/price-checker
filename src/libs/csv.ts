@@ -1,7 +1,6 @@
 import { storage } from '../proxies';
 
-// TODO better handle static methods
-export const parseCsvLine = <T>(csvLine: string, headers: Array<keyof T>) => {
+const parseCsvLine = <T>(csvLine: string, headers: Array<keyof T>) => {
   const items = csvLine.split(',').map(item => item.trim());
 
   return headers.reduce((obj, header, index) => {
@@ -9,12 +8,6 @@ export const parseCsvLine = <T>(csvLine: string, headers: Array<keyof T>) => {
     return obj;
   }, {} as Record<keyof T, string>);
 };
-// TODO depracated
-export const parseCsv = <T>(content: string, headers: Array<keyof T>) =>
-  content
-    .trim()
-    .split('\n')
-    .map(line => parseCsvLine<T>(line, headers));
 
 export default async (filename: string) => {
   const currentFile = await storage.readFile<string>(filename);

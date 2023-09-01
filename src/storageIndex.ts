@@ -35,6 +35,8 @@ export default async (filename: string) => {
     indexMap.set(key, value);
   };
 
+  const getEntries = () => Array.from(indexMap);
+
   const save = async () => {
     indexFile.setContent(indexMap);
     await indexFile.save();
@@ -43,6 +45,7 @@ export default async (filename: string) => {
   return {
     get,
     set,
+    getEntries,
     save,
   };
 };
