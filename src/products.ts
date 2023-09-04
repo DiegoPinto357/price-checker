@@ -75,29 +75,35 @@ export const saveProductsOnLocal = async (
   const localIndex = await createStorageIndex('/products/index.csv');
 
   let hasNewData = false;
-  for (const [index, record] of records.entries()) {
-    const filename = `/products/${record.code}.json`;
-    const currentFile = await storage.readFile<ProductHistory>(filename);
+  await Promise.all(
+    records.map(async (record, index) => {
+      const filename = `/products/${record.code}.json`;
+      const currentFile = await storage.readFile<ProductHistory>(filename);
 
-    let dataToSave: ProductHistory | null;
+      let dataToSave: ProductHistory | null;
 
-    // TODO skip if existing and new are equal
-    if (currentFile) {
-      dataToSave = mergeProducts(currentFile, record);
-    } else {
-      dataToSave = record;
-    }
+      if (currentFile) {
+        dataToSave = mergeProducts(currentFile, record);
+      } else {
+        dataToSave = record;
+      }
 
-    if (dataToSave) {
-      localIndex.set(
-        dataToSave.code,
-        generateIndexEntry(dataToSave, indexMetadata?.[index])
-      );
+      if (dataToSave) {
+        const newIndex = generateIndexEntry(dataToSave, indexMetadata?.[index]);
 
-      await storage.writeFile(filename, dataToSave);
-      hasNewData = true;
-    }
-  }
+        if (
+          !currentFile ||
+          (currentFile &&
+            newIndex.hash !== localIndex.get(currentFile.code)?.hash)
+        ) {
+          localIndex.set(dataToSave.code, newIndex);
+
+          await storage.writeFile(filename, dataToSave);
+          hasNewData = true;
+        }
+      }
+    })
+  );
 
   if (hasNewData) {
     await localIndex.save();
@@ -139,7 +145,6 @@ export const saveProductsOnRemote = async (
     records.map(async (record, loopIndex) => {
       const existingRecord = await getRemoteProductItem(record.code);
 
-      // TODO skip if existing and new are equal
       if (existingRecord) {
         const mergedRecord = mergeProducts(
           existingRecord,
@@ -157,7 +162,9 @@ export const saveProductsOnRemote = async (
             ),
           };
 
-          await updateRemoteProductItem(recordWithIndex);
+          if (existingRecord.index.hash !== recordWithIndex.index.hash) {
+            await updateRemoteProductItem(recordWithIndex);
+          }
         }
 
         return;
