@@ -83,131 +83,140 @@ describe('dataSync', () => {
     (database as DatabaseMock).clearRecords();
   });
 
-  it('pulls missing data from remote', async () => {
-    const remoteIndex = baseIndex;
-    const entriesToRemove = [
-      '7896333041307',
-      '7896333041383',
-      '2989530000002',
-      '7898994521204',
-      '2022640000002',
-    ];
+  // rebuild local index (missing file OR index entry)
 
-    const localIndex = new Map(baseIndex);
-    entriesToRemove.forEach(entry => localIndex.delete(entry));
+  describe('producs', () => {
+    it('pulls missing data from remote', async () => {
+      const remoteIndex = baseIndex;
+      const entriesToRemove = [
+        '7896333041307',
+        '7896333041383',
+        '2989530000002',
+        '7898994521204',
+        '2022640000002',
+      ];
 
-    const missingEntries = entriesToRemove.map(entry => ({
-      id: entry,
-      index: { ...baseIndex.get(entry) },
-    }));
+      const localIndex = new Map(baseIndex);
+      entriesToRemove.forEach(entry => localIndex.delete(entry));
 
-    await setupRemote('products', remoteIndex);
-    await setupLocal('products', localIndex);
+      const missingEntries = entriesToRemove.map(entry => ({
+        id: entry,
+        index: { ...baseIndex.get(entry) },
+      }));
 
-    await dataSync.startSync();
+      await setupRemote('products', remoteIndex);
+      await setupLocal('products', localIndex);
 
-    const newLocalIndex = await createStorageIndex('/products/index.csv');
+      await dataSync.startSync();
 
-    missingEntries.forEach(async missingEntry => {
-      const localItem = await storage.readFile(
-        `/products/${missingEntry.id}.json`
+      const newLocalIndex = await createStorageIndex('/products/index.csv');
+
+      missingEntries.forEach(async missingEntry => {
+        const localItem = await storage.readFile(
+          `/products/${missingEntry.id}.json`
+        );
+
+        expect(localItem).toEqual({
+          code: missingEntry.id,
+          description: '',
+          history: [],
+        });
+
+        expect(newLocalIndex.get(missingEntry.id)).toEqual(missingEntry.index);
+      });
+    });
+
+    it('pushes missing data to remote', async () => {
+      const localIndex = baseIndex;
+      const entriesToRemove = [
+        '7896333041307',
+        '7896333041383',
+        '2989530000002',
+        '7898994521204',
+        '2022640000002',
+      ];
+
+      const remoteIndex = new Map(baseIndex);
+      entriesToRemove.forEach(entry => remoteIndex.delete(entry));
+
+      const missingEntries = entriesToRemove.map(entry => ({
+        id: entry,
+        index: { ...baseIndex.get(entry) },
+      }));
+
+      await setupRemote('products', remoteIndex);
+      await setupLocal('products', localIndex);
+
+      await dataSync.startSync();
+
+      missingEntries.forEach(async missingEntry => {
+        const remoteItem = await database.find(
+          'items',
+          'products',
+          {
+            code: missingEntry.id,
+          },
+          { projection: { _id: 0 } }
+        );
+
+        expect(remoteItem).toHaveLength(1);
+        expect(remoteItem[0]).toEqual({
+          code: missingEntry.id,
+          index: missingEntry.index,
+          description: '',
+          history: [],
+        });
+      });
+    });
+
+    it('merges product history data', async () => {
+      const remoteProduct = product1;
+      const localProduct = product2;
+
+      const localIndex = new Map([
+        [localProduct.code, generateIndexEntry(localProduct)],
+      ]);
+      await setupLocal('products', localIndex, [localProduct]);
+
+      const remoteIndex = new Map([
+        [remoteProduct.code, generateIndexEntry(remoteProduct)],
+      ]);
+      await setupRemote('products', remoteIndex, [remoteProduct]);
+
+      await dataSync.startSync();
+
+      const expectedProduct = mergedProduct;
+
+      const resultLocalIndex = await createStorageIndex('/products/index.csv');
+      const resultLocalItemIndex = resultLocalIndex.get(localProduct.code);
+
+      const resultLocalItem = await storage.readFile(
+        `/products/${localProduct.code}.json`
       );
 
-      expect(localItem).toEqual({
-        code: missingEntry.id,
-        description: '',
-        history: [],
-      });
-
-      expect(newLocalIndex.get(missingEntry.id)).toEqual(missingEntry.index);
-    });
-  });
-
-  it('pushes missing data to remote', async () => {
-    const localIndex = baseIndex;
-    const entriesToRemove = [
-      '7896333041307',
-      '7896333041383',
-      '2989530000002',
-      '7898994521204',
-      '2022640000002',
-    ];
-
-    const remoteIndex = new Map(baseIndex);
-    entriesToRemove.forEach(entry => remoteIndex.delete(entry));
-
-    const missingEntries = entriesToRemove.map(entry => ({
-      id: entry,
-      index: { ...baseIndex.get(entry) },
-    }));
-
-    await setupRemote('products', remoteIndex);
-    await setupLocal('products', localIndex);
-
-    await dataSync.startSync();
-
-    missingEntries.forEach(async missingEntry => {
-      const remoteItem = await database.find(
+      const resultRemoteItem = await database.find<
+        WithId<ProductHistoryWithIndex>
+      >(
         'items',
         'products',
         {
-          code: missingEntry.id,
+          code: remoteProduct.code,
         },
         { projection: { _id: 0 } }
       );
 
-      expect(remoteItem).toHaveLength(1);
-      expect(remoteItem[0]).toEqual({
-        code: missingEntry.id,
-        index: missingEntry.index,
-        description: '',
-        history: [],
-      });
+      expect(resultLocalItemIndex).toEqual(resultRemoteItem[0].index);
+      expect(resultLocalItem).toEqual(expectedProduct);
+      expect(resultRemoteItem).toHaveLength(1);
+      expect(_.omit(resultRemoteItem[0], 'index')).toEqual(expectedProduct);
     });
+
+    // describe('resolves conflicts on product history', () => {});
   });
 
-  it('merges product history data', async () => {
-    const remoteProduct = product1;
-    const localProduct = product2;
+  // describe('nfs', () => {
+  //   it('pulls missing data from remote', async () => {});
 
-    const localIndex = new Map([
-      [localProduct.code, generateIndexEntry(localProduct)],
-    ]);
-    await setupLocal('products', localIndex, [localProduct]);
-
-    const remoteIndex = new Map([
-      [remoteProduct.code, generateIndexEntry(remoteProduct)],
-    ]);
-    await setupRemote('products', remoteIndex, [remoteProduct]);
-
-    await dataSync.startSync();
-
-    const expectedProduct = mergedProduct;
-
-    const resultLocalIndex = await createStorageIndex('/products/index.csv');
-    const resultLocalItemIndex = resultLocalIndex.get(localProduct.code);
-
-    const resultLocalItem = await storage.readFile(
-      `/products/${localProduct.code}.json`
-    );
-
-    const resultRemoteItem = await database.find<
-      WithId<ProductHistoryWithIndex>
-    >(
-      'items',
-      'products',
-      {
-        code: remoteProduct.code,
-      },
-      { projection: { _id: 0 } }
-    );
-
-    expect(resultLocalItemIndex).toEqual(resultRemoteItem[0].index);
-    expect(resultLocalItem).toEqual(expectedProduct);
-    expect(resultRemoteItem).toHaveLength(1);
-    expect(_.omit(resultRemoteItem[0], 'index')).toEqual(expectedProduct);
-  });
-
-  // describe('resolves conflicts on product history', () => {});
-  // rebuild local index (missing file OR index entry)
+  //   it('pushes missing data to remote', async () => {});
+  // });
 });
