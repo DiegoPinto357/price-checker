@@ -1,3 +1,5 @@
+export type WithId<T> = { _id: string } & T;
+
 interface Store {
   name: string;
   cnpj: string;

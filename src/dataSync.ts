@@ -1,9 +1,18 @@
 import createStorageIndex from './storageIndex';
-import { saveProductsOnLocal, saveProductsOnRemote } from './products';
+import {
+  saveProductsOnLocal,
+  saveProductsOnRemote,
+  mergeProducts,
+} from './products';
 import { storage, database } from './proxies';
 import { ProductHistory, ProductHistoryWithIndex } from './types';
 
-type IndexEntry = [string, { timestamp: number; hash: string }];
+interface IndexData {
+  timestamp: number;
+  hash: string;
+}
+
+type IndexEntry = [string, IndexData];
 
 // TODO use a type decorator to add _id to existing types
 interface ProductHistoryWithIndexFromDB extends ProductHistoryWithIndex {
@@ -12,7 +21,6 @@ interface ProductHistoryWithIndexFromDB extends ProductHistoryWithIndex {
 
 const getMissingFiles = async () => {
   const [localIndex, remoteItems] = await Promise.all([
-    // TODO use csv module to load the file
     createStorageIndex('/products/index.csv'),
     database.find<ProductHistoryWithIndexFromDB>(
       'items',
@@ -27,13 +35,27 @@ const getMissingFiles = async () => {
     item.index,
   ]);
 
-  const missingLocalFiles = remoteIndex.filter(([id]) => !localIndex.get(id));
+  const conflictingFiles = new Set<string>();
+
+  const missingLocalFiles = remoteIndex.filter(([id, { hash }]) => {
+    const localEntry = localIndex.get(id);
+
+    if (localEntry && localEntry.hash !== hash) {
+      conflictingFiles.add(id);
+    }
+
+    return !localEntry;
+  });
 
   const missingRemoteFiles = localIndex
     .getEntries()
     .filter(([id]) => !remoteIndex.find(remoteEntry => remoteEntry[0] === id));
 
-  return { missingLocalFiles, missingRemoteFiles };
+  return {
+    missingLocalFiles,
+    missingRemoteFiles,
+    conflictingFiles: Array.from(conflictingFiles),
+  };
 };
 
 const pullFromRemote = async (entriesList: IndexEntry[]) => {
@@ -47,7 +69,7 @@ const pullFromRemote = async (entriesList: IndexEntry[]) => {
         { projection: { _id: 0, index: 0 } }
       )
     )
-  )) as ProductHistory[]; // TODO resahpe result internally based on projection
+  )) as ProductHistory[]; // TODO reshape result internally based on projection
 
   const validRecords = records.filter(
     (record): record is ProductHistory => !!record
@@ -70,9 +92,42 @@ const pushToRemote = async (entriesList: IndexEntry[]) => {
   await saveProductsOnRemote(files, indexMetadata);
 };
 
+const resolveConflicts = async (conflicts: string[]) => {
+  const productsToUpdate: ProductHistory[] = [];
+
+  for (const id of conflicts) {
+    const [localFile, remoteRecord] = await Promise.all([
+      storage.readFile<ProductHistory>(`/products/${id}.json`),
+      database.findOne<ProductHistoryWithIndexFromDB>(
+        'items',
+        'products',
+        { code: id },
+        { projection: { _id: 0, index: 0 } }
+      ),
+    ]);
+
+    if (localFile && remoteRecord) {
+      // merge will happen twice (products will do it again)
+      const merged = mergeProducts(localFile, remoteRecord);
+      productsToUpdate.push(merged);
+    }
+  }
+
+  if (productsToUpdate.length) {
+    await Promise.all([
+      saveProductsOnLocal(productsToUpdate),
+      saveProductsOnRemote(productsToUpdate),
+    ]);
+  }
+};
+
 const startSync = async () => {
-  const { missingLocalFiles, missingRemoteFiles } = await getMissingFiles();
-  console.dir({ missingLocalFiles, missingRemoteFiles }, { depth: null });
+  const { missingLocalFiles, missingRemoteFiles, conflictingFiles } =
+    await getMissingFiles();
+  console.dir(
+    { missingLocalFiles, missingRemoteFiles, conflictingFiles },
+    { depth: null }
+  );
 
   if (missingLocalFiles.length) {
     await pullFromRemote(missingLocalFiles);
@@ -80,6 +135,10 @@ const startSync = async () => {
 
   if (missingRemoteFiles.length) {
     await pushToRemote(missingRemoteFiles);
+  }
+
+  if (conflictingFiles.length) {
+    await resolveConflicts(conflictingFiles);
   }
 };
 

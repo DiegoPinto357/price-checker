@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { storage, database } from './proxies';
 import {
+  WithId,
   Nf,
   Product,
   ProductHistory,
@@ -9,8 +10,6 @@ import {
 } from './types';
 import createStorageIndex from './storageIndex';
 import generateIndexEntry from './libs/generateIndexEntry';
-
-type WithId<T> = { _id: string } & T;
 
 const parseDate = (stringDate: string) => {
   const [date, time] = stringDate.split(' ');
@@ -60,6 +59,13 @@ const mergeHistory = <T extends ProductHistory>(
   return null;
 };
 
+export const mergeProducts = (a: ProductHistory, b: ProductHistory) => {
+  return b.history.reduce((result, historyItem) => {
+    const merged = mergeHistory(result, historyItem);
+    return merged ? merged : result;
+  }, a);
+};
+
 export const saveProductsOnLocal = async (
   records: ProductHistory[],
   indexMetadata?: { timestamp: number; hash: string }[]
@@ -75,8 +81,9 @@ export const saveProductsOnLocal = async (
 
     let dataToSave: ProductHistory | null;
 
+    // TODO skip if existing and new are equal
     if (currentFile) {
-      dataToSave = mergeHistory(currentFile, record.history[0]);
+      dataToSave = mergeProducts(currentFile, record);
     } else {
       dataToSave = record;
     }
@@ -132,14 +139,18 @@ export const saveProductsOnRemote = async (
     records.map(async (record, loopIndex) => {
       const existingRecord = await getRemoteProductItem(record.code);
 
+      // TODO skip if existing and new are equal
       if (existingRecord) {
-        const mergedRecord = mergeHistory(existingRecord, record.history[0]);
+        const mergedRecord = mergeProducts(
+          existingRecord,
+          record
+        ) as ProductHistoryWithIndex;
 
         if (mergedRecord) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { index, ...mergedRecordWithoutIndex } = mergedRecord;
           const recordWithIndex = {
-            ...mergedRecordWithoutIndex,
+            ...mergedRecord,
             index: generateIndexEntry(
               mergedRecordWithoutIndex,
               indexMetadata?.[loopIndex]

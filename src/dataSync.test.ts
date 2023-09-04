@@ -1,7 +1,15 @@
+import _ from 'lodash';
 import createStorageIndex from './storageIndex';
 import { storage, database } from './proxies';
 import dataSync from './dataSync';
-import baseIndexObject from '../mockData/dataSync/baseIndex.json';
+import generateIndexEntry from './libs/generateIndexEntry';
+import { WithId, ProductHistory, ProductHistoryWithIndex } from './types';
+import {
+  baseIndex as baseIndexObject,
+  product1,
+  product2,
+  mergedProduct,
+} from '../mockData/dataSync';
 
 vi.mock('./proxies/storage');
 vi.mock('./proxies/database');
@@ -16,25 +24,31 @@ interface IndexEntryValue {
 
 const setupRemote = async (
   collectionName: string,
-  indexEntries: Map<string, IndexEntryValue>
+  indexEntries: Map<string, IndexEntryValue>,
+  files?: ProductHistory[]
 ) => {
   const remoteFiles = Array.from(indexEntries).map(
-    ([id, { timestamp, hash }]) => ({
-      code: id,
-      index: {
-        timestamp,
-        hash,
-      },
-      description: '',
-      history: [],
-    })
+    ([id, { timestamp, hash }], index) => {
+      const fileToSave = files
+        ? files[index]
+        : { description: '', history: [] };
+      return {
+        ...fileToSave,
+        code: id,
+        index: {
+          timestamp,
+          hash,
+        },
+      };
+    }
   );
   await database.insert('items', collectionName, remoteFiles);
 };
 
 const setupLocal = async (
   dataFolder: string,
-  indexEntries: Map<string, IndexEntryValue>
+  indexEntries: Map<string, IndexEntryValue>,
+  files?: ProductHistory[]
 ) => {
   const csvIndex =
     Array.from(indexEntries).reduce(
@@ -44,13 +58,15 @@ const setupLocal = async (
     ) + '\n';
   await storage.writeFile('/products/index.csv', csvIndex);
 
-  const files = Array.from(indexEntries).map(([id]) => ({
-    code: id,
-    description: '',
-    history: [],
-  }));
+  const filesToSave = files
+    ? files
+    : Array.from(indexEntries).map(([id]) => ({
+        code: id,
+        description: '',
+        history: [],
+      }));
 
-  for (const file of files) {
+  for (const file of filesToSave) {
     await storage.writeFile(`/${dataFolder}/${file.code}.json`, file);
   }
 };
@@ -150,7 +166,47 @@ describe('dataSync', () => {
     });
   });
 
-  // describe('merges product history data', () => {});
+  it('merges product history data', async () => {
+    const remoteProduct = product1;
+    const localProduct = product2;
+
+    const localIndex = new Map([
+      [localProduct.code, generateIndexEntry(localProduct)],
+    ]);
+    await setupLocal('products', localIndex, [localProduct]);
+
+    const remoteIndex = new Map([
+      [remoteProduct.code, generateIndexEntry(remoteProduct)],
+    ]);
+    await setupRemote('products', remoteIndex, [remoteProduct]);
+
+    await dataSync.startSync();
+
+    const expectedProduct = mergedProduct;
+
+    const resultLocalIndex = await createStorageIndex('/products/index.csv');
+    const resultLocalItemIndex = resultLocalIndex.get(localProduct.code);
+
+    const resultLocalItem = await storage.readFile(
+      `/products/${localProduct.code}.json`
+    );
+
+    const resultRemoteItem = await database.find<
+      WithId<ProductHistoryWithIndex>
+    >(
+      'items',
+      'products',
+      {
+        code: remoteProduct.code,
+      },
+      { projection: { _id: 0 } }
+    );
+
+    expect(resultLocalItemIndex).toEqual(resultRemoteItem[0].index);
+    expect(resultLocalItem).toEqual(expectedProduct);
+    expect(resultRemoteItem).toHaveLength(1);
+    expect(_.omit(resultRemoteItem[0], 'index')).toEqual(expectedProduct);
+  });
 
   // describe('resolves conflicts on product history', () => {});
   // rebuild local index (missing file OR index entry)
