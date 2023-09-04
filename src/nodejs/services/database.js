@@ -15,7 +15,7 @@ const headers = {
 const dataSource = 'Cluster0';
 
 const getDatabaseName = database =>
-  sandboxMode ? `${database}-sandbox` : sandboxMode;
+  sandboxMode ? `${database}-sandbox` : database;
 
 const find = async (database, collection, filter, options) => {
   const url = `${baseUrl}/find`;
