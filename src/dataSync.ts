@@ -5,7 +5,7 @@ import {
   mergeProducts,
 } from './products';
 import { storage, database } from './proxies';
-import { ProductHistory, ProductHistoryWithIndex } from './types';
+import { WithId, ProductHistory, ProductHistoryWithIndex } from './types';
 
 interface IndexData {
   timestamp: number;
@@ -14,15 +14,10 @@ interface IndexData {
 
 type IndexEntry = [string, IndexData];
 
-// TODO use a type decorator to add _id to existing types
-interface ProductHistoryWithIndexFromDB extends ProductHistoryWithIndex {
-  _id: string;
-}
-
 const getMissingFiles = async () => {
   const [localIndex, remoteItems] = await Promise.all([
     createStorageIndex('/products/index.csv'),
-    database.find<ProductHistoryWithIndexFromDB>(
+    database.find<WithId<ProductHistoryWithIndex>>(
       'items',
       'products',
       {},
@@ -62,14 +57,14 @@ const pullFromRemote = async (entriesList: IndexEntry[]) => {
   // TODO method to get mising files already found the records, it can be passed to this method
   const records = (await Promise.all(
     entriesList.map(([id]) =>
-      database.findOne<ProductHistoryWithIndexFromDB>(
+      database.findOne<WithId<ProductHistoryWithIndex>>(
         'items',
         'products',
         { code: id },
         { projection: { _id: 0, index: 0 } }
       )
     )
-  )) as ProductHistory[]; // TODO reshape result internally based on projection
+  )) as ProductHistory[];
 
   const validRecords = records.filter(
     (record): record is ProductHistory => !!record
@@ -98,7 +93,7 @@ const resolveConflicts = async (conflicts: string[]) => {
   for (const id of conflicts) {
     const [localFile, remoteRecord] = await Promise.all([
       storage.readFile<ProductHistory>(`/products/${id}.json`),
-      database.findOne<ProductHistoryWithIndexFromDB>(
+      database.findOne<WithId<ProductHistoryWithIndex>>(
         'items',
         'products',
         { code: id },
