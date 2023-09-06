@@ -1,8 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
 import { FindOptions, FindOneOptions, UpdateOneOptions } from '../types';
-
-type WithId<T> = { _id: string } & T;
+import { WithId } from '../../../types';
 
 interface DatabaseEntry {
   databaseName: string;
@@ -43,6 +42,30 @@ const setDocument = <T>(id: string, data: T) => {
   dataBuffer[index].data = { _id: id, ...data };
 };
 
+const resolveProjection = <T extends WithId<unknown>>(
+  item: T,
+  projection: FindOptions<T>['projection']
+) => {
+  const projectionEntries = Object.entries(projection) as [
+    keyof WithId<T>,
+    0 | 1
+  ][];
+
+  const includeAllFieldsByDefault = projectionEntries.every(
+    entry => entry[1] === 0
+  );
+
+  const result = includeAllFieldsByDefault
+    ? item
+    : ({ _id: item._id } as WithId<T>);
+
+  projectionEntries.forEach(([key, value]) => {
+    if (value === 0) delete result[key];
+    if (value === 1) result[key] = item[key];
+  });
+  return result;
+};
+
 // TODO return _id
 const find = vi.fn(
   async <T>(
@@ -51,7 +74,10 @@ const find = vi.fn(
     filter?: object,
     options?: FindOptions<T>
   ) => {
-    const collection = getCollection(databaseName, collectionName) as T[];
+    const collection = getCollection(
+      databaseName,
+      collectionName
+    ) as WithId<T>[];
 
     if (!filter) {
       return collection;
@@ -69,18 +95,9 @@ const find = vi.fn(
       return filteredData;
     }
 
-    return filteredData.map(item => {
-      const projectionEntries = Object.entries(options?.projection) as [
-        keyof T,
-        0 | 1
-      ][];
-      projectionEntries.forEach(([key, value]) => {
-        if (value === 0) {
-          delete item[key];
-        }
-      });
-      return { ...item };
-    });
+    return filteredData.map(item =>
+      resolveProjection(item, options?.projection)
+    );
   }
 );
 
@@ -92,7 +109,10 @@ const findOne = vi.fn(
     filter?: object,
     options?: FindOneOptions<T>
   ) => {
-    const collection = getCollection(databaseName, collectionName) as T[];
+    const collection = getCollection(
+      databaseName,
+      collectionName
+    ) as WithId<T>[];
 
     if (!filter) {
       return collection[0];
@@ -101,7 +121,7 @@ const findOne = vi.fn(
     const record = _.cloneDeep(
       collection.find(item =>
         Object.entries(filter).every(([key, value]) => {
-          return item[key as keyof T] === value;
+          return item[key as keyof WithId<T>] === value;
         })
       )
     );
@@ -114,17 +134,7 @@ const findOne = vi.fn(
       return record;
     }
 
-    const projectionEntries = Object.entries(options?.projection) as [
-      keyof T,
-      0 | 1
-    ][];
-    projectionEntries.forEach(([key, value]) => {
-      if (value === 0) {
-        delete record[key];
-      }
-    });
-
-    return record;
+    return resolveProjection(record, options?.projection);
   }
 );
 
