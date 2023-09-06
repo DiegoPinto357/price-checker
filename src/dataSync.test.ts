@@ -3,9 +3,10 @@ import createStorageIndex from './storageIndex';
 import { storage, database } from './proxies';
 import dataSync from './dataSync';
 import generateIndexEntry from './libs/generateIndexEntry';
-import { WithId, ProductHistory, ProductHistoryWithIndex } from './types';
+import { WithId, WithIndex, ProductHistory, Nf } from './types';
 import {
-  baseIndex as baseIndexObject,
+  baseProductIndex as baseProductIndexObject,
+  baseNfIndex as baseNfIndexObject,
   product1,
   product2,
   mergedProduct,
@@ -22,16 +23,28 @@ interface IndexEntryValue {
   hash: string;
 }
 
-const setupRemote = async (
-  collectionName: string,
+const dummyProduct = { description: '', history: [] };
+
+const dummyNf = {
+  version: '',
+  env: '',
+  csc: '',
+  hash: '',
+  number: '',
+  series: '',
+  date: '',
+  protocol: '',
+  store: { name: '', cnpj: '', incricaoEstadual: '', address: '' },
+  items: [],
+};
+
+const setupRemoteProducts = async (
   indexEntries: Map<string, IndexEntryValue>,
   files?: ProductHistory[]
 ) => {
   const remoteFiles = Array.from(indexEntries).map(
     ([id, { timestamp, hash }], index) => {
-      const fileToSave = files
-        ? files[index]
-        : { description: '', history: [] };
+      const fileToSave = files ? files[index] : dummyProduct;
       return {
         ...fileToSave,
         code: id,
@@ -42,11 +55,30 @@ const setupRemote = async (
       };
     }
   );
-  await database.insert('items', collectionName, remoteFiles);
+  await database.insert('items', 'products', remoteFiles);
 };
 
-const setupLocal = async (
-  dataFolder: string,
+const setupRemoteNfs = async (
+  indexEntries: Map<string, IndexEntryValue>,
+  files?: Nf[]
+) => {
+  const remoteFiles = Array.from(indexEntries).map(
+    ([id, { timestamp, hash }], index) => {
+      const fileToSave = files ? files[index] : dummyNf;
+      return {
+        ...fileToSave,
+        key: id,
+        index: {
+          timestamp,
+          hash,
+        },
+      };
+    }
+  );
+  await database.insert('items', 'nfs', remoteFiles);
+};
+
+const setupLocalProducts = async (
   indexEntries: Map<string, IndexEntryValue>,
   files?: ProductHistory[]
 ) => {
@@ -62,16 +94,40 @@ const setupLocal = async (
     ? files
     : Array.from(indexEntries).map(([id]) => ({
         code: id,
-        description: '',
-        history: [],
+        ...dummyProduct,
       }));
 
   for (const file of filesToSave) {
-    await storage.writeFile(`/${dataFolder}/${file.code}.json`, file);
+    await storage.writeFile(`/products/${file.code}.json`, file);
   }
 };
 
-const baseIndex = new Map(Object.entries(baseIndexObject));
+const setupLocalNfs = async (
+  indexEntries: Map<string, IndexEntryValue>,
+  files?: Nf[]
+) => {
+  const csvIndex =
+    Array.from(indexEntries).reduce(
+      (csvContent, [id, { timestamp, hash }]) =>
+        `${csvContent}\n${id}, ${timestamp}, ${hash}`,
+      ''
+    ) + '\n';
+  await storage.writeFile('/nfs/index.csv', csvIndex);
+
+  const filesToSave = files
+    ? files
+    : Array.from(indexEntries).map(([id]) => ({
+        key: id,
+        ...dummyNf,
+      }));
+
+  for (const file of filesToSave) {
+    await storage.writeFile(`/nfs/${file.key}.json`, file);
+  }
+};
+
+const baseProductIndex = new Map(Object.entries(baseProductIndexObject));
+const baseNfIndex = new Map(Object.entries(baseNfIndexObject));
 
 describe('dataSync', () => {
   beforeEach(() => {
@@ -85,9 +141,9 @@ describe('dataSync', () => {
 
   // rebuild local index (missing file OR index entry)
 
-  describe('producs', () => {
+  describe('products', () => {
     it('pulls missing data from remote', async () => {
-      const remoteIndex = baseIndex;
+      const remoteIndex = baseProductIndex;
       const entriesToRemove = [
         '7896333041307',
         '7896333041383',
@@ -96,38 +152,37 @@ describe('dataSync', () => {
         '2022640000002',
       ];
 
-      const localIndex = new Map(baseIndex);
+      const localIndex = new Map(baseProductIndex);
       entriesToRemove.forEach(entry => localIndex.delete(entry));
 
       const missingEntries = entriesToRemove.map(entry => ({
         id: entry,
-        index: { ...baseIndex.get(entry) },
+        index: { ...baseProductIndex.get(entry) },
       }));
 
-      await setupRemote('products', remoteIndex);
-      await setupLocal('products', localIndex);
+      await setupRemoteProducts(remoteIndex);
+      await setupLocalProducts(localIndex);
 
       await dataSync.startSync();
 
       const newLocalIndex = await createStorageIndex('/products/index.csv');
 
-      missingEntries.forEach(async missingEntry => {
+      for (const missingEntry of missingEntries) {
         const localItem = await storage.readFile(
           `/products/${missingEntry.id}.json`
         );
 
         expect(localItem).toEqual({
           code: missingEntry.id,
-          description: '',
-          history: [],
+          ...dummyProduct,
         });
 
         expect(newLocalIndex.get(missingEntry.id)).toEqual(missingEntry.index);
-      });
+      }
     });
 
     it('pushes missing data to remote', async () => {
-      const localIndex = baseIndex;
+      const localIndex = baseProductIndex;
       const entriesToRemove = [
         '7896333041307',
         '7896333041383',
@@ -136,20 +191,20 @@ describe('dataSync', () => {
         '2022640000002',
       ];
 
-      const remoteIndex = new Map(baseIndex);
+      const remoteIndex = new Map(baseProductIndex);
       entriesToRemove.forEach(entry => remoteIndex.delete(entry));
 
       const missingEntries = entriesToRemove.map(entry => ({
         id: entry,
-        index: { ...baseIndex.get(entry) },
+        index: { ...baseProductIndex.get(entry) },
       }));
 
-      await setupRemote('products', remoteIndex);
-      await setupLocal('products', localIndex);
+      await setupRemoteProducts(remoteIndex);
+      await setupLocalProducts(localIndex);
 
       await dataSync.startSync();
 
-      missingEntries.forEach(async missingEntry => {
+      for (const missingEntry of missingEntries) {
         const remoteItem = await database.find(
           'items',
           'products',
@@ -163,10 +218,9 @@ describe('dataSync', () => {
         expect(remoteItem[0]).toEqual({
           code: missingEntry.id,
           index: missingEntry.index,
-          description: '',
-          history: [],
+          ...dummyProduct,
         });
-      });
+      }
     });
 
     it('merges product history data', async () => {
@@ -176,12 +230,12 @@ describe('dataSync', () => {
       const localIndex = new Map([
         [localProduct.code, generateIndexEntry(localProduct)],
       ]);
-      await setupLocal('products', localIndex, [localProduct]);
+      await setupLocalProducts(localIndex, [localProduct]);
 
       const remoteIndex = new Map([
         [remoteProduct.code, generateIndexEntry(remoteProduct)],
       ]);
-      await setupRemote('products', remoteIndex, [remoteProduct]);
+      await setupRemoteProducts(remoteIndex, [remoteProduct]);
 
       await dataSync.startSync();
 
@@ -195,7 +249,7 @@ describe('dataSync', () => {
       );
 
       const resultRemoteItem = await database.find<
-        WithId<ProductHistoryWithIndex>
+        WithId<WithIndex<ProductHistory>>
       >(
         'items',
         'products',
@@ -214,9 +268,46 @@ describe('dataSync', () => {
     // describe('resolves conflicts on product history', () => {});
   });
 
-  // describe('nfs', () => {
-  //   it('pulls missing data from remote', async () => {});
+  describe('nfs', () => {
+    it('pulls missing data from remote', async () => {
+      const remoteIndex = baseNfIndex;
+      const entriesToRemove = [
+        '43230593015006003210651060002744541496656957',
+        '43230593015006003210651220005531961557462753',
+        '43230593015006003210651270008838621425327965',
+        '43230693015006003210651240012627391776533210',
+        '43230793015006004291651010004202201906299678',
+      ];
 
-  //   it('pushes missing data to remote', async () => {});
-  // });
+      const localIndex = new Map(baseNfIndex);
+      entriesToRemove.forEach(entry => localIndex.delete(entry));
+
+      const missingEntries = entriesToRemove.map(entry => ({
+        id: entry,
+        index: { ...baseNfIndex.get(entry) },
+      }));
+
+      await setupRemoteNfs(remoteIndex);
+      await setupLocalNfs(localIndex);
+
+      await dataSync.startSync();
+
+      const newLocalIndex = await createStorageIndex('/nfs/index.csv');
+
+      for (const missingEntry of missingEntries) {
+        const localItem = await storage.readFile(
+          `/nfs/${missingEntry.id}.json`
+        );
+
+        expect(localItem).toEqual({
+          key: missingEntry.id,
+          ...dummyNf,
+        });
+
+        expect(newLocalIndex.get(missingEntry.id)).toEqual(missingEntry.index);
+      }
+    });
+
+    // it('pushes missing data to remote', async () => {});
+  });
 });

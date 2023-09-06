@@ -16,16 +16,34 @@ const mergeProducts = (products: Nf['items']) =>
     return merged;
   }, [] as typeof products);
 
-const saveNfOnLocal = async (nf: Nf) => {
+export const saveNfsOnLocal = async (
+  nfs: Nf[],
+  indexMetadata?: { timestamp: number; hash: string }[]
+) => {
+  if (!nfs.length) return;
+
   const localIndex = await createStorageIndex('/nfs/index.csv');
 
-  if (localIndex.get(nf.key)) return;
+  let hasNewData = false;
 
-  localIndex.set(nf.key, generateIndexEntry(nf));
+  await Promise.all(
+    nfs.map(async (nf, index) => {
+      if (localIndex.get(nf.key)) return;
+      hasNewData = true;
 
-  const filename = `/nfs/${nf.key}.json`;
-  await storage.writeFile(filename, nf);
-  await localIndex.save();
+      const indexEntry = indexMetadata
+        ? indexMetadata[index]
+        : generateIndexEntry(nf);
+      localIndex.set(nf.key, indexEntry);
+
+      const filename = `/nfs/${nf.key}.json`;
+      await storage.writeFile(filename, nf);
+    })
+  );
+
+  if (hasNewData) {
+    await localIndex.save();
+  }
 };
 
 const saveNfOnRemote = async (nf: Nf) => {
@@ -52,5 +70,5 @@ export const getNfData = async (key: string) => {
 };
 
 export const saveNf = async (nf: Nf) => {
-  await Promise.all([saveNfOnLocal(nf), saveNfOnRemote(nf)]);
+  await Promise.all([saveNfsOnLocal([nf]), saveNfOnRemote(nf)]);
 };
