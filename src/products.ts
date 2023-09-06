@@ -2,11 +2,11 @@ import _ from 'lodash';
 import { storage, database } from './proxies';
 import {
   WithId,
+  WithIndex,
   Nf,
   Product,
   ProductHistory,
   ProductHistoryItem,
-  ProductHistoryWithIndex,
 } from './types';
 import createStorageIndex from './storageIndex';
 import generateIndexEntry from './libs/generateIndexEntry';
@@ -111,7 +111,7 @@ export const saveProductsOnLocal = async (
 };
 
 const getRemoteProductItem = (code: string) =>
-  database.findOne<WithId<ProductHistoryWithIndex>>(
+  database.findOne<WithId<WithIndex<ProductHistory>>>(
     'items',
     'products',
     {
@@ -120,8 +120,8 @@ const getRemoteProductItem = (code: string) =>
     { projection: { _id: 0 } }
   );
 
-const updateRemoteProductItem = async (item: ProductHistoryWithIndex) =>
-  database.updateOne<ProductHistoryWithIndex>(
+const updateRemoteProductItem = async (item: WithIndex<ProductHistory>) =>
+  database.updateOne<WithIndex<ProductHistory>>(
     'items',
     'products',
     { code: item.code },
@@ -139,7 +139,7 @@ export const saveProductsOnRemote = async (
 ) => {
   if (!records.length) return;
 
-  const recordsToInsert: ProductHistoryWithIndex[] = [];
+  const recordsToInsert: WithIndex<ProductHistory>[] = [];
 
   await Promise.all(
     records.map(async (record, loopIndex) => {
@@ -149,7 +149,7 @@ export const saveProductsOnRemote = async (
         const mergedRecord = mergeProducts(
           existingRecord,
           record
-        ) as ProductHistoryWithIndex;
+        ) as WithIndex<ProductHistory>;
 
         if (mergedRecord) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -178,7 +178,7 @@ export const saveProductsOnRemote = async (
   );
 
   if (recordsToInsert.length) {
-    await database.insert<ProductHistoryWithIndex>(
+    await database.insert<WithIndex<ProductHistory>>(
       'items',
       'products',
       recordsToInsert

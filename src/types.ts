@@ -1,5 +1,12 @@
 export type WithId<T> = { _id: string } & T;
 
+export type WithIndex<T> = {
+  index: {
+    timestamp: number;
+    hash: string;
+  };
+} & T;
+
 interface Store {
   name: string;
   cnpj: string;
@@ -43,11 +50,4 @@ export interface ProductHistory {
   code: string;
   description: string;
   history: ProductHistoryItem[];
-}
-
-export interface ProductHistoryWithIndex extends ProductHistory {
-  index: {
-    timestamp: number;
-    hash: string;
-  };
 }
