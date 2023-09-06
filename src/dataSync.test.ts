@@ -308,6 +308,46 @@ describe('dataSync', () => {
       }
     });
 
-    // it('pushes missing data to remote', async () => {});
+    it('pushes missing data to remote', async () => {
+      const localIndex = baseNfIndex;
+      const entriesToRemove = [
+        '43230593015006003210651060002744541496656957',
+        '43230593015006003210651220005531961557462753',
+        '43230593015006003210651270008838621425327965',
+        '43230693015006003210651240012627391776533210',
+        '43230793015006004291651010004202201906299678',
+      ];
+
+      const remoteIndex = new Map(baseNfIndex);
+      entriesToRemove.forEach(entry => remoteIndex.delete(entry));
+
+      const missingEntries = entriesToRemove.map(entry => ({
+        id: entry,
+        index: { ...baseNfIndex.get(entry) },
+      }));
+
+      await setupRemoteNfs(remoteIndex);
+      await setupLocalNfs(localIndex);
+
+      await dataSync.startSync();
+
+      for (const missingEntry of missingEntries) {
+        const remoteItem = await database.find(
+          'items',
+          'nfs',
+          {
+            key: missingEntry.id,
+          },
+          { projection: { _id: 0 } }
+        );
+
+        expect(remoteItem).toHaveLength(1);
+        expect(remoteItem[0]).toEqual({
+          key: missingEntry.id,
+          index: missingEntry.index,
+          ...dummyNf,
+        });
+      }
+    });
   });
 });

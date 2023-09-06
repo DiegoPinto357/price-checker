@@ -4,7 +4,7 @@ import {
   saveProductsOnRemote,
   mergeProducts,
 } from './products';
-import { saveNfsOnLocal } from './nfs';
+import { saveNfsOnLocal, saveNfsOnRemote } from './nfs';
 import { storage, database } from './proxies';
 import { WithId, WithIndex, ProductHistory, Nf } from './types';
 
@@ -126,6 +126,15 @@ const pullNfsFromRemote = async (entriesList: IndexEntry[]) => {
   }
 };
 
+const pushNfsToRemote = async (entriesList: IndexEntry[]) => {
+  const files = await Promise.all(
+    entriesList.map(([id]) => storage.readFile<Nf>(`/nfs/${id}.json`))
+  );
+
+  const indexMetadata = entriesList.map(entry => entry[1]);
+  await saveNfsOnRemote(files, indexMetadata);
+};
+
 const syncProducts = async () => {
   const [localIndex, remoteItems] = await Promise.all([
     createStorageIndex('/products/index.csv'),
@@ -179,16 +188,19 @@ const syncNfs = async () => {
     item.index,
   ]);
 
-  const { missingLocalFiles, missingRemoteFiles, conflictingFiles } =
-    await getMissingFiles(localIndex, remoteIndex);
-
-  console.dir(
-    { missingLocalFiles, missingRemoteFiles, conflictingFiles },
-    { depth: null }
+  const { missingLocalFiles, missingRemoteFiles } = await getMissingFiles(
+    localIndex,
+    remoteIndex
   );
+
+  console.dir({ missingLocalFiles, missingRemoteFiles }, { depth: null });
 
   if (missingLocalFiles.length) {
     await pullNfsFromRemote(missingLocalFiles);
+  }
+
+  if (missingRemoteFiles.length) {
+    await pushNfsToRemote(missingRemoteFiles);
   }
 };
 

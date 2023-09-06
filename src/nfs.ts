@@ -46,22 +46,35 @@ export const saveNfsOnLocal = async (
   }
 };
 
-const saveNfOnRemote = async (nf: Nf) => {
-  const existingEntry = await database.findOne(
-    'items',
-    'nfs',
-    {
-      key: nf.key,
-    },
-    { projection: { _id: 0 } }
+export const saveNfsOnRemote = async (
+  nfs: Nf[],
+  indexMetadata?: { timestamp: number; hash: string }[]
+) => {
+  if (!nfs.length) return;
+
+  await Promise.all(
+    nfs.map(async (nf, index) => {
+      const existingEntry = await database.findOne(
+        'items',
+        'nfs',
+        {
+          key: nf.key,
+        },
+        { projection: { _id: 0 } }
+      );
+
+      if (existingEntry) return;
+
+      const indexEntry = indexMetadata
+        ? indexMetadata[index]
+        : generateIndexEntry(nf);
+
+      await database.insertOne('items', 'nfs', {
+        ...nf,
+        index: indexEntry,
+      });
+    })
   );
-
-  if (existingEntry) return;
-
-  await database.insertOne('items', 'nfs', {
-    ...nf,
-    index: generateIndexEntry(nf),
-  });
 };
 
 export const getNfData = async (key: string) => {
@@ -70,5 +83,5 @@ export const getNfData = async (key: string) => {
 };
 
 export const saveNf = async (nf: Nf) => {
-  await Promise.all([saveNfsOnLocal([nf]), saveNfOnRemote(nf)]);
+  await Promise.all([saveNfsOnLocal([nf]), saveNfsOnRemote([nf])]);
 };
