@@ -91,12 +91,12 @@ describe('nfs', () => {
     });
 
     it('does not add index entry if it already exists', async () => {
-      const indexFilname = '/nfs/index.csv';
+      const indexFilename = '/nfs/index.csv';
       const currentLocalIndexContent = indexEntryToCsvLine({
         id: '43230693015006003210651210008545221815897062',
         ...indexEntry,
       });
-      await storage.writeFile(indexFilname, currentLocalIndexContent);
+      await storage.writeFile(indexFilename, currentLocalIndexContent);
 
       await database.insertOne('items', 'nfs', {
         ...nfData,
@@ -108,7 +108,9 @@ describe('nfs', () => {
 
       await saveNf(nfData);
 
-      const newLocalIndexContent = await storage.readFile<string>(indexFilname);
+      const newLocalIndexContent = await storage.readFile<string>(
+        indexFilename
+      );
       const newRemoteItemContent = await database.find(
         'items',
         'nfs',
