@@ -1,7 +1,7 @@
 import { nf, storage, database } from './proxies';
 import createStorageIndex from './storageIndex';
 import generateIndexEntry from './libs/generateIndexEntry';
-import { Nf } from './types';
+import { Nf, WithId, WithIndex } from './types';
 
 const mergeProducts = (products: Nf['items']) =>
   products.reduce((merged, product) => {
@@ -54,7 +54,7 @@ export const saveNfsOnRemote = async (
 
   await Promise.all(
     nfs.map(async (nf, index) => {
-      const existingEntry = await database.findOne(
+      const existingEntry = await database.findOne<WithId<WithIndex<Nf>>>(
         'items',
         'nfs',
         {

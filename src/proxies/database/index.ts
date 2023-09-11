@@ -1,5 +1,10 @@
 import { Capacitor } from '@capacitor/core';
-import { FindOptions, FindOneOptions, UpdateOneOptions } from './types';
+import {
+  FilterOperations,
+  FindOptions,
+  FindOneOptions,
+  UpdateOneOptions,
+} from './types';
 
 const platform = Capacitor.getPlatform();
 
@@ -7,13 +12,13 @@ export interface DatabaseProxy {
   find: <T>(
     databaseName: string,
     collectionName: string,
-    filter?: object,
+    filter?: Partial<FilterOperations<T> & T>,
     options?: FindOptions<T>
   ) => Promise<T[]>;
   findOne: <T>(
     databaseName: string,
     collectionName: string,
-    filter: object,
+    filter: Partial<T>,
     options?: FindOneOptions<T>
   ) => Promise<T | null>;
   // TODO implement on backend

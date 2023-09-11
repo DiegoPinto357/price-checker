@@ -1,3 +1,7 @@
+export interface FilterOperations<T> {
+  $or: Partial<T>[];
+}
+
 export interface FindOptions<T> {
   projection: Partial<Record<keyof T, 0 | 1>>;
 }

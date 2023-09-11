@@ -43,16 +43,13 @@ const getMissingFiles = async (
 };
 
 const pullProductsFromRemote = async (entriesList: IndexEntry[]) => {
-  // TODO method to get mising files already found the records, it can be passed to this method
-  const records = (await Promise.all(
-    entriesList.map(([id]) =>
-      database.findOne<WithId<WithIndex<ProductHistory>>>(
-        'items',
-        'products',
-        { code: id },
-        { projection: { _id: 0, index: 0 } }
-      )
-    )
+  const records = (await database.find<WithId<WithIndex<ProductHistory>>>(
+    'items',
+    'products',
+    {
+      $or: entriesList.map(([id]) => ({ code: id })),
+    },
+    { projection: { _id: 0, index: 0 } }
   )) as ProductHistory[];
 
   const validRecords = records.filter(
@@ -79,19 +76,21 @@ const pushProductsToRemote = async (entriesList: IndexEntry[]) => {
 const resolveProductsConflicts = async (conflicts: string[]) => {
   const productsToUpdate: ProductHistory[] = [];
 
-  for (const id of conflicts) {
-    const [localFile, remoteRecord] = await Promise.all([
-      storage.readFile<ProductHistory>(`/products/${id}.json`),
-      database.findOne<WithId<WithIndex<ProductHistory>>>(
-        'items',
-        'products',
-        { code: id },
-        { projection: { _id: 0, index: 0 } }
-      ),
-    ]);
+  const remoteRecords = await database.find<WithId<WithIndex<ProductHistory>>>(
+    'items',
+    'products',
+    { $or: conflicts.map(id => ({ code: id })) },
+    { projection: { _id: 0, index: 0 } }
+  );
+
+  for (const [index, id] of conflicts.entries()) {
+    const localFile = await storage.readFile<ProductHistory>(
+      `/products/${id}.json`
+    );
+    const remoteRecord = remoteRecords[index];
 
     if (localFile && remoteRecord) {
-      // merge will happen twice (products will do it again)
+      // TODO merge will happen twice (products will do it again)
       const merged = mergeProducts(localFile, remoteRecord);
       productsToUpdate.push(merged);
     }
@@ -106,16 +105,13 @@ const resolveProductsConflicts = async (conflicts: string[]) => {
 };
 
 const pullNfsFromRemote = async (entriesList: IndexEntry[]) => {
-  // TODO method to get mising files already found the records, it can be passed to this method
-  const records = (await Promise.all(
-    entriesList.map(([id]) =>
-      database.findOne<WithId<WithIndex<Nf>>>(
-        'items',
-        'nfs',
-        { key: id },
-        { projection: { _id: 0, index: 0 } }
-      )
-    )
+  const records = (await database.find<WithId<WithIndex<Nf>>>(
+    'items',
+    'nfs',
+    {
+      $or: entriesList.map(([id]) => ({ key: id })),
+    },
+    { projection: { _id: 0, index: 0 } }
   )) as Nf[];
 
   const validRecords = records.filter((record): record is Nf => !!record)!;
@@ -193,7 +189,7 @@ const syncNfs = async () => {
     remoteIndex
   );
 
-  console.dir({ missingLocalFiles, missingRemoteFiles }, { depth: null });
+  // console.dir({ missingLocalFiles, missingRemoteFiles }, { depth: null });
 
   if (missingLocalFiles.length) {
     await pullNfsFromRemote(missingLocalFiles);

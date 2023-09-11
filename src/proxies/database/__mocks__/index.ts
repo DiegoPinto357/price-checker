@@ -1,6 +1,11 @@
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
-import { FindOptions, FindOneOptions, UpdateOneOptions } from '../types';
+import {
+  FilterOperations,
+  FindOptions,
+  FindOneOptions,
+  UpdateOneOptions,
+} from '../types';
 import { WithId } from '../../../types';
 
 interface DatabaseEntry {
@@ -71,7 +76,7 @@ const find = vi.fn(
   async <T>(
     databaseName: string,
     collectionName: string,
-    filter?: object,
+    filter?: Partial<FilterOperations<T> & T>,
     options?: FindOptions<T>
   ) => {
     const collection = getCollection(
@@ -84,11 +89,21 @@ const find = vi.fn(
     }
 
     const filteredData = _.cloneDeep(
-      collection.filter(item =>
-        Object.entries(filter).every(
+      collection.filter(item => {
+        const orOperations = filter['$or'];
+
+        if (orOperations) {
+          return orOperations.some(subFilter =>
+            Object.entries(subFilter).every(
+              ([key, value]) => item[key as keyof T] === value
+            )
+          );
+        }
+
+        return Object.entries(filter).every(
           ([key, value]) => item[key as keyof T] === value
-        )
-      )
+        );
+      })
     );
 
     if (!options?.projection) {

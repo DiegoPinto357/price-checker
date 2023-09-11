@@ -205,7 +205,9 @@ describe('dataSync', () => {
       await dataSync.startSync();
 
       for (const missingEntry of missingEntries) {
-        const remoteItem = await database.find(
+        const remoteItem = await database.find<
+          WithId<WithIndex<ProductHistory>>
+        >(
           'items',
           'products',
           {
@@ -332,7 +334,7 @@ describe('dataSync', () => {
       await dataSync.startSync();
 
       for (const missingEntry of missingEntries) {
-        const remoteItem = await database.find(
+        const remoteItem = await database.find<WithId<WithIndex<Nf>>>(
           'items',
           'nfs',
           {
