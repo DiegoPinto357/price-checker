@@ -3,6 +3,8 @@ import { nf, storage, database } from './proxies';
 import { getNfData, saveNf } from './nfs';
 import nfData from '../mockData/nf/nfData.json';
 import nfDataWithDuplication from '../mockData/nf/nfDataWithDuplication.json';
+import { WithId, WithIndex } from './types';
+import { Nf } from './types';
 
 type MockStorage = typeof storage & { clearFiles: () => void };
 type MockDatabase = typeof database & { clearRecords: () => void };
@@ -111,7 +113,7 @@ describe('nfs', () => {
       const newLocalIndexContent = await storage.readFile<string>(
         indexFilename
       );
-      const newRemoteItemContent = await database.find(
+      const newRemoteItemContent = await database.find<WithId<WithIndex<Nf>>>(
         'items',
         'nfs',
         {

@@ -186,6 +186,32 @@ export const saveProductsOnRemote = async (
   }
 };
 
+export const getProductsFromRemote = async (idList: string[]) => {
+  const records = (await database.find<WithId<WithIndex<ProductHistory>>>(
+    'items',
+    'products',
+    {
+      $or: idList.map(id => ({ code: id })),
+    },
+    { projection: { _id: 0, index: 0 } }
+  )) as ProductHistory[];
+
+  return records.filter((record): record is ProductHistory => !!record)!;
+};
+
+export const getProductsRemoteIndex = async (): Promise<
+  [string, { timestamp: number; hash: string }][]
+> => {
+  const records = await database.find<WithId<WithIndex<ProductHistory>>>(
+    'items',
+    'products',
+    {},
+    { projection: { _id: 0, code: 1, index: 1 } }
+  );
+
+  return records.map(item => [item.code, item.index]);
+};
+
 // TODO optimize params - duplication
 export const saveProducts = async (products: Product[], nfData: Nf) => {
   const mappedProducts = products.map(product => ({

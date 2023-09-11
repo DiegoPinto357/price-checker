@@ -77,6 +77,32 @@ export const saveNfsOnRemote = async (
   );
 };
 
+export const getNfsFromRemote = async (idList: string[]) => {
+  const records = (await database.find<WithId<WithIndex<Nf>>>(
+    'items',
+    'nfs',
+    {
+      $or: idList.map(id => ({ key: id })),
+    },
+    { projection: { _id: 0, index: 0 } }
+  )) as Nf[];
+
+  return records.filter((record): record is Nf => !!record)!;
+};
+
+export const getNfsRemoteIndex = async (): Promise<
+  [string, { timestamp: number; hash: string }][]
+> => {
+  const records = await database.find<WithId<WithIndex<Nf>>>(
+    'items',
+    'nfs',
+    {},
+    { projection: { _id: 0, key: 1, index: 1 } }
+  );
+
+  return records.map(item => [item.key, item.index]);
+};
+
 export const getNfData = async (key: string) => {
   const nfData = await nf.getNfData(key);
   return { ...nfData, items: mergeProducts(nfData.items) };

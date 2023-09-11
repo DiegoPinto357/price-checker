@@ -1,12 +1,19 @@
 import createStorageIndex from './storageIndex';
 import {
+  getProductsFromRemote,
+  getProductsRemoteIndex,
   saveProductsOnLocal,
   saveProductsOnRemote,
   mergeProducts,
 } from './products';
-import { saveNfsOnLocal, saveNfsOnRemote } from './nfs';
-import { storage, database } from './proxies';
-import { WithId, WithIndex, ProductHistory, Nf } from './types';
+import {
+  getNfsFromRemote,
+  getNfsRemoteIndex,
+  saveNfsOnLocal,
+  saveNfsOnRemote,
+} from './nfs';
+import { storage } from './proxies';
+import { ProductHistory, Nf } from './types';
 
 interface IndexData {
   timestamp: number;
@@ -43,22 +50,11 @@ const getMissingFiles = async (
 };
 
 const pullProductsFromRemote = async (entriesList: IndexEntry[]) => {
-  const records = (await database.find<WithId<WithIndex<ProductHistory>>>(
-    'items',
-    'products',
-    {
-      $or: entriesList.map(([id]) => ({ code: id })),
-    },
-    { projection: { _id: 0, index: 0 } }
-  )) as ProductHistory[];
+  const products = await getProductsFromRemote(entriesList.map(([id]) => id));
 
-  const validRecords = records.filter(
-    (record): record is ProductHistory => !!record
-  )!;
-
-  if (validRecords.length) {
+  if (products.length) {
     const indexMetadata = entriesList.map(entry => entry[1]);
-    await saveProductsOnLocal(validRecords, indexMetadata);
+    await saveProductsOnLocal(products, indexMetadata);
   }
 };
 
@@ -75,13 +71,7 @@ const pushProductsToRemote = async (entriesList: IndexEntry[]) => {
 
 const resolveProductsConflicts = async (conflicts: string[]) => {
   const productsToUpdate: ProductHistory[] = [];
-
-  const remoteRecords = await database.find<WithId<WithIndex<ProductHistory>>>(
-    'items',
-    'products',
-    { $or: conflicts.map(id => ({ code: id })) },
-    { projection: { _id: 0, index: 0 } }
-  );
+  const remoteRecords = await getProductsFromRemote(conflicts);
 
   for (const [index, id] of conflicts.entries()) {
     const localFile = await storage.readFile<ProductHistory>(
@@ -105,20 +95,11 @@ const resolveProductsConflicts = async (conflicts: string[]) => {
 };
 
 const pullNfsFromRemote = async (entriesList: IndexEntry[]) => {
-  const records = (await database.find<WithId<WithIndex<Nf>>>(
-    'items',
-    'nfs',
-    {
-      $or: entriesList.map(([id]) => ({ key: id })),
-    },
-    { projection: { _id: 0, index: 0 } }
-  )) as Nf[];
+  const nfs = await getNfsFromRemote(entriesList.map(([id]) => id));
 
-  const validRecords = records.filter((record): record is Nf => !!record)!;
-
-  if (validRecords.length) {
+  if (nfs.length) {
     const indexMetadata = entriesList.map(entry => entry[1]);
-    await saveNfsOnLocal(validRecords, indexMetadata);
+    await saveNfsOnLocal(nfs, indexMetadata);
   }
 };
 
@@ -132,19 +113,9 @@ const pushNfsToRemote = async (entriesList: IndexEntry[]) => {
 };
 
 const syncProducts = async () => {
-  const [localIndex, remoteItems] = await Promise.all([
+  const [localIndex, remoteIndex] = await Promise.all([
     createStorageIndex('/products/index.csv'),
-    database.find<WithId<WithIndex<ProductHistory>>>(
-      'items',
-      'products',
-      {},
-      { projection: { _id: 0, code: 1, index: 1 } }
-    ),
-  ]);
-
-  const remoteIndex: IndexEntry[] = remoteItems.map(item => [
-    item.code,
-    item.index,
+    getProductsRemoteIndex(),
   ]);
 
   const { missingLocalFiles, missingRemoteFiles, conflictingFiles } =
@@ -169,19 +140,9 @@ const syncProducts = async () => {
 };
 
 const syncNfs = async () => {
-  const [localIndex, remoteItems] = await Promise.all([
+  const [localIndex, remoteIndex] = await Promise.all([
     createStorageIndex('/nfs/index.csv'),
-    database.find<WithId<WithIndex<Nf>>>(
-      'items',
-      'nfs',
-      {},
-      { projection: { _id: 0, key: 1, index: 1 } }
-    ),
-  ]);
-
-  const remoteIndex: IndexEntry[] = remoteItems.map(item => [
-    item.key,
-    item.index,
+    getNfsRemoteIndex(),
   ]);
 
   const { missingLocalFiles, missingRemoteFiles } = await getMissingFiles(
