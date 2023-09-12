@@ -55,14 +55,14 @@ const pullProductsFromRemote = async (entriesList: IndexEntry[]) => {
 
   if (products.length) {
     const indexMetadata = entriesList.map(entry => entry[1]);
-    await saveProductsOnLocal(products, indexMetadata);
+    await saveProductsOnLocal(products, { indexMetadata });
   }
 };
 
 const pushProductsToRemote = async (entriesList: IndexEntry[]) => {
   const files = await getProductsFromLocal(entriesList.map(([id]) => id));
   const indexMetadata = entriesList.map(entry => entry[1]);
-  await saveProductsOnRemote(files, indexMetadata);
+  await saveProductsOnRemote(files, { indexMetadata });
 };
 
 const resolveProductsConflicts = async (conflicts: string[]) => {
@@ -84,7 +84,7 @@ const resolveProductsConflicts = async (conflicts: string[]) => {
 
   if (productsToUpdate.length) {
     await Promise.all([
-      saveProductsOnLocal(productsToUpdate),
+      saveProductsOnLocal(productsToUpdate, { overwrite: true }),
       saveProductsOnRemote(productsToUpdate),
     ]);
   }

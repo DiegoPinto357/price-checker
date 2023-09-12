@@ -54,6 +54,7 @@ export const saveNfsOnRemote = async (
 
   await Promise.all(
     nfs.map(async (nf, index) => {
+      // TODO existing items are unlikely to happen, suggested to use update with upsert
       const existingEntry = await database.findOne<WithId<WithIndex<Nf>>>(
         'items',
         'nfs',

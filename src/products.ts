@@ -68,7 +68,10 @@ export const mergeProducts = (a: ProductHistory, b: ProductHistory) => {
 
 export const saveProductsOnLocal = async (
   records: ProductHistory[],
-  indexMetadata?: { timestamp: number; hash: string }[]
+  options?: {
+    overwrite?: boolean;
+    indexMetadata?: { timestamp: number; hash: string }[];
+  }
 ) => {
   if (!records.length) return;
 
@@ -78,18 +81,22 @@ export const saveProductsOnLocal = async (
   await Promise.all(
     records.map(async (record, index) => {
       const filename = `/products/${record.code}.json`;
-      const currentFile = await storage.readFile<ProductHistory>(filename);
 
-      let dataToSave: ProductHistory | null;
+      let currentFile: ProductHistory | null = null;
+      let dataToSave: ProductHistory | null = record;
 
-      if (currentFile) {
-        dataToSave = mergeProducts(currentFile, record);
-      } else {
-        dataToSave = record;
+      if (!options?.overwrite) {
+        currentFile = await storage.readFile<ProductHistory>(filename);
+        if (currentFile) {
+          dataToSave = mergeProducts(currentFile, record);
+        }
       }
 
       if (dataToSave) {
-        const newIndex = generateIndexEntry(dataToSave, indexMetadata?.[index]);
+        const newIndex = generateIndexEntry(
+          dataToSave,
+          options?.indexMetadata?.[index]
+        );
 
         if (
           !currentFile ||
@@ -135,7 +142,10 @@ const updateRemoteProductItem = async (item: WithIndex<ProductHistory>) =>
 
 export const saveProductsOnRemote = async (
   records: ProductHistory[],
-  indexMetadata?: { timestamp: number; hash: string }[]
+  // TODO add overwrite option
+  options?: {
+    indexMetadata?: { timestamp: number; hash: string }[];
+  }
 ) => {
   if (!records.length) return;
 
@@ -158,7 +168,7 @@ export const saveProductsOnRemote = async (
             ...mergedRecord,
             index: generateIndexEntry(
               mergedRecordWithoutIndex,
-              indexMetadata?.[loopIndex]
+              options?.indexMetadata?.[loopIndex]
             ),
           };
 
@@ -172,7 +182,7 @@ export const saveProductsOnRemote = async (
 
       recordsToInsert.push({
         ...record,
-        index: generateIndexEntry(record, indexMetadata?.[loopIndex]),
+        index: generateIndexEntry(record, options?.indexMetadata?.[loopIndex]),
       });
     })
   );
