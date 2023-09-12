@@ -3,6 +3,7 @@ import { Button } from '@nextui-org/react';
 import QrCodeReader from './QrCodeReader';
 import QrResults from './QrResults';
 import NodejsLoader from './NodejsLoader';
+import Loader from './Loader';
 import { getNfData, saveNf } from '../nfs';
 import { saveProducts } from '../products';
 import { Nf, Product } from '../types';
@@ -17,6 +18,7 @@ enum ContentPage {
 
 const App = () => {
   const [contentPage, setContentPage] = useState<ContentPage>(ContentPage.Idle);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [nf, setNf] = useState<Nf | null>();
 
   const onParseButtonClick = useCallback(async () => {
@@ -29,25 +31,29 @@ const App = () => {
   }, []);
 
   const onQrCodeReaderClose = useCallback(async (data?: string) => {
+    setIsLoading(true);
     if (data) {
       const key = data.match(/\?p=([^&]*)/)![1];
       const nfData = await getNfData(key);
       setNf(nfData);
       setContentPage(ContentPage.QrResults);
+      setIsLoading(false);
       return;
     }
 
     setContentPage(ContentPage.Idle);
+    setIsLoading(false);
   }, []);
 
   const onQrResultsSaveClick = useCallback(
     async (products: Product[]) => {
+      setIsLoading(true);
       if (nf) {
-        await saveNf(nf);
-        await saveProducts(products, nf);
+        await Promise.all([saveNf(nf), saveProducts(products, nf)]);
       }
       setNf(null);
       setContentPage(ContentPage.Idle);
+      setIsLoading(false);
     },
     [nf]
   );
@@ -111,9 +117,10 @@ const App = () => {
   );
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto h-full p-4">
       <NodejsLoader />
       {renderContentPage(contentPage)}
+      {isLoading && <Loader />}
     </div>
   );
 };
