@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { NextUIProvider, Container, Button } from '@nextui-org/react';
+import { Button } from '@nextui-org/react';
 import QrCodeReader from './QrCodeReader';
 import QrResults from './QrResults';
 import NodejsLoader from './NodejsLoader';
@@ -62,14 +62,28 @@ const App = () => {
         case ContentPage.Loader:
           break;
 
-        case ContentPage.Idle:
+        case ContentPage.Idle: {
+          const buttonStyle = 'grow w-full md:w-1/5';
           return (
-            <div>
-              <Button onPress={onParseButtonClick}>Parse NF</Button>
-              <br />
-              <Button onPress={onSyncButtonClick}>DB Sync</Button>
+            <div className="flex flex-col md:flex-row gap-4">
+              <Button
+                className={buttonStyle}
+                color="primary"
+                onPress={onParseButtonClick}
+              >
+                Parse NF
+              </Button>
+              {/* <Spacer x={4} /> */}
+              <Button
+                className={buttonStyle}
+                color="primary"
+                onPress={onSyncButtonClick}
+              >
+                DB Sync
+              </Button>
             </div>
           );
+        }
 
         case ContentPage.QrReader:
           return <QrCodeReader onClose={onQrCodeReaderClose} />;
@@ -97,12 +111,10 @@ const App = () => {
   );
 
   return (
-    <NextUIProvider>
-      <Container sm>
-        <NodejsLoader />
-        {renderContentPage(contentPage)}
-      </Container>
-    </NextUIProvider>
+    <div className="container mx-auto p-4">
+      <NodejsLoader />
+      {renderContentPage(contentPage)}
+    </div>
   );
 };
 

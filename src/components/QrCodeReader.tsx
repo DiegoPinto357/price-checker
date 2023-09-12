@@ -54,6 +54,7 @@ const QrCodeReader = ({ onClose }: QrCodeReaderProps) => {
     <div style={{ position: 'relative' }}>
       <Button
         style={{ position: 'absolute', zIndex: 100 }}
+        color="danger"
         onPress={stopQrReader}
       >
         Close

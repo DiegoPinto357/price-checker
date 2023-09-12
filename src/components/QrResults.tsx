@@ -1,9 +1,6 @@
-import { Grid, Button } from '@nextui-org/react';
+import { Button } from '@nextui-org/react';
 import ItemsList from './ItemsList';
 import { Product } from '../types';
-
-const fullWidthCss = { width: '100%' };
-
 export interface QrResultsProps {
   products: Product[];
   onSaveClick: (products: Product[]) => void;
@@ -15,21 +12,24 @@ const QrResults = ({
   onSaveClick,
   onCancelClick,
 }: QrResultsProps) => {
+  const buttonStyle = 'grow w-full md:w-1/5';
+
   return (
     <div>
       <ItemsList products={products} />
-      <Grid.Container gap={1} justify="center">
-        <Grid xs>
-          <Button css={fullWidthCss} onPress={() => onSaveClick(products)}>
-            Salvar
-          </Button>
-        </Grid>
-        <Grid xs>
-          <Button css={fullWidthCss} onPress={onCancelClick}>
-            Cancelar
-          </Button>
-        </Grid>
-      </Grid.Container>
+      <div className="flex flex-col md:flex-row py-4 gap-4">
+        <Button
+          className={buttonStyle}
+          color="primary"
+          onPress={() => onSaveClick(products)}
+        >
+          Salvar
+        </Button>
+
+        <Button className={buttonStyle} color="danger" onPress={onCancelClick}>
+          Cancelar
+        </Button>
+      </div>
     </div>
   );
 };
