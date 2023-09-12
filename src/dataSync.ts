@@ -1,5 +1,6 @@
 import createStorageIndex from './storageIndex';
 import {
+  getProductsFromLocal,
   getProductsFromRemote,
   getProductsRemoteIndex,
   saveProductsOnLocal,
@@ -7,13 +8,13 @@ import {
   mergeProducts,
 } from './products';
 import {
+  getNfsFromLocal,
   getNfsFromRemote,
   getNfsRemoteIndex,
   saveNfsOnLocal,
   saveNfsOnRemote,
 } from './nfs';
-import { storage } from './proxies';
-import { ProductHistory, Nf } from './types';
+import { ProductHistory } from './types';
 
 interface IndexData {
   timestamp: number;
@@ -59,24 +60,19 @@ const pullProductsFromRemote = async (entriesList: IndexEntry[]) => {
 };
 
 const pushProductsToRemote = async (entriesList: IndexEntry[]) => {
-  const files = await Promise.all(
-    entriesList.map(([id]) =>
-      storage.readFile<ProductHistory>(`/products/${id}.json`)
-    )
-  );
-
+  const files = await getProductsFromLocal(entriesList.map(([id]) => id));
   const indexMetadata = entriesList.map(entry => entry[1]);
   await saveProductsOnRemote(files, indexMetadata);
 };
 
 const resolveProductsConflicts = async (conflicts: string[]) => {
   const productsToUpdate: ProductHistory[] = [];
-  const remoteRecords = await getProductsFromRemote(conflicts);
+  const [remoteRecords, localFiles] = await Promise.all([
+    getProductsFromRemote(conflicts),
+    getProductsFromLocal(conflicts),
+  ]);
 
-  for (const [index, id] of conflicts.entries()) {
-    const localFile = await storage.readFile<ProductHistory>(
-      `/products/${id}.json`
-    );
+  localFiles.forEach((localFile, index) => {
     const remoteRecord = remoteRecords[index];
 
     if (localFile && remoteRecord) {
@@ -84,7 +80,7 @@ const resolveProductsConflicts = async (conflicts: string[]) => {
       const merged = mergeProducts(localFile, remoteRecord);
       productsToUpdate.push(merged);
     }
-  }
+  });
 
   if (productsToUpdate.length) {
     await Promise.all([
@@ -104,10 +100,7 @@ const pullNfsFromRemote = async (entriesList: IndexEntry[]) => {
 };
 
 const pushNfsToRemote = async (entriesList: IndexEntry[]) => {
-  const files = await Promise.all(
-    entriesList.map(([id]) => storage.readFile<Nf>(`/nfs/${id}.json`))
-  );
-
+  const files = await getNfsFromLocal(entriesList.map(([id]) => id));
   const indexMetadata = entriesList.map(entry => entry[1]);
   await saveNfsOnRemote(files, indexMetadata);
 };

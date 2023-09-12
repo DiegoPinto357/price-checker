@@ -77,6 +77,9 @@ export const saveNfsOnRemote = async (
   );
 };
 
+export const getNfsFromLocal = (idList: string[]) =>
+  Promise.all(idList.map(id => storage.readFile<Nf>(`/nfs/${id}.json`)));
+
 export const getNfsFromRemote = async (idList: string[]) => {
   const records = (await database.find<WithId<WithIndex<Nf>>>(
     'items',

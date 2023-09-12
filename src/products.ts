@@ -186,6 +186,11 @@ export const saveProductsOnRemote = async (
   }
 };
 
+export const getProductsFromLocal = (idList: string[]) =>
+  Promise.all(
+    idList.map(id => storage.readFile<ProductHistory>(`/products/${id}.json`))
+  );
+
 export const getProductsFromRemote = async (idList: string[]) => {
   const records = (await database.find<WithId<WithIndex<ProductHistory>>>(
     'items',
