@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { NodeJS } from 'capacitor-nodejs';
+import { FindOne, Insert, InsertOne, UpdateOne } from './types';
 
 const find = async <T>(
   databaseName: string,
@@ -19,4 +21,8 @@ const find = async <T>(
 
 export default {
   find,
+  findOne: (() => {}) as unknown as FindOne,
+  insert: (() => {}) as unknown as Insert,
+  insertOne: (() => {}) as unknown as InsertOne,
+  updateOne: (() => {}) as unknown as UpdateOne,
 };

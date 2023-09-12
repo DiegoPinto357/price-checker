@@ -1,12 +1,7 @@
 import { Capacitor } from '@capacitor/core';
+import storageHttp from './storageHttp';
+import storageIpc from './storageIpc';
 
 const platform = Capacitor.getPlatform();
 
-export interface StorageProxy {
-  writeFile: <T>(filename: string, data: T) => Promise<void>;
-  readFile: <T>(filename: string) => Promise<T>;
-}
-
-export default platform === 'web'
-  ? ((await import('./storageHttp')).default as unknown as StorageProxy)
-  : ((await import('./storageIpc')).default as unknown as StorageProxy);
+export default platform === 'web' ? storageHttp : storageIpc;

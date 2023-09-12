@@ -38,7 +38,7 @@ const insertDocument = <T>(
     _id,
     data: { _id, ..._.cloneDeep(data) },
   });
-  return { insertId: _id };
+  return { insertedId: _id };
 };
 
 const setDocument = <T>(id: string, data: T) => {
@@ -168,7 +168,7 @@ const insertOne = vi.fn(
     databaseName: string,
     collectionName: string,
     document: T
-  ): Promise<{ insertId: string } | undefined> => {
+  ): Promise<{ insertedId: string } | undefined> => {
     return Promise.resolve(
       insertDocument(databaseName, collectionName, document)
     );
@@ -194,8 +194,8 @@ const updateOne = vi.fn(
         return { matchedCount: 0 };
       }
 
-      const { insertId } = insertDocument(databaseName, collectionName, {});
-      record = { _id: insertId } as WithId<DatabaseEntry>;
+      const { insertedId } = insertDocument(databaseName, collectionName, {});
+      record = { _id: insertedId } as WithId<DatabaseEntry>;
     }
 
     const operations = Object.entries(update);

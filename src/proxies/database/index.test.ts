@@ -1,7 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import axios from 'axios';
-import { DatabaseProxy } from '.';
 import { Mock } from 'vitest';
+import { Find, FindOne, Insert, InsertOne, UpdateOne } from './types';
 
 vi.mock('@capacitor/core');
 vi.mock('axios');
@@ -10,6 +10,14 @@ const databaseName = 'products';
 const collectionName = 'items';
 
 const serverHost = 'http://127.0.0.1:3001';
+
+interface DatabaseProxy {
+  find: Find;
+  findOne: FindOne;
+  insert: Insert;
+  insertOne: InsertOne;
+  updateOne: UpdateOne;
+}
 
 let databaseProxy: DatabaseProxy;
 
@@ -86,7 +94,7 @@ describe('database proxy', () => {
       (axios.post as Mock).mockClear();
 
       const filter = { code: '52472544243', banana: false };
-      const update = { banana: true };
+      const update = { $set: { banana: true } };
       await databaseProxy.updateOne(
         databaseName,
         collectionName,

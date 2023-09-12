@@ -14,7 +14,7 @@ import {
   saveNfsOnLocal,
   saveNfsOnRemote,
 } from './nfs';
-import { ProductHistory } from './types';
+import { ProductHistory, Nf } from './types';
 
 interface IndexData {
   timestamp: number;
@@ -61,8 +61,10 @@ const pullProductsFromRemote = async (entriesList: IndexEntry[]) => {
 
 const pushProductsToRemote = async (entriesList: IndexEntry[]) => {
   const files = await getProductsFromLocal(entriesList.map(([id]) => id));
+  const validFiles = files.filter((file): file is ProductHistory => !!file)!;
+
   const indexMetadata = entriesList.map(entry => entry[1]);
-  await saveProductsOnRemote(files, { indexMetadata });
+  await saveProductsOnRemote(validFiles, { indexMetadata });
 };
 
 const resolveProductsConflicts = async (conflicts: string[]) => {
@@ -101,8 +103,10 @@ const pullNfsFromRemote = async (entriesList: IndexEntry[]) => {
 
 const pushNfsToRemote = async (entriesList: IndexEntry[]) => {
   const files = await getNfsFromLocal(entriesList.map(([id]) => id));
+  const validFiles = files.filter((file): file is Nf => !!file)!;
+
   const indexMetadata = entriesList.map(entry => entry[1]);
-  await saveNfsOnRemote(files, indexMetadata);
+  await saveNfsOnRemote(validFiles, indexMetadata);
 };
 
 const syncProducts = async () => {

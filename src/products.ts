@@ -82,7 +82,7 @@ export const saveProductsOnLocal = async (
     records.map(async (record, index) => {
       const filename = `/products/${record.code}.json`;
 
-      let currentFile: ProductHistory | null = null;
+      let currentFile: ProductHistory | undefined;
       let dataToSave: ProductHistory | null = record;
 
       if (!options?.overwrite) {

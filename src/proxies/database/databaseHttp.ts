@@ -62,7 +62,7 @@ const insertOne = async <T>(
   databaseName: string,
   collectionName: string,
   document: T
-): Promise<{ insertId: string } | undefined> => {
+): Promise<{ insertedId: string } | undefined> => {
   try {
     const { data } = await axios.post(`${serverHost}/database/insertOne`, {
       databaseName,
@@ -81,7 +81,10 @@ const updateOne = async <T>(
   filter: Partial<T>,
   update: Record<string, Partial<T>>,
   options?: UpdateOneOptions
-): Promise<{ insertId: string } | undefined> => {
+): Promise<
+  | { matchedCount: number; modifiedCount: number; upsertedId?: string }
+  | undefined
+> => {
   try {
     const { data } = await axios.post(`${serverHost}/database/updateOne`, {
       databaseName,
