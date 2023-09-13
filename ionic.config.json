@@ -1,0 +1,7 @@
+{
+  "name": "price-checker",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "custom"
+}

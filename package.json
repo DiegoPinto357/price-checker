@@ -12,17 +12,20 @@
     "test:ui": "vitest --ui",
     "server": "nodemon ./src/server/index.ts",
     "build-app": "npm run build && cp -r src/nodejs dist/ && npx cap sync",
-    "android": "npx cap open android",
-    "core": "node ./src/nodejs/index.js"
+    "android:project": "npx cap open android",
+    "android": "npx cap run android --target=Pixel_6_API_31  --external",
+    "core": "node ./src/nodejs/index.js",
+    "ionic:build": "npm run build",
+    "ionic:serve": "npm run dev"
   },
   "dependencies": {
-    "@capacitor-community/barcode-scanner": "^3.0.3",
-    "@capacitor/android": "^4.8.0",
-    "@capacitor/core": "^4.8.0",
+    "@capacitor-community/barcode-scanner": "^4.0.1",
+    "@capacitor/android": "^5.0.0",
+    "@capacitor/core": "^5.0.0",
     "@fastify/cors": "^8.0.0",
     "@nextui-org/react": "^2.1.12",
     "axios": "^1.4.0",
-    "capacitor-nodejs": "https://github.com/hampoelz/capacitor-nodejs/releases/download/v1.0.0-beta.2/capacitor-nodejs.tgz",
+    "capacitor-nodejs": "https://github.com/hampoelz/capacitor-nodejs/releases/download/v1.0.0-beta.4/capacitor-nodejs.tgz",
     "fastify": "^4.15.0",
     "framer-motion": "^10.16.4",
     "lodash": "^4.17.21",
@@ -31,7 +34,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "^4.8.0",
+    "@capacitor/cli": "^5.0.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
