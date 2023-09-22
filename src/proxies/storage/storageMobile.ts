@@ -9,14 +9,18 @@ const userDataFolder = config.sandboxMode
 const getFullPath = (filename: string) => `${userDataFolder}${filename}`;
 
 const readFile = async <T>(filename: string) => {
-  const { data } = await Filesystem.readFile({
-    path: getFullPath(filename),
-    directory: Directory.Documents,
-    encoding: Encoding.UTF8,
-  });
+  try {
+    const { data } = await Filesystem.readFile({
+      path: getFullPath(filename),
+      directory: Directory.Documents,
+      encoding: Encoding.UTF8,
+    });
 
-  const fileExtension = filename.split('.')[1];
-  return (fileExtension === 'json' ? JSON.parse(data as string) : data) as T;
+    const fileExtension = filename.split('.')[1];
+    return (fileExtension === 'json' ? JSON.parse(data as string) : data) as T;
+  } catch (e) {
+    console.log(`${filename} file not found.`);
+  }
 };
 
 const writeFile = async <T>(filename: string, data: T) =>
