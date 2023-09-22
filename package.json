@@ -22,6 +22,7 @@
     "@capacitor-community/barcode-scanner": "^4.0.1",
     "@capacitor/android": "^5.0.0",
     "@capacitor/core": "^5.0.0",
+    "@capacitor/filesystem": "^5.1.4",
     "@fastify/cors": "^8.0.0",
     "@nextui-org/react": "^2.1.12",
     "axios": "^1.4.0",

@@ -2,11 +2,11 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const coreFs = require('fs');
 const path = require('path');
-const { sandboxMode } = require('../config');
+const config = require('../config.json');
 
 const fs = coreFs.promises;
 
-const userDataFolder = sandboxMode ? './userData-sandbox' : './userData';
+const userDataFolder = config.sandboxMode ? './userData-sandbox' : './userData';
 
 const writeFile = async (filename, data) => {
   const fullPath = path.join(userDataFolder, filename);

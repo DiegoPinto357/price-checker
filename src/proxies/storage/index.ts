@@ -1,7 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import storageHttp from './storageHttp';
-import storageIpc from './storageIpc';
+import storageMobile from './storageMobile';
 
 const platform = Capacitor.getPlatform();
 
-export default platform === 'web' ? storageHttp : storageIpc;
+export default platform === 'web' ? storageHttp : storageMobile;
