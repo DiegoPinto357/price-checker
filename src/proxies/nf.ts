@@ -1,6 +1,6 @@
 import { Capacitor } from '@capacitor/core';
-import { NodeJS } from 'capacitor-nodejs';
 import axios from 'axios';
+import ipc from '../ipc';
 import { Nf } from '../types';
 
 const platform = Capacitor.getPlatform();
@@ -13,17 +13,7 @@ const getNfDataHttp = async (key: string): Promise<Nf> => {
 };
 
 const getNfDataIpc = (key: string): Promise<Nf> =>
-  new Promise(resolve => {
-    NodeJS.addListener('reply', event => {
-      const data = event.args[0];
-      resolve(data);
-    });
-
-    NodeJS.send({
-      eventName: '/nf-data',
-      args: [key],
-    });
-  });
+  ipc.send<Nf>(`get:nf-data`, key);
 
 const getNfData = platform === 'web' ? getNfDataHttp : getNfDataIpc;
 
