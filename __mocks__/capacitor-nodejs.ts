@@ -7,7 +7,6 @@ const events = new Map<string, Callbak>();
 export const NodeJS = {
   addListener: vi.fn((channelName: string, callback: Callbak) => {
     events.set(channelName, callback);
-    console.log({ events });
     return channelName;
   }),
 
@@ -19,7 +18,6 @@ export const NodeJS = {
 
   triggerReply: (channelName: string, data: unknown) => {
     const callback = events.get(channelName);
-    console.log({ callback });
     if (callback) {
       callback({ args: [data] });
     }

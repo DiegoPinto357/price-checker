@@ -12,7 +12,6 @@ const send = <T>(channelName: string, params?: unknown): Promise<T> =>
       buildReplyChannelName(channelName, id),
       event => {
         NodeJS.removeListener(replyListener);
-        console.log(`${channelName} reply received`);
         const data: T = event.args[0];
         resolve(data);
       }
