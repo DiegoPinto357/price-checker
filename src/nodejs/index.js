@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const ipc = require('./ipc');
 const nfParser = require('./nfParser');
+require('./database.ipc');
 
 ipc.on('get:nf-data', async (key, reply) => {
   console.log('[node] get:nf-data event: ' + key);
