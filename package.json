@@ -26,7 +26,7 @@
     "@fastify/cors": "^8.0.0",
     "@nextui-org/react": "^2.1.12",
     "axios": "^1.4.0",
-    "capacitor-nodejs": "https://github.com/hampoelz/capacitor-nodejs/releases/download/v1.0.0-beta.4/capacitor-nodejs.tgz",
+    "capacitor-nodejs": "https://github.com/hampoelz/capacitor-nodejs/releases/download/v1.0.0-beta.6/capacitor-nodejs.tgz",
     "fastify": "^4.15.0",
     "framer-motion": "^10.16.4",
     "lodash": "^4.17.21",
