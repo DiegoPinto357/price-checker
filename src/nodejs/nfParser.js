@@ -6,7 +6,7 @@ const cheerio = require('cheerio');
 const baseUrl =
   'https://www.sefaz.rs.gov.br/ASP/AAE_ROOT/NFE/SAT-WEB-NFE-NFC_QRCODE_1.asp?p=';
 
-const formatDecimal = value => value.replace(',', '.');
+const formatDecimal = value => value.replace('.', '').replace(',', '.');
 
 const getPage = async key => {
   const url = `${baseUrl}${key}`;
