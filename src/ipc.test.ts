@@ -11,6 +11,7 @@ vi.mock('uuid', () => ({
 }));
 
 describe('ipc', () => {
+  // TODO add test to assert listener management
   it('sends an event and get a reply', async () => {
     const channelName = 'get:potatos';
     const replyChannelName =
