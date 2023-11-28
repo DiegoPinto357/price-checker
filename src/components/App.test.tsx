@@ -2,7 +2,7 @@ import { Mock } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axios from 'axios';
-import { QrCodeReaderProps } from './QrCodeReader';
+import { QrCodeReaderProps } from './NFScan/QrCodeReader';
 import { storage } from '../proxies';
 import App from './App';
 import nfData from '../../mockData/nf/nfData.json';
@@ -11,7 +11,7 @@ vi.mock('axios');
 vi.mock('../proxies/storage');
 vi.mock('../proxies/database');
 
-vi.mock('./QrCodeReader', () => ({
+vi.mock('./NFScan/QrCodeReader', () => ({
   default: ({ onClose }: QrCodeReaderProps) => {
     onClose(
       'https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?p=4…62|2|1|1|F45F565F22E7784B638952FF47C3870F93E7212C'

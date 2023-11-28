@@ -1,6 +1,6 @@
 import { Button } from '@nextui-org/react';
 import ItemsList from './ItemsList';
-import { Product } from '../types';
+import { Product } from '../../types';
 export interface QrResultsProps {
   products: Product[];
   onSaveClick: (products: Product[]) => void;
