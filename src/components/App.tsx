@@ -26,8 +26,9 @@ const App = () => {
   }, []);
 
   const onSyncButtonClick = useCallback(async () => {
-    console.log('SYNC!');
+    setIsLoading(true);
     await dataSync.startSync();
+    setIsLoading(false);
   }, []);
 
   const onQrCodeReaderClose = useCallback(async (data?: string) => {
