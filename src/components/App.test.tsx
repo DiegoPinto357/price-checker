@@ -26,6 +26,9 @@ describe('App', () => {
 
     render(<App />);
 
+    const qrScanTab = screen.getByRole('tab', { name: 'Escanear NF' });
+    await userEvent.click(qrScanTab);
+
     const qrScanButton = screen.getByRole('button', { name: 'Parse NF' });
     await userEvent.click(qrScanButton);
 

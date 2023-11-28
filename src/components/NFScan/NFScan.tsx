@@ -19,6 +19,7 @@ const NFScan = () => {
     setContentPage('qr-reader');
   }, []);
 
+  // TODO chnage event hanlder naming to "handle"
   const onSyncButtonClick = useCallback(async () => {
     setIsLoading(true);
     await dataSync.startSync();
