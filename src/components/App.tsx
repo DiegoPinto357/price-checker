@@ -1,35 +1,30 @@
-import { useState } from 'react';
+// import { useState } from 'react';
 import { Tabs, Tab } from '@nextui-org/react';
 import NodejsLoader from './NodejsLoader';
-// TODO rename to NFScanner
-import NFScan from './NFScan';
+import NFScanner from './NFScanner';
 
 const App = () => {
-  const [selectedTab, setSelectedTab] = useState<string | number>(
-    'shopping-list'
-  );
-
   return (
     <div className="container mx-auto h-full p-4">
       <NodejsLoader />
 
       <Tabs
-        className="fixed bottom-0 left-0 p-4 "
-        variant="bordered"
+        className="fixed bottom-0 left-0"
+        // variant="underlined"
         color="primary"
         fullWidth
         size="lg"
-        selectedKey={selectedTab}
-        onSelectionChange={setSelectedTab}
+        radius="none"
+        // disableAnimation
       >
         <Tab key="shopping-list" title="Lista de Compras">
-          lista
+          <div data-testid="shopping-list">lista</div>
         </Tab>
         <Tab key="nf-scanner" title="Escanear NF">
-          <NFScan />
+          <NFScanner />
         </Tab>
         <Tab key="settings" title="Configurações">
-          config
+          <div data-testid="settings">configs</div>
         </Tab>
       </Tabs>
     </div>

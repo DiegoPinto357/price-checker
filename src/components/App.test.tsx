@@ -1,60 +1,29 @@
-import { Mock } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import axios from 'axios';
-import { QrCodeReaderProps } from './NFScan/QrCodeReader';
-import { storage } from '../proxies';
 import App from './App';
-import nfData from '../../mockData/nf/nfData.json';
-
-vi.mock('axios');
-vi.mock('../proxies/storage');
-vi.mock('../proxies/database');
-
-vi.mock('./NFScan/QrCodeReader', () => ({
-  default: ({ onClose }: QrCodeReaderProps) => {
-    onClose(
-      'https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?p=4…62|2|1|1|F45F565F22E7784B638952FF47C3870F93E7212C'
-    );
-    return null;
-  },
-}));
 
 describe('App', () => {
-  it('scans qr code and saves nf and products data', async () => {
-    (axios.get as Mock).mockResolvedValue({ data: nfData });
-
+  it('renders each module for each selected tab', async () => {
     render(<App />);
 
-    const qrScanTab = screen.getByRole('tab', { name: 'Escanear NF' });
-    await userEvent.click(qrScanTab);
+    let content = screen.getByTestId('shopping-list');
+    expect(content).toBeInTheDocument();
 
-    const qrScanButton = screen.getByRole('button', { name: 'Parse NF' });
-    await userEvent.click(qrScanButton);
+    const nfScannerTab = screen.getByRole('tab', { name: 'Escanear NF' });
+    await userEvent.click(nfScannerTab);
+    content = screen.getByTestId('qr-scanner');
+    expect(content).toBeInTheDocument();
 
-    const saveResultsButton = screen.getByRole('button', { name: 'Salvar' });
-    await userEvent.click(saveResultsButton);
+    const settingsTab = screen.getByRole('tab', { name: 'Configurações' });
+    await userEvent.click(settingsTab);
+    content = screen.getByTestId('settings');
+    expect(content).toBeInTheDocument();
 
-    // FIXME remove storage assertions, focus on screens and UI
-    expect(storage.writeFile).toBeCalledTimes(nfData.items.length + 3);
-
-    expect(storage.writeFile).toBeCalledWith(`/nfs/${nfData.key}.json`, nfData);
-
-    nfData.items.forEach(item => {
-      expect(storage.writeFile).toBeCalledWith(`/products/${item.code}.json`, {
-        code: item.code,
-        description: item.description,
-        history: [
-          {
-            nfKey: nfData.key,
-            date: nfData.date,
-            amount: item.amount,
-            unit: item.unit,
-            value: item.value,
-            totalValue: item.totalValue,
-          },
-        ],
-      });
+    const shoppingListTab = screen.getByRole('tab', {
+      name: 'Lista de Compras',
     });
+    await userEvent.click(shoppingListTab);
+    content = screen.getByTestId('shopping-list');
+    expect(content).toBeInTheDocument();
   });
 });

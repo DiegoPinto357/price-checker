@@ -10,23 +10,22 @@ import dataSync from '../../dataSync';
 
 type ContentPage = 'idle' | 'qr-reader' | 'qr-results';
 
-const NFScan = () => {
+const NFScanner = () => {
   const [contentPage, setContentPage] = useState<ContentPage>('idle');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [nf, setNf] = useState<Nf | null>();
 
-  const onParseButtonClick = useCallback(async () => {
+  const handleParseButtonClick = useCallback(async () => {
     setContentPage('qr-reader');
   }, []);
 
-  // TODO chnage event hanlder naming to "handle"
-  const onSyncButtonClick = useCallback(async () => {
+  const handleSyncButtonClick = useCallback(async () => {
     setIsLoading(true);
     await dataSync.startSync();
     setIsLoading(false);
   }, []);
 
-  const onQrCodeReaderClose = useCallback(async (data?: string) => {
+  const handleQrCodeReaderClose = useCallback(async (data?: string) => {
     setIsLoading(true);
     if (data) {
       const key = data.match(/\?p=([^&]*)/)![1];
@@ -41,7 +40,7 @@ const NFScan = () => {
     setIsLoading(false);
   }, []);
 
-  const onQrResultsSaveClick = useCallback(
+  const handleQrResultsSaveClick = useCallback(
     async (products: Product[]) => {
       setIsLoading(true);
       if (nf) {
@@ -54,7 +53,7 @@ const NFScan = () => {
     [nf]
   );
 
-  const onQrResultsCancelClick = useCallback(() => {
+  const handleQrResultsCancelClick = useCallback(() => {
     setContentPage('idle');
   }, []);
 
@@ -68,7 +67,7 @@ const NFScan = () => {
               <Button
                 className={buttonStyle}
                 color="primary"
-                onPress={onParseButtonClick}
+                onPress={handleParseButtonClick}
               >
                 Parse NF
               </Button>
@@ -76,7 +75,7 @@ const NFScan = () => {
               <Button
                 className={buttonStyle}
                 color="primary"
-                onPress={onSyncButtonClick}
+                onPress={handleSyncButtonClick}
               >
                 DB Sync
               </Button>
@@ -85,36 +84,34 @@ const NFScan = () => {
         }
 
         case 'qr-reader':
-          return <QrCodeReader onClose={onQrCodeReaderClose} />;
+          return <QrCodeReader onClose={handleQrCodeReaderClose} />;
 
         case 'qr-results':
           return (
             <QrResults
               products={nf ? nf.items : []}
-              onSaveClick={onQrResultsSaveClick}
-              onCancelClick={onQrResultsCancelClick}
+              onSaveClick={handleQrResultsSaveClick}
+              onCancelClick={handleQrResultsCancelClick}
             />
           );
       }
-
-      return null;
     },
     [
       nf,
-      onParseButtonClick,
-      onSyncButtonClick,
-      onQrCodeReaderClose,
-      onQrResultsSaveClick,
-      onQrResultsCancelClick,
+      handleParseButtonClick,
+      handleSyncButtonClick,
+      handleQrCodeReaderClose,
+      handleQrResultsSaveClick,
+      handleQrResultsCancelClick,
     ]
   );
 
   return (
-    <>
+    <div data-testid="qr-scanner">
       {renderContentPage(contentPage)}
       {isLoading && <Loader />}
-    </>
+    </div>
   );
 };
 
-export default NFScan;
+export default NFScanner;
