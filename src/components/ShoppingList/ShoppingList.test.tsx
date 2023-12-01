@@ -20,4 +20,5 @@ describe('ShoppingList', () => {
   // insert items pressing enter
   // sort items alphabetically
   // sort checked items
+  // Prevent duplicated
 });

@@ -5,27 +5,29 @@ import ShoppingList from './ShoppingList';
 import NFScanner from './NFScanner';
 
 const App = () => {
-  const tabClass = 'grow p-4';
-
   return (
-    <div className="container flex flex-col-reverse mx-auto h-full">
+    <div className="container flex flex-col-reverse h-full">
       <NodejsLoader />
 
       <Tabs
-        // variant="underlined"
+        classNames={{
+          tab: 'overflow-hidden',
+          tabContent: 'overflow-hidden',
+          panel: 'overflow-y-scroll grow p-4',
+        }}
         color="primary"
         fullWidth
         size="lg"
         radius="none"
-        // disableAnimation
+        disableAnimation
       >
-        <Tab key="shopping-list" title="Lista de Compras" className={tabClass}>
+        <Tab key="shopping-list" title="Lista de Compras">
           <ShoppingList />
         </Tab>
-        <Tab key="nf-scanner" title="Escanear NF" className={tabClass}>
+        <Tab key="nf-scanner" title="Escanear NF">
           <NFScanner />
         </Tab>
-        <Tab key="settings" title="Configurações" className={tabClass}>
+        <Tab key="settings" title="Configurações">
           <div data-testid="settings">configs</div>
         </Tab>
       </Tabs>

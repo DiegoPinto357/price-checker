@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import {
+  CheckboxGroup,
   Checkbox,
   Autocomplete,
   AutocompleteItem,
@@ -27,13 +28,18 @@ const ShoppingList = () => {
       data-testid="shopping-list"
       className="flex flex-col justify-between h-full"
     >
-      <div className="grow flex flex-col overflow-y-scroll">
+      <h1 className="grow font-bold mb-4">Shopping List</h1>
+      <CheckboxGroup
+        className="h-full overflow-auto mb-4"
+        lineThrough
+        disableAnimation
+      >
         {items.map(item => (
-          <Checkbox key={item} className="-my-1">
+          <Checkbox key={item} value={item}>
             {item}
           </Checkbox>
         ))}
-      </div>
+      </CheckboxGroup>
 
       <div className="flex">
         <Autocomplete
