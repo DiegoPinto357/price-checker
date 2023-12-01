@@ -8,19 +8,26 @@ import {
 } from '@nextui-org/react';
 
 const initialItems: string[] = [
-  'Banana',
-  'Batata',
-  'Biritis',
-  'Queijo illuminati',
-  'Suculenta rara',
+  // 'Batata',
+  // 'Biritis',
+  // 'Queijo illuminati',
+  // 'Suculenta rara',
 ];
 
 const ShoppingList = () => {
   const [items, setItems] = useState<string[]>(initialItems);
-  const [inputValue, setInputValue] = useState<string | number>('');
+  const [inputValue, setInputValue] = useState<string>('');
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
-  const addItem = useCallback((item: string | number) => {
+  const handleSelectionChange = useCallback((key: string | number) => {
+    setInputValue(key as string);
+    setSelectedKey(key as string);
+  }, []);
+
+  const handleAddButtonPress = useCallback((item: string | null) => {
     setItems(items => [...items, item as string]);
+    setSelectedKey(null);
+    setInputValue('');
   }, []);
 
   return (
@@ -48,17 +55,19 @@ const ShoppingList = () => {
           allowsCustomValue
           radius="full"
           variant="bordered"
-          onValueChange={setInputValue}
-          onSelectionChange={setInputValue}
+          inputValue={inputValue}
+          selectedKey={selectedKey}
+          onInputChange={setInputValue}
+          onSelectionChange={handleSelectionChange}
         >
-          {initialItems.map(item => (
+          {[...initialItems, 'select this'].map(item => (
             <AutocompleteItem key={item}>{item}</AutocompleteItem>
           ))}
         </Autocomplete>
         <Button
           className="h-14"
           color="secondary"
-          onPress={() => addItem(inputValue)}
+          onPress={() => handleAddButtonPress(inputValue)}
         >
           Adicionar
         </Button>
