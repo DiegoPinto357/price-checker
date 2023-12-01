@@ -1,15 +1,17 @@
 // import { useState } from 'react';
 import { Tabs, Tab } from '@nextui-org/react';
 import NodejsLoader from './NodejsLoader';
+import ShoppingList from './ShoppingList';
 import NFScanner from './NFScanner';
 
 const App = () => {
+  const tabClass = 'grow p-4';
+
   return (
-    <div className="container mx-auto h-full p-4">
+    <div className="container flex flex-col-reverse mx-auto h-full">
       <NodejsLoader />
 
       <Tabs
-        className="fixed bottom-0 left-0"
         // variant="underlined"
         color="primary"
         fullWidth
@@ -17,13 +19,13 @@ const App = () => {
         radius="none"
         // disableAnimation
       >
-        <Tab key="shopping-list" title="Lista de Compras">
-          <div data-testid="shopping-list">lista</div>
+        <Tab key="shopping-list" title="Lista de Compras" className={tabClass}>
+          <ShoppingList />
         </Tab>
-        <Tab key="nf-scanner" title="Escanear NF">
+        <Tab key="nf-scanner" title="Escanear NF" className={tabClass}>
           <NFScanner />
         </Tab>
-        <Tab key="settings" title="Configurações">
+        <Tab key="settings" title="Configurações" className={tabClass}>
           <div data-testid="settings">configs</div>
         </Tab>
       </Tabs>
