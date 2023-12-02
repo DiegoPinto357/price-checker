@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   CheckboxGroup,
   Checkbox,
@@ -6,6 +6,7 @@ import {
   AutocompleteItem,
   Button,
 } from '@nextui-org/react';
+import { FaPlus } from 'react-icons/fa';
 
 import type { KeyboardEvent } from 'react';
 
@@ -32,11 +33,6 @@ const ShoppingList = () => {
   const [inputValue, setInputValue] = useState<string>('');
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
-  // FIXME workaround to force an empty state beofre each test
-  useEffect(() => {
-    setItems([]);
-  }, []);
-
   const addItem = useCallback((itemName: string | null) => {
     setItems(items => {
       const existingItem = items.find(({ name }) => name === itemName);
@@ -44,7 +40,7 @@ const ShoppingList = () => {
         items.push({ name: itemName, checked: false });
       return sortItems(items);
     });
-    setSelectedKey(null);
+    // setSelectedKey(null);
     setInputValue('');
   }, []);
 
@@ -105,26 +101,30 @@ const ShoppingList = () => {
       <div className="flex">
         <Autocomplete
           className="mr-2"
-          label={'Item'}
+          label={'Buscar produto'}
+          labelPlacement="outside"
           allowsCustomValue
-          radius="full"
+          // radius="full"
           variant="bordered"
+          defaultItems={items}
           inputValue={inputValue}
-          selectedKey={selectedKey}
+          // selectedKey={selectedKey}
           onInputChange={setInputValue}
-          onSelectionChange={handleSelectionChange}
+          // onSelectionChange={handleSelectionChange}
           onKeyDown={handleKeyPress}
         >
-          {[...initialItems].map(item => (
+          {item => (
             <AutocompleteItem key={item.name}>{item.name}</AutocompleteItem>
-          ))}
+          )}
         </Autocomplete>
         <Button
-          className="h-14"
+          className="self-end"
           color="secondary"
+          aria-label="add"
+          isIconOnly
           onPress={() => addItem(inputValue)}
         >
-          Adicionar
+          <FaPlus />
         </Button>
       </div>
     </div>

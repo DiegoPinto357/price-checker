@@ -6,24 +6,31 @@ describe('App', () => {
   it('renders each module for each selected tab', async () => {
     render(<App />);
 
-    let content = screen.getByTestId('shopping-list');
+    let content = screen.getByTestId('meals');
     expect(content).toBeInTheDocument();
 
-    const nfScannerTab = screen.getByRole('tab', { name: 'Escanear NF' });
+    const shoppingListTab = screen.getByRole('tab', {
+      name: 'shopping list',
+    });
+    await userEvent.click(shoppingListTab);
+    content = screen.getByTestId('shopping-list');
+    expect(content).toBeInTheDocument();
+
+    const nfScannerTab = screen.getByRole('tab', { name: 'nf scanner' });
     await userEvent.click(nfScannerTab);
     content = screen.getByTestId('qr-scanner');
     expect(content).toBeInTheDocument();
 
-    const settingsTab = screen.getByRole('tab', { name: 'Configurações' });
+    const settingsTab = screen.getByRole('tab', { name: 'settings' });
     await userEvent.click(settingsTab);
     content = screen.getByTestId('settings');
     expect(content).toBeInTheDocument();
 
-    const shoppingListTab = screen.getByRole('tab', {
-      name: 'Lista de Compras',
+    const mealsTab = screen.getByRole('tab', {
+      name: 'meals',
     });
-    await userEvent.click(shoppingListTab);
-    content = screen.getByTestId('shopping-list');
+    await userEvent.click(mealsTab);
+    content = screen.getByTestId('meals');
     expect(content).toBeInTheDocument();
   });
 });

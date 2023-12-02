@@ -6,8 +6,8 @@ describe('ShoppingList', () => {
   it('inserts item by typing and pressing add button', async () => {
     render(<ShoppingList />);
 
-    const input = screen.getByRole('combobox', { name: 'Item' });
-    const addButton = screen.getByRole('button', { name: 'Adicionar' });
+    const input = screen.getByRole('combobox', { name: 'Buscar produto' });
+    const addButton = screen.getByRole('button', { name: 'add' });
     await userEvent.type(input, 'Banana');
     fireEvent.click(addButton);
 
@@ -19,7 +19,7 @@ describe('ShoppingList', () => {
   it('inserts item by typing and pressing enter', async () => {
     render(<ShoppingList />);
 
-    const input = screen.getByRole('combobox', { name: 'Item' });
+    const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     await userEvent.type(input, 'Banana{enter}');
 
     const addedItem = screen.getByTestId('list-item-Banana');
@@ -30,7 +30,7 @@ describe('ShoppingList', () => {
   it('sorts inserted items alphabeticaly', async () => {
     render(<ShoppingList />);
 
-    const input = screen.getByRole('combobox', { name: 'Item' });
+    const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     await userEvent.type(input, 'Suculenta{enter}');
     await userEvent.type(input, 'Banana{enter}');
 
@@ -42,7 +42,7 @@ describe('ShoppingList', () => {
   it('moves checked item to the end of the list', async () => {
     render(<ShoppingList />);
 
-    const input = screen.getByRole('combobox', { name: 'Item' });
+    const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     await userEvent.type(input, 'Suculenta{enter}');
     await userEvent.type(input, 'Banana{enter}');
     await userEvent.type(input, 'Vinho{enter}');
@@ -62,7 +62,7 @@ describe('ShoppingList', () => {
   it('does not insert an existing item', async () => {
     render(<ShoppingList />);
 
-    const input = screen.getByRole('combobox', { name: 'Item' });
+    const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     await userEvent.type(input, 'Banana{enter}');
     await userEvent.type(input, 'Banana{enter}');
 
