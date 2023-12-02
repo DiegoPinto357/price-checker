@@ -1,6 +1,6 @@
 import { Tabs, Tab } from '@nextui-org/react';
 import { IoPizzaOutline } from 'react-icons/io5';
-import { FiShoppingCart } from 'react-icons/fi';
+import { PiShoppingCart } from 'react-icons/pi';
 import { BsQrCodeScan } from 'react-icons/bs';
 import { GoGear } from 'react-icons/go';
 import NodejsLoader from './NodejsLoader';
@@ -35,7 +35,7 @@ const App = () => {
         <Tab
           key="shopping-list"
           aria-label="shopping list"
-          title={<FiShoppingCart className={iconClass} />}
+          title={<PiShoppingCart className={iconClass} />}
         >
           <ShoppingList />
         </Tab>
