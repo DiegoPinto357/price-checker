@@ -31,7 +31,6 @@ const sortItems = (items: Item[]) => [
 const ShoppingList = () => {
   const [items, setItems] = useState<Item[]>(initialItems);
   const [inputValue, setInputValue] = useState<string>('');
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const addItem = useCallback((itemName: string | null) => {
     setItems(items => {
@@ -40,14 +39,7 @@ const ShoppingList = () => {
         items.push({ name: itemName, checked: false });
       return sortItems(items);
     });
-    // setSelectedKey(null);
     setInputValue('');
-  }, []);
-
-  const handleSelectionChange = useCallback((key: string | number) => {
-    if (typeof key === 'string') {
-      setInputValue(key);
-    }
   }, []);
 
   const handleKeyPress = useCallback(
@@ -75,7 +67,7 @@ const ShoppingList = () => {
       data-testid="shopping-list"
       className="flex flex-col justify-between h-full"
     >
-      <h1 className="grow font-bold mb-4">Shopping List</h1>
+      <h1 className="mb-4 text-2xl">Lista de Compras</h1>
       <CheckboxGroup
         className="h-full overflow-auto mb-4"
         lineThrough
@@ -104,13 +96,10 @@ const ShoppingList = () => {
           label={'Buscar produto'}
           labelPlacement="outside"
           allowsCustomValue
-          // radius="full"
           variant="bordered"
-          defaultItems={items}
+          defaultItems={[] as Item[]}
           inputValue={inputValue}
-          // selectedKey={selectedKey}
           onInputChange={setInputValue}
-          // onSelectionChange={handleSelectionChange}
           onKeyDown={handleKeyPress}
         >
           {item => (
