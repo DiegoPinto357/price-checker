@@ -71,5 +71,6 @@ describe('ShoppingList', () => {
     expect(addedItems).toHaveLength(1);
   });
 
+  // focus on input after pressing the button
   // inserts item by selcting - needs DB cache
 });
