@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useContext, useState, useCallback } from 'react';
 import {
   CheckboxGroup,
   Checkbox,
@@ -7,40 +7,41 @@ import {
   Button,
 } from '@nextui-org/react';
 import { FaPlus } from 'react-icons/fa';
+import { ShoppingListContext } from '../Context';
 
 import type { KeyboardEvent } from 'react';
+import type { ShoppingListItem } from './types';
 
-type Item = {
-  name: string;
-  checked: boolean;
-};
+// const initialItems: ShoppingListItem[] = [
+//   // 'Batata',
+//   // 'Biritis',
+//   // 'Queijo illuminati',
+//   // 'Suculenta rara',
+// ];
 
-const initialItems: Item[] = [
-  // 'Batata',
-  // 'Biritis',
-  // 'Queijo illuminati',
-  // 'Suculenta rara',
-];
-
-const sortItems = (items: Item[]) => [
+const sortItems = (items: ShoppingListItem[]) => [
   ...items
     .sort((a, b) => (a.name.toLowerCase() < b.name.toLowerCase() ? 1 : -1))
     .sort((a, b) => (a.checked && a.checked !== b.checked ? 1 : -1)),
 ];
 
 const ShoppingList = () => {
-  const [items, setItems] = useState<Item[]>(initialItems);
+  const { shoppingListItems: items, setShoppingListItems: setItems } =
+    useContext(ShoppingListContext);
   const [inputValue, setInputValue] = useState<string>('');
 
-  const addItem = useCallback((itemName: string | null) => {
-    setItems(items => {
-      const existingItem = items.find(({ name }) => name === itemName);
-      if (itemName && !existingItem)
-        items.push({ name: itemName, checked: false });
-      return sortItems(items);
-    });
-    setInputValue('');
-  }, []);
+  const addItem = useCallback(
+    (itemName: string | null) => {
+      setItems(items => {
+        const existingItem = items.find(({ name }) => name === itemName);
+        if (itemName && !existingItem)
+          items.push({ name: itemName, checked: false });
+        return sortItems(items);
+      });
+      setInputValue('');
+    },
+    [setItems]
+  );
 
   const handleKeyPress = useCallback(
     (e: KeyboardEvent) => {
@@ -59,8 +60,12 @@ const ShoppingList = () => {
         return sortItems(items);
       });
     },
-    []
+    [setItems]
   );
+
+  const selectedItems = items
+    .filter(({ checked }) => checked)
+    .map(({ name }) => name);
 
   return (
     <div
@@ -72,22 +77,20 @@ const ShoppingList = () => {
         className="h-full overflow-auto mb-4"
         lineThrough
         disableAnimation
+        value={selectedItems}
       >
-        {items.map(item => {
-          return (
-            <Checkbox
-              data-testid={`list-item-${item.name}`}
-              key={`${item.name}-${item.checked}`}
-              value={item.name}
-              checked={item.checked}
-              onChange={e =>
-                handleCheckboxChange(item.name, e.currentTarget.checked)
-              }
-            >
-              {item.name}
-            </Checkbox>
-          );
-        })}
+        {items.map(item => (
+          <Checkbox
+            data-testid={`list-item-${item.name}`}
+            key={`${item.name}-${item.checked}`}
+            value={item.name}
+            onChange={e =>
+              handleCheckboxChange(item.name, e.currentTarget.checked)
+            }
+          >
+            {item.name}
+          </Checkbox>
+        ))}
       </CheckboxGroup>
 
       <div className="flex">
@@ -97,7 +100,7 @@ const ShoppingList = () => {
           labelPlacement="outside"
           allowsCustomValue
           variant="bordered"
-          defaultItems={[] as Item[]}
+          defaultItems={[] as ShoppingListItem[]}
           inputValue={inputValue}
           onInputChange={setInputValue}
           onKeyDown={handleKeyPress}

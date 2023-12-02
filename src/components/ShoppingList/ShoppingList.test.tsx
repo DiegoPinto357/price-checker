@@ -1,10 +1,11 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderWithContext } from '../testUtils';
 import ShoppingList from '.';
 
 describe('ShoppingList', () => {
   it('inserts item by typing and pressing add button', async () => {
-    render(<ShoppingList />);
+    renderWithContext(<ShoppingList />);
 
     const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     const addButton = screen.getByRole('button', { name: 'add' });
@@ -17,7 +18,7 @@ describe('ShoppingList', () => {
   });
 
   it('inserts item by typing and pressing enter', async () => {
-    render(<ShoppingList />);
+    renderWithContext(<ShoppingList />);
 
     const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     await userEvent.type(input, 'Banana{enter}');
@@ -28,7 +29,7 @@ describe('ShoppingList', () => {
   });
 
   it('sorts inserted items alphabeticaly', async () => {
-    render(<ShoppingList />);
+    renderWithContext(<ShoppingList />);
 
     const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     await userEvent.type(input, 'Suculenta{enter}');
@@ -40,7 +41,7 @@ describe('ShoppingList', () => {
   });
 
   it('moves checked item to the end of the list', async () => {
-    render(<ShoppingList />);
+    renderWithContext(<ShoppingList />);
 
     const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     await userEvent.type(input, 'Suculenta{enter}');
@@ -60,7 +61,7 @@ describe('ShoppingList', () => {
   });
 
   it('does not insert an existing item', async () => {
-    render(<ShoppingList />);
+    renderWithContext(<ShoppingList />);
 
     const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     await userEvent.type(input, 'Banana{enter}');
