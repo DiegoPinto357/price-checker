@@ -6,7 +6,6 @@ import Loader from '../Loader';
 import { getNfData, saveNf } from '../../nfs';
 import { saveProducts } from '../../products';
 import { Nf, Product } from '../../types';
-import dataSync from '../../dataSync';
 
 type ContentPage = 'idle' | 'qr-reader' | 'qr-results';
 
@@ -17,12 +16,6 @@ const NFScanner = () => {
 
   const handleParseButtonClick = useCallback(async () => {
     setContentPage('qr-reader');
-  }, []);
-
-  const handleSyncButtonClick = useCallback(async () => {
-    setIsLoading(true);
-    await dataSync.startSync();
-    setIsLoading(false);
   }, []);
 
   const handleQrCodeReaderClose = useCallback(async (data?: string) => {
@@ -71,14 +64,6 @@ const NFScanner = () => {
               >
                 Parse NF
               </Button>
-
-              <Button
-                className={buttonStyle}
-                color="primary"
-                onPress={handleSyncButtonClick}
-              >
-                DB Sync
-              </Button>
             </div>
           );
         }
@@ -99,7 +84,6 @@ const NFScanner = () => {
     [
       nf,
       handleParseButtonClick,
-      handleSyncButtonClick,
       handleQrCodeReaderClose,
       handleQrResultsSaveClick,
       handleQrResultsCancelClick,

@@ -7,6 +7,7 @@ import ContextProvider from './Context';
 import NodejsLoader from './NodejsLoader';
 import ShoppingList from './ShoppingList';
 import NFScanner from './NFScanner';
+import Settings from './Settings';
 
 const App = () => {
   const iconClass = 'w-8 h-8';
@@ -55,7 +56,7 @@ const App = () => {
             aria-label="settings"
             title={<GoGear className={iconClass} />}
           >
-            <div data-testid="settings">configs</div>
+            <Settings />
           </Tab>
         </Tabs>
       </div>
