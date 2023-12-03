@@ -1,4 +1,5 @@
 import { useContext, useCallback } from 'react';
+import Typography from '../lib/Typography';
 import ProductList from './ProductList';
 import ProductSearch from './ProductSearch';
 import { ShoppingListContext } from '../Context';
@@ -43,7 +44,7 @@ const ShoppingList = () => {
       data-testid="shopping-list"
       className="flex flex-col justify-between h-full"
     >
-      <h1 className="mb-4 text-2xl">Lista de Compras</h1>
+      <Typography variant="h1">Lista de Compras</Typography>
       <ProductList items={items} onItemChange={handleListItemChange} />
       <ProductSearch onAddItem={addItem} />
     </div>

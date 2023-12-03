@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Button } from '@nextui-org/react';
+import Typography from '../lib/Typography';
 import QrCodeReader from './QrCodeReader';
 import QrResults from './QrResults';
 import Loader from '../Loader';
@@ -92,6 +93,7 @@ const NFScanner = () => {
 
   return (
     <div data-testid="qr-scanner">
+      <Typography variant="h1">Nota Fiscal</Typography>
       {renderContentPage(contentPage)}
       {isLoading && <Loader />}
     </div>
