@@ -28,9 +28,8 @@ const ProductSearch = ({ onAddItem }: Props) => {
   }, [onAddItem, inputValue]);
 
   return (
-    <div className="flex">
+    <div className="flex gap-2">
       <Autocomplete
-        className="mr-2"
         label={'Buscar produto'}
         labelPlacement="outside"
         allowsCustomValue
