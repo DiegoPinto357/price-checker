@@ -29,7 +29,9 @@ describe('NFScanner', () => {
 
     render(<NFScanner />);
 
-    const qrScanButton = screen.getByRole('button', { name: 'Parse NF' });
+    const qrScanButton = screen.getByRole('button', {
+      name: 'Escanear Nota Fiscal',
+    });
     await userEvent.click(qrScanButton);
 
     const saveResultsButton = screen.getByRole('button', { name: 'Salvar' });

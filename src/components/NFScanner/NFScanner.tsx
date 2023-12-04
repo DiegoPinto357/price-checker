@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Button } from '@nextui-org/react';
+import { IoCameraOutline } from 'react-icons/io5';
 import Typography from '../lib/Typography';
 import QrCodeReader from './QrCodeReader';
 import QrResults from './QrResults';
@@ -55,15 +56,15 @@ const NFScanner = () => {
     (selectedContentPage: ContentPage) => {
       switch (selectedContentPage) {
         case 'idle': {
-          const buttonStyle = 'grow w-full md:w-1/5';
           return (
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="h-full flex items-center justify-center">
               <Button
-                className={buttonStyle}
                 color="primary"
+                size="lg"
                 onPress={handleParseButtonClick}
+                endContent={<IoCameraOutline className="w-6 h-6" />}
               >
-                Parse NF
+                Escanear Nota Fiscal
               </Button>
             </div>
           );
@@ -92,7 +93,7 @@ const NFScanner = () => {
   );
 
   return (
-    <div data-testid="qr-scanner">
+    <div data-testid="qr-scanner" className="flex flex-col h-full">
       <Typography variant="h1">Nota Fiscal</Typography>
       {renderContentPage(contentPage)}
       {isLoading && <Loader />}
