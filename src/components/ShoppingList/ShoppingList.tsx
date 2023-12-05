@@ -7,9 +7,11 @@ import { ShoppingListContext } from '../Context';
 import type { ShoppingListItem } from './types';
 
 const sortItems = (items: ShoppingListItem[]) => [
-  ...items
-    .sort((a, b) => (a.name.toLowerCase() < b.name.toLowerCase() ? 1 : -1))
-    .sort((a, b) => (a.checked && a.checked !== b.checked ? 1 : -1)),
+  ...items.sort((a, b) =>
+    // a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+  ),
+  // .sort((a, b) => (a.checked && a.checked !== b.checked ? 1 : -1)),
 ];
 
 const ShoppingList = () => {
@@ -39,13 +41,21 @@ const ShoppingList = () => {
     [setItems]
   );
 
+  const handleDeleteSelectedItems = useCallback(() => {
+    setItems(items => items.filter(({ checked }) => !checked));
+  }, [setItems]);
+
   return (
     <div
       data-testid="shopping-list"
       className="flex flex-col justify-between h-full"
     >
       <Typography variant="h1">Lista de Compras</Typography>
-      <ProductList items={items} onItemChange={handleListItemChange} />
+      <ProductList
+        items={items}
+        onItemChange={handleListItemChange}
+        onDeleteSelectedItems={handleDeleteSelectedItems}
+      />
       <ProductSearch onAddItem={addItem} />
     </div>
   );
