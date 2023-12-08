@@ -8,10 +8,8 @@ import type { ShoppingListItem } from './types';
 
 const sortItems = (items: ShoppingListItem[]) => [
   ...items.sort((a, b) =>
-    // a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
     a.name.toLowerCase().localeCompare(b.name.toLowerCase())
   ),
-  // .sort((a, b) => (a.checked && a.checked !== b.checked ? 1 : -1)),
 ];
 
 const ShoppingList = () => {

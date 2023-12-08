@@ -4,15 +4,15 @@ import { renderWithContext } from '../testUtils';
 import ShoppingList from '.';
 
 const addItems = async (items: string[]) => {
-  for (const item in items) {
-    const input = screen.getByRole('combobox', { name: 'Buscar produto' });
+  const input = screen.getByRole('combobox', { name: 'Buscar produto' });
+  for (const item of items) {
     await userEvent.type(input, `${item}{enter}`);
   }
 };
 
 const selectItems = async (itemIndexes: number[]) => {
   const listItems = screen.getAllByTestId(/list-item/);
-  for (const itemIndex in itemIndexes) {
+  for (const itemIndex of itemIndexes) {
     await userEvent.click(listItems[itemIndex]);
   }
 };
@@ -45,9 +45,7 @@ describe('ShoppingList', () => {
   it('sorts inserted items alphabeticaly', async () => {
     renderWithContext(<ShoppingList />);
 
-    const input = screen.getByRole('combobox', { name: 'Buscar produto' });
-    await userEvent.type(input, 'Suculenta{enter}');
-    await userEvent.type(input, 'Banana{enter}');
+    await addItems(['Suculenta', 'Banana']);
 
     const addedItems = screen.getAllByTestId(/list-item/);
     expect(addedItems[0]).toHaveTextContent('Banana');
@@ -58,12 +56,7 @@ describe('ShoppingList', () => {
     renderWithContext(<ShoppingList />);
 
     await addItems(['Suculenta', 'Banana', 'Vinho', 'Batata']);
-
-    const unselectedItemsGroup = screen.getByTestId('unselected-items-group');
-    const unselectedItems =
-      within(unselectedItemsGroup).getAllByTestId(/list-item/);
-    await userEvent.click(unselectedItems[1]);
-    await userEvent.click(unselectedItems[2]);
+    await selectItems([1, 2]);
 
     const selectedItemsGroup = screen.getByTestId('selected-items-group');
     const selectedItems =
@@ -75,9 +68,7 @@ describe('ShoppingList', () => {
   it('does not insert an existing item', async () => {
     renderWithContext(<ShoppingList />);
 
-    const input = screen.getByRole('combobox', { name: 'Buscar produto' });
-    await userEvent.type(input, 'Banana{enter}');
-    await userEvent.type(input, 'Banana{enter}');
+    await addItems(['Banana', 'Banana']);
 
     const addedItems = screen.getAllByTestId('list-item-Banana');
     expect(addedItems).toHaveLength(1);
