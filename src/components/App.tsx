@@ -18,10 +18,11 @@ const App = () => {
         <NodejsLoader />
 
         <Tabs
+          className="z-50"
           classNames={{
             tab: 'overflow-hidden h-16',
             tabContent: 'overflow-hidden h-16 m-auto pt-3',
-            panel: 'overflow-y-scroll grow p-4',
+            panel: 'relative overflow-y-scroll grow p-4',
           }}
           color="primary"
           fullWidth

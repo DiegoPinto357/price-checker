@@ -1,16 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { Button } from '@nextui-org/react';
-
-const overrideBodyCss = () => {
-  document.body.style.position = 'unset';
-  document.body.style.backgroundColor = 'transparent';
-};
-
-const restoreBodyCss = () => {
-  document.body.style.position = 'relative';
-  document.body.style.backgroundColor = 'var(--nextui-colors-background)';
-};
+import { IoClose } from 'react-icons/io5';
 
 export interface QrCodeReaderProps {
   onClose: (data?: string) => void;
@@ -19,7 +10,6 @@ export interface QrCodeReaderProps {
 const QrCodeReader = ({ onClose }: QrCodeReaderProps) => {
   const startQrReader = useCallback(async () => {
     await BarcodeScanner.checkPermission({ force: true });
-    overrideBodyCss();
     BarcodeScanner.hideBackground();
     return await BarcodeScanner.startScan({
       cameraDirection: 'back',
@@ -28,7 +18,6 @@ const QrCodeReader = ({ onClose }: QrCodeReaderProps) => {
   }, []);
 
   const stopQrReader = useCallback(() => {
-    restoreBodyCss();
     BarcodeScanner.showBackground();
     BarcodeScanner.stopScan();
     onClose();
@@ -48,18 +37,34 @@ const QrCodeReader = ({ onClose }: QrCodeReaderProps) => {
     };
 
     readQrCode();
+
+    return () => {
+      BarcodeScanner.showBackground();
+      BarcodeScanner.stopScan();
+    };
   }, [startQrReader, stopQrReader, onClose]);
 
+  const fullScreenClasses = 'absolute top-0 left-0 w-full h-full';
+
   return (
-    <div style={{ position: 'relative' }}>
-      <Button
-        style={{ position: 'absolute', zIndex: 100 }}
-        color="danger"
-        onPress={stopQrReader}
-      >
-        Close
-      </Button>
-    </div>
+    <>
+      <div className={`${fullScreenClasses} bg-black`} />
+      <div className={`${fullScreenClasses} flex flex-col p-8 z-10`}>
+        <Button className="self-start z-20" onPress={stopQrReader} isIconOnly>
+          <IoClose className="w-5 h-5" />
+        </Button>
+        <div
+          className="z-10 m-auto"
+          style={{
+            width: '70vw',
+            height: '70vw',
+            border: '4px solid white',
+            borderRadius: '10px',
+            boxShadow: '0 0 0 99999px rgba(0, 0, 0, .6)',
+          }}
+        />
+      </div>
+    </>
   );
 };
 

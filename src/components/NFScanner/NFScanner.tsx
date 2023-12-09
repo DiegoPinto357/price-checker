@@ -21,8 +21,8 @@ const NFScanner = () => {
   }, []);
 
   const handleQrCodeReaderClose = useCallback(async (data?: string) => {
-    setIsLoading(true);
     if (data) {
+      setIsLoading(true);
       const key = data.match(/\?p=([^&]*)/)![1];
       const nfData = await getNfData(key);
       setNf(nfData);
@@ -32,7 +32,6 @@ const NFScanner = () => {
     }
 
     setContentPage('idle');
-    setIsLoading(false);
   }, []);
 
   const handleQrResultsSaveClick = useCallback(
