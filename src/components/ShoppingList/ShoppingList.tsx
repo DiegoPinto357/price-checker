@@ -5,6 +5,7 @@ import ProductSearch from './ProductSearch';
 import { ShoppingListContext } from '../Context';
 
 import type { ShoppingListItem } from './types';
+import type { ItemChange } from './ProductList';
 
 const sortItems = (items: ShoppingListItem[]) => [
   ...items.sort((a, b) =>
@@ -19,7 +20,9 @@ const ShoppingList = () => {
   const addItem = useCallback(
     (itemName: string) => {
       setItems(items => {
-        const existingItem = items.find(({ name }) => name === itemName);
+        const existingItem = items.find(
+          ({ name }) => name.toLowerCase() === itemName.toLowerCase()
+        );
         if (itemName && !existingItem)
           items.push({ name: itemName, checked: false });
         return sortItems(items);
@@ -29,10 +32,13 @@ const ShoppingList = () => {
   );
 
   const handleListItemChange = useCallback(
-    (itemName: string, checked: boolean) => {
+    ({ name, newName, checked }: ItemChange) => {
       setItems(items => {
-        const item = items.find(({ name }) => name === itemName);
-        if (item) item.checked = checked;
+        const item = items.find(item => item.name === name);
+        if (item) {
+          if (newName !== undefined) item.name = newName;
+          if (checked !== undefined) item.checked = checked;
+        }
         return sortItems(items);
       });
     },

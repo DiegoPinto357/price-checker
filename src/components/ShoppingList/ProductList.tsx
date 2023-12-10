@@ -3,30 +3,58 @@ import { CheckboxGroup, Checkbox, Divider, Button } from '@nextui-org/react';
 import { MdOutlineDeleteSweep } from 'react-icons/md';
 import Typography from '../lib/Typography';
 import ConfirmDialog from '../lib/ConfirmDialog';
+import EditProductModal from './EditProductModal';
 
 import type { ShoppingListItem } from './types';
 import type { ConfirmDialogUserAction } from '../lib/ConfirmDialog';
+import type { ItemEdit } from './EditProductModal';
+
+export type ItemChange = ItemEdit & { checked?: boolean };
 
 type Props = {
   items: ShoppingListItem[];
-  onItemChange: (name: string, checked: boolean) => void;
+  onItemChange: (itemChange: ItemChange) => void;
   onDeleteSelectedItems: () => void;
 };
 
 const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
+  const [editItemDialogOpen, setEditItemDialogOpen] = useState<boolean>(false);
+  const [selectedItem, setSelectedItem] = useState<string>('');
 
   const unselectedItems = items.filter(({ checked }) => !checked);
   const selectedItems = items.filter(({ checked }) => checked);
 
-  const handleDialogClose = useCallback(
+  const handleItemContextMenu = useCallback(
+    (
+      event: React.MouseEvent<HTMLInputElement, MouseEvent>,
+      itemName: string
+    ) => {
+      event.preventDefault();
+      setSelectedItem(itemName);
+      setEditItemDialogOpen(true);
+    },
+    []
+  );
+
+  const handleConfirmDialogClose = useCallback(
     (userAction: ConfirmDialogUserAction) => {
-      setDialogOpen(false);
+      setConfirmDialogOpen(false);
       if (userAction === 'accept') {
         onDeleteSelectedItems();
       }
     },
     [onDeleteSelectedItems]
+  );
+
+  const handleEditItemDialogClose = useCallback(
+    (newItemData?: ItemEdit) => {
+      setEditItemDialogOpen(false);
+      if (newItemData) {
+        onItemChange(newItemData);
+      }
+    },
+    [onItemChange]
   );
 
   return (
@@ -41,10 +69,16 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
         >
           {unselectedItems.map(item => (
             <Checkbox
-              data-testid={`list-item-${item.name}`}
+              data-testid={`list-item-${item.name.toLowerCase()}`}
               key={`${item.name}-${item.checked}`}
               value={item.name}
-              onChange={e => onItemChange(item.name, e.currentTarget.checked)}
+              onChange={e =>
+                onItemChange({
+                  name: item.name,
+                  checked: e.currentTarget.checked,
+                })
+              }
+              onContextMenu={e => handleItemContextMenu(e, item.name)}
             >
               {item.name}
             </Checkbox>
@@ -64,7 +98,7 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
               size="sm"
               color="danger"
               isIconOnly
-              onPress={() => setDialogOpen(true)}
+              onPress={() => setConfirmDialogOpen(true)}
             >
               <MdOutlineDeleteSweep className="w-5 h-5" />
             </Button>
@@ -78,10 +112,15 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
           >
             {selectedItems.map(item => (
               <Checkbox
-                data-testid={`list-item-${item.name}`}
+                data-testid={`list-item-${item.name.toLowerCase()}`}
                 key={`${item.name}-${item.checked}`}
                 value={item.name}
-                onChange={e => onItemChange(item.name, e.currentTarget.checked)}
+                onChange={e =>
+                  onItemChange({
+                    name: item.name,
+                    checked: e.currentTarget.checked,
+                  })
+                }
               >
                 {item.name}
               </Checkbox>
@@ -92,8 +131,14 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
 
       <ConfirmDialog
         title="Deletar items?"
-        isOpen={dialogOpen}
-        onClose={handleDialogClose}
+        isOpen={confirmDialogOpen}
+        onClose={handleConfirmDialogClose}
+      />
+
+      <EditProductModal
+        isOpen={editItemDialogOpen}
+        itemName={selectedItem}
+        onClose={handleEditItemDialogClose}
       />
     </div>
   );

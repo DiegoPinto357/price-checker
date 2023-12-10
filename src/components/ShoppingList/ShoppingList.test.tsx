@@ -112,7 +112,31 @@ describe('ShoppingList', () => {
     expect(selectedItemsGroup).not.toBeInTheDocument();
   });
 
-  // trim values before adding
+  it('edits unselected item', async () => {
+    renderWithContext(<ShoppingList />);
+
+    await addItems(['Suculenta', 'Banan']);
+    const itemToEdit = screen.getByTestId('list-item-banan');
+    fireEvent.contextMenu(itemToEdit);
+
+    const dialog = screen.getByRole('dialog', { name: 'Editar item' });
+    const editNameInput = within(dialog).getByTestId('edit-item-input');
+    expect(editNameInput).toHaveFocus();
+    expect(editNameInput).toHaveValue('Banan');
+    await userEvent.type(editNameInput, 'a');
+    expect(editNameInput).toHaveValue('Banana');
+    const dialogOkButton = within(dialog).getByRole('button', { name: 'Ok' });
+    await userEvent.click(dialogOkButton);
+
+    const editedItem = screen.getByTestId('list-item-banana');
+    expect(editedItem).toBeInTheDocument();
+  });
+
+  // edit selected item
+  // edit and cofirm by pressing enter
+  // edit item case
+  // delete single item
+
   // focus on input after pressing the button
-  // inserts item by selcting - needs DB cache
+  // inserts item by selecting - needs DB cache
 });
