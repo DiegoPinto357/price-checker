@@ -15,7 +15,7 @@ const ProductSearch = ({ onAddItem }: Props) => {
   const handleKeyPress = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
-        onAddItem(inputValue);
+        onAddItem(inputValue.trim());
         setInputValue('');
       }
     },
@@ -30,7 +30,7 @@ const ProductSearch = ({ onAddItem }: Props) => {
   return (
     <div className="flex gap-2">
       <Autocomplete
-        label={'Buscar produto'}
+        label="Buscar produto"
         labelPlacement="outside"
         allowsCustomValue
         variant="bordered"

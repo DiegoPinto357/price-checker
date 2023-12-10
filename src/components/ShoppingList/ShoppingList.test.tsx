@@ -37,7 +37,7 @@ describe('ShoppingList', () => {
     const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     await userEvent.type(input, 'Banana{enter}');
 
-    const addedItem = screen.getByTestId('list-item-Banana');
+    const addedItem = screen.getByTestId('list-item-banana');
     expect(addedItem).toBeInTheDocument();
     expect(input).toHaveValue('');
   });
@@ -65,12 +65,31 @@ describe('ShoppingList', () => {
     expect(selectedItems[1]).toHaveTextContent('Suculenta');
   });
 
+  it('trims spaces before adding new item', async () => {
+    renderWithContext(<ShoppingList />);
+
+    const input = screen.getByRole('combobox', { name: 'Buscar produto' });
+    await userEvent.type(input, '    Banana   {enter}');
+
+    const addedItem = screen.getByTestId('list-item-banana');
+    expect(addedItem).toBeInTheDocument();
+  });
+
   it('does not insert an existing item', async () => {
     renderWithContext(<ShoppingList />);
 
     await addItems(['Banana', 'Banana']);
 
-    const addedItems = screen.getAllByTestId('list-item-Banana');
+    const addedItems = screen.getAllByTestId('list-item-banana');
+    expect(addedItems).toHaveLength(1);
+  });
+
+  it('does not insert an existing item with different case', async () => {
+    renderWithContext(<ShoppingList />);
+
+    await addItems(['Banana', 'banana']);
+
+    const addedItems = screen.getAllByTestId('list-item-banana');
     expect(addedItems).toHaveLength(1);
   });
 
