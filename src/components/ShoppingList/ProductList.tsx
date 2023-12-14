@@ -121,6 +121,7 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
                     checked: e.currentTarget.checked,
                   })
                 }
+                onContextMenu={e => handleItemContextMenu(e, item.name)}
               >
                 {item.name}
               </Checkbox>
