@@ -32,12 +32,14 @@ const ShoppingList = () => {
   );
 
   const handleListItemChange = useCallback(
-    ({ name, newName, checked }: ItemChange) => {
+    ({ name, newName, checked, deleted }: ItemChange) => {
       setItems(items => {
         const item = items.find(item => item.name === name);
         if (item) {
           if (newName !== undefined) item.name = newName;
           if (checked !== undefined) item.checked = checked;
+          if (deleted !== undefined)
+            return items.filter(item => item.name !== name);
         }
         return sortItems(items);
       });

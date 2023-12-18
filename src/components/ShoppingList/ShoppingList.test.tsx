@@ -154,10 +154,48 @@ describe('ShoppingList', () => {
     expect(editedItem).toBeInTheDocument();
   });
 
-  // edit and cofirm by pressing enter
-  // edit item case
-  // delete single item
+  it('edits item and cofirm by pressing enter', async () => {
+    renderWithContext(<ShoppingList />);
 
-  // focus on input after pressing the button
+    await addItems(['Suculenta', 'Banan']);
+    const itemToEdit = screen.getByTestId('list-item-banan');
+    fireEvent.contextMenu(itemToEdit);
+
+    const dialog = screen.getByRole('dialog', { name: 'Editar item' });
+    const editNameInput = within(dialog).getByTestId('edit-item-input');
+    expect(editNameInput).toHaveFocus();
+    expect(editNameInput).toHaveValue('Banan');
+    await userEvent.type(editNameInput, 'a{enter}');
+
+    const editedItem = screen.getByTestId('list-item-banana');
+    expect(editedItem).toBeInTheDocument();
+  });
+
+  it('deletes item', async () => {
+    renderWithContext(<ShoppingList />);
+
+    await addItems(['Suculenta', 'Banana']);
+    const itemToEdit = screen.getByTestId('list-item-banana');
+    fireEvent.contextMenu(itemToEdit);
+
+    const editDialog = screen.getByRole('dialog', { name: 'Editar item' });
+    const deleteButton = within(editDialog).getByRole('button', {
+      name: 'Deletar',
+    });
+    await userEvent.click(deleteButton);
+
+    const confirmDialog = screen.getByRole('dialog', {
+      name: 'Deletar item?',
+    });
+    const dialogOkButton = within(confirmDialog).getByRole('button', {
+      name: 'Ok',
+    });
+    await userEvent.click(dialogOkButton);
+
+    const deletedItem = screen.queryByTestId('list-item-banana');
+    expect(deletedItem).not.toBeInTheDocument();
+  });
+
+  // focus on search input after pressing the button
   // inserts item by selecting - needs DB cache
 });
