@@ -69,9 +69,6 @@ const NFScanner = () => {
           );
         }
 
-        case 'qr-reader':
-          return <QrCodeReader onClose={handleQrCodeReaderClose} />;
-
         case 'qr-results':
           return (
             <QrResults
@@ -85,7 +82,6 @@ const NFScanner = () => {
     [
       nf,
       handleParseButtonClick,
-      handleQrCodeReaderClose,
       handleQrResultsSaveClick,
       handleQrResultsCancelClick,
     ]
@@ -93,8 +89,15 @@ const NFScanner = () => {
 
   return (
     <div data-testid="qr-scanner" className="flex flex-col h-full">
-      <Typography variant="h1">Nota Fiscal</Typography>
-      {renderContentPage(contentPage)}
+      {/* TODO refactor conditional rendering */}
+      {contentPage === 'qr-reader' ? (
+        <QrCodeReader onClose={handleQrCodeReaderClose} />
+      ) : (
+        <>
+          <Typography variant="h1">Nota Fiscal</Typography>
+          {renderContentPage(contentPage)}{' '}
+        </>
+      )}
       {isLoading && <Loader />}
     </div>
   );

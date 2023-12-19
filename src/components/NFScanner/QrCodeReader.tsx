@@ -48,7 +48,6 @@ const QrCodeReader = ({ onClose }: QrCodeReaderProps) => {
 
   return (
     <>
-      <div className={`${fullScreenClasses} bg-black`} />
       <div className={`${fullScreenClasses} flex flex-col p-8 z-10`}>
         <Button className="self-start z-20" onPress={stopQrReader} isIconOnly>
           <IoClose className="w-5 h-5" />
