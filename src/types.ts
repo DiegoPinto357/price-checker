@@ -7,14 +7,14 @@ export type WithIndex<T> = {
   };
 } & T;
 
-interface Store {
+type Store = {
   name: string;
   cnpj: string;
   incricaoEstadual: string;
   address: string;
-}
+};
 
-export interface Nf {
+export type Nf = {
   key: string;
   version: string;
   env: string;
@@ -26,28 +26,33 @@ export interface Nf {
   protocol: string;
   store: Store;
   items: Product[];
-}
+};
 
-export interface Product {
+export type Product = {
   code: string;
   description: string;
   amount: number;
   unit: string;
   value: number;
   totalValue: number;
-}
+};
 
-export interface ProductHistoryItem {
+export type ProductHistoryItem = {
   nfKey: string;
   date: string;
   amount: number;
   unit: string;
   value: number;
   totalValue: number;
-}
+};
 
-export interface ProductHistory {
+export type ProductHistory = {
   code: string;
   description: string;
   history: ProductHistoryItem[];
-}
+};
+
+export type ShoppingListItem = {
+  name: string;
+  checked?: boolean;
+};
