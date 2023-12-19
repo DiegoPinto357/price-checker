@@ -21,7 +21,7 @@ const NodejsLoader = () => {
     }
   }, []);
 
-  return isMobile && !isNodeReady ? <Loader fullscreen /> : null;
+  return isMobile && !isNodeReady ? <Loader opaque /> : null;
 };
 
 export default NodejsLoader;
