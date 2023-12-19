@@ -4,7 +4,7 @@ import { IoCameraOutline } from 'react-icons/io5';
 import Typography from '../lib/Typography';
 import QrCodeReader from './QrCodeReader';
 import QrResults from './QrResults';
-import Loader from '../Loader';
+import Loader from '../lib/Loader';
 import { getNfData, saveNf } from '../../nfs';
 import { saveProducts } from '../../products';
 import { Nf, Product } from '../../types';

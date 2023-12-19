@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { NodeJS } from 'capacitor-nodejs';
+import Loader from './lib/Loader';
 
 const platform = Capacitor.getPlatform();
 const isMobile = platform !== 'web';
@@ -20,11 +21,7 @@ const NodejsLoader = () => {
     }
   }, []);
 
-  return (
-    <div>
-      {isMobile ? (!isNodeReady ? 'Awaiting nodejs' : 'Node ready') : null}
-    </div>
-  );
+  return isMobile && !isNodeReady ? <Loader fullscreen /> : null;
 };
 
 export default NodejsLoader;

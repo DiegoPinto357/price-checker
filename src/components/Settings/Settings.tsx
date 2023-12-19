@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@nextui-org/react';
 import Typography from '../lib/Typography';
-import Loader from '../Loader';
+import Loader from '../lib/Loader';
 import dataSync from '../../dataSync';
 
 const Settings = () => {

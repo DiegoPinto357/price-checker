@@ -18,7 +18,7 @@ const App = () => {
         <NodejsLoader />
 
         <Tabs
-          className="z-50"
+          className="z-40"
           classNames={{
             tab: 'overflow-hidden h-16',
             tabContent: 'overflow-hidden h-16 m-auto pt-3',
