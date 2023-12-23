@@ -19,37 +19,36 @@ const ShoppingList = () => {
 
   const addItem = useCallback(
     (itemName: string) => {
-      setItems(items => {
-        const existingItem = items.find(
-          ({ name }) => name.toLowerCase() === itemName.toLowerCase()
-        );
-        if (itemName && !existingItem)
-          items.push({ name: itemName, checked: false });
-        return sortItems(items);
-      });
+      const existingItem = items.find(
+        ({ name }) => name.toLowerCase() === itemName.toLowerCase()
+      );
+      if (itemName && !existingItem)
+        items.push({ name: itemName, checked: false });
+      setItems(sortItems(items));
     },
-    [setItems]
+    [items, setItems]
   );
 
   const handleListItemChange = useCallback(
     ({ name, newName, checked, deleted }: ItemChange) => {
-      setItems(items => {
-        const item = items.find(item => item.name === name);
-        if (item) {
-          if (newName !== undefined) item.name = newName;
-          if (checked !== undefined) item.checked = checked;
-          if (deleted !== undefined)
-            return items.filter(item => item.name !== name);
+      const item = items.find(item => item.name === name);
+      if (item) {
+        if (newName !== undefined) item.name = newName;
+        if (checked !== undefined) item.checked = checked;
+        if (deleted !== undefined) {
+          setItems(items.filter(item => item.name !== name));
+          return;
         }
-        return sortItems(items);
-      });
+      }
+      setItems(sortItems(items));
     },
-    [setItems]
+
+    [items, setItems]
   );
 
   const handleDeleteSelectedItems = useCallback(() => {
-    setItems(items => items.filter(({ checked }) => !checked));
-  }, [setItems]);
+    setItems(items.filter(({ checked }) => !checked));
+  }, [items, setItems]);
 
   return (
     <div
