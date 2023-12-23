@@ -12,5 +12,13 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './setupTest.ts',
+    onConsoleLog(log) {
+      if (
+        log.includes(
+          'stopPropagation is now the default behavior for events in React Spectrum. You can use continuePropagation() to revert this behavior.'
+        )
+      )
+        return false;
+    },
   },
 });
