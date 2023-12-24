@@ -1,4 +1,5 @@
-import { createContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback, useEffect } from 'react';
+import { getShoppintList, setShoppingList } from '../../shoppingList';
 
 import type { ReactNode } from 'react';
 import type { ShoppingListItem } from '../ShoppingList/types';
@@ -19,8 +20,20 @@ export const ShoppingListContextProvider = ({
 }) => {
   const [items, setItems] = useState<ShoppingListItem[]>([]);
 
-  const setShoppingListItems = useCallback((newItems: ShoppingListItem[]) => {
-    setItems(newItems);
+  const setShoppingListItems = useCallback(
+    async (newItems: ShoppingListItem[]) => {
+      setItems(newItems);
+      await setShoppingList(newItems);
+    },
+    []
+  );
+
+  useEffect(() => {
+    const loadShoppingList = async () => {
+      const shoppingList = await getShoppintList();
+      setItems(shoppingList);
+    };
+    loadShoppingList();
   }, []);
 
   return (

@@ -1,7 +1,14 @@
-import { screen, fireEvent, within } from '@testing-library/react';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithContext } from '../testUtils';
+import { storage } from '../../proxies';
 import ShoppingList from '.';
+
+vi.mock('../../proxies/storage');
+
+type MockStorage = typeof storage & { clearFiles: () => void };
+
+const mockStorage = storage as MockStorage;
 
 const addItems = async (items: string[]) => {
   const input = screen.getByRole('combobox', { name: 'Buscar produto' });
@@ -17,7 +24,91 @@ const selectItems = async (itemIndexes: number[]) => {
   }
 };
 
+const deleteItem = async (itemLabel: string) => {
+  const itemToDelete = screen.getByLabelText(itemLabel);
+  fireEvent.contextMenu(itemToDelete);
+
+  const editDialog = screen.getByRole('dialog', { name: 'Editar item' });
+  const deleteButton = within(editDialog).getByRole('button', {
+    name: 'Deletar',
+  });
+  await userEvent.click(deleteButton);
+
+  const confirmDialog = screen.getByRole('dialog', {
+    name: 'Deletar item?',
+  });
+  const dialogOkButton = within(confirmDialog).getByRole('button', {
+    name: 'Ok',
+  });
+  await userEvent.click(dialogOkButton);
+};
+
+const editItem = async (
+  itemLabel: string,
+  { newName }: { newName: string }
+) => {
+  const itemToEdit = screen.getByLabelText(itemLabel);
+  fireEvent.contextMenu(itemToEdit);
+
+  const dialog = screen.getByRole('dialog', { name: 'Editar item' });
+  const editNameInput = within(dialog).getByTestId('edit-item-input');
+  fireEvent.change(editNameInput, { target: { value: newName } });
+
+  const dialogOkButton = within(dialog).getByRole('button', { name: 'Ok' });
+  await userEvent.click(dialogOkButton);
+};
+
 describe('ShoppingList', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockStorage.clearFiles();
+  });
+
+  it('loads shopping list file on start', async () => {
+    await storage.writeFile('shopping-list.json', [
+      {
+        name: 'Pão',
+      },
+      {
+        name: 'Vinho',
+        checked: true,
+      },
+    ]);
+
+    renderWithContext(<ShoppingList />);
+
+    await waitFor(() => {
+      const unselectedItemsGroup = screen.getByTestId('unselected-items-group');
+      const unselectedItem = within(unselectedItemsGroup).getByLabelText('Pão');
+      const selectedItemsGroup = screen.getByTestId('selected-items-group');
+      const selectedItem = within(selectedItemsGroup).getByLabelText('Vinho');
+
+      expect(unselectedItem).toBeInTheDocument();
+      expect(selectedItem).toBeInTheDocument();
+    });
+  });
+
+  it('saves shopping list to a file', async () => {
+    renderWithContext(<ShoppingList />);
+
+    await addItems(['Suculenta', 'Banana', 'Vinho', 'Acepip']);
+
+    const itemToSelect = screen.getByLabelText('Suculenta');
+    await userEvent.click(itemToSelect);
+
+    await deleteItem('Banana');
+
+    await editItem('Acepip', { newName: 'Acepipe' });
+
+    const shoppingListFile = await storage.readFile('shopping-list.json');
+
+    expect(shoppingListFile).toEqual([
+      { name: 'Acepipe', checked: false },
+      { name: 'Suculenta', checked: true },
+      { name: 'Vinho', checked: false },
+    ]);
+  });
+
   it('inserts item by typing and pressing add button', async () => {
     renderWithContext(<ShoppingList />);
 
@@ -175,22 +266,8 @@ describe('ShoppingList', () => {
     renderWithContext(<ShoppingList />);
 
     await addItems(['Suculenta', 'Banana']);
-    const itemToEdit = screen.getByTestId('list-item-banana');
-    fireEvent.contextMenu(itemToEdit);
 
-    const editDialog = screen.getByRole('dialog', { name: 'Editar item' });
-    const deleteButton = within(editDialog).getByRole('button', {
-      name: 'Deletar',
-    });
-    await userEvent.click(deleteButton);
-
-    const confirmDialog = screen.getByRole('dialog', {
-      name: 'Deletar item?',
-    });
-    const dialogOkButton = within(confirmDialog).getByRole('button', {
-      name: 'Ok',
-    });
-    await userEvent.click(dialogOkButton);
+    await deleteItem('Banana');
 
     const deletedItem = screen.queryByTestId('list-item-banana');
     expect(deletedItem).not.toBeInTheDocument();

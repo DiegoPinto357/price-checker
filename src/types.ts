@@ -51,8 +51,3 @@ export type ProductHistory = {
   description: string;
   history: ProductHistoryItem[];
 };
-
-export type ShoppingListItem = {
-  name: string;
-  checked?: boolean;
-};
