@@ -5,7 +5,7 @@ import ProductSearch from './ProductSearch';
 import { ShoppingListContext } from '../Context';
 
 import type { ShoppingListItem } from './types';
-import type { ItemChange } from './ProductList';
+import type { ItemChange } from './ProductListGroup';
 
 const sortItems = (items: ShoppingListItem[]) => [
   ...items.sort((a, b) =>

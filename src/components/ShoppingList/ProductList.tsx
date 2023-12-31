@@ -1,15 +1,15 @@
 import { useCallback, useState } from 'react';
-import { CheckboxGroup, Checkbox, Divider, Button } from '@nextui-org/react';
+import { Divider, Button } from '@nextui-org/react';
 import { MdOutlineDeleteSweep } from 'react-icons/md';
 import Typography from '../lib/Typography';
 import ConfirmDialog from '../lib/ConfirmDialog';
+import ProductListGroup from './ProductListGroup';
 import EditProductModal from './EditProductModal';
 
 import type { ShoppingListItem } from './types';
 import type { ConfirmDialogUserAction } from '../lib/ConfirmDialog';
+import type { ItemChange } from './ProductListGroup';
 import type { ItemEdit } from './EditProductModal';
-
-export type ItemChange = ItemEdit & { checked?: boolean };
 
 type Props = {
   items: ShoppingListItem[];
@@ -60,35 +60,17 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
   return (
     <div className="h-full overflow-auto mb-4">
       {unselectedItems.length ? (
-        <CheckboxGroup
+        <ProductListGroup
           data-testid="unselected-items-group"
-          className="mb-2"
-          lineThrough
-          disableAnimation
-          value={[]}
-        >
-          {unselectedItems.map(item => (
-            <Checkbox
-              data-testid={`list-item-${item.name.toLowerCase()}`}
-              key={`${item.name}-${item.checked}`}
-              value={item.name}
-              onChange={e =>
-                onItemChange({
-                  name: item.name,
-                  checked: e.currentTarget.checked,
-                })
-              }
-              onContextMenu={e => handleItemContextMenu(e, item.name)}
-            >
-              {item.name}
-            </Checkbox>
-          ))}
-        </CheckboxGroup>
+          items={unselectedItems}
+          onItemChange={onItemChange}
+          onItemContextMenu={handleItemContextMenu}
+        />
       ) : null}
 
       {selectedItems.length ? (
         <>
-          <div className="flex items-center gap-2 mt-4 mr-4 mb-2">
+          <div className="flex items-center gap-2 mt-4 mr-3 mb-4">
             <Typography variant="h3" className="whitespace-nowrap">
               Produtos comprados
             </Typography>
@@ -104,29 +86,12 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
             </Button>
           </div>
 
-          <CheckboxGroup
+          <ProductListGroup
             data-testid="selected-items-group"
-            lineThrough
-            disableAnimation
-            value={selectedItems.map(({ name }) => name)}
-          >
-            {selectedItems.map(item => (
-              <Checkbox
-                data-testid={`list-item-${item.name.toLowerCase()}`}
-                key={`${item.name}-${item.checked}`}
-                value={item.name}
-                onChange={e =>
-                  onItemChange({
-                    name: item.name,
-                    checked: e.currentTarget.checked,
-                  })
-                }
-                onContextMenu={e => handleItemContextMenu(e, item.name)}
-              >
-                {item.name}
-              </Checkbox>
-            ))}
-          </CheckboxGroup>
+            items={selectedItems}
+            onItemChange={onItemChange}
+            onItemContextMenu={handleItemContextMenu}
+          />
         </>
       ) : null}
 
