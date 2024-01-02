@@ -58,7 +58,7 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
   );
 
   return (
-    <div className="h-full overflow-auto mb-4">
+    <div className="h-full overflow-auto mb-4 pt-4">
       {unselectedItems.length ? (
         <ProductListGroup
           data-testid="unselected-items-group"
