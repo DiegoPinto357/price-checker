@@ -59,4 +59,26 @@ describe('NFScanner', () => {
       });
     });
   });
+
+  describe('error handling', () => {
+    it('renders error message when getNfData fails', async () => {
+      vi.mocked(axios.get).mockRejectedValue({
+        response: { data: { message: 'Something went wrong!' } },
+      });
+
+      render(<NFScanner />);
+
+      const qrScanButton = screen.getByRole('button', {
+        name: 'Escanear Nota Fiscal',
+      });
+      await userEvent.click(qrScanButton);
+
+      const errorMessage = screen.getByText('Something went wrong!');
+      expect(errorMessage).toBeInTheDocument();
+    });
+
+    // it('renders error message when saveNf fails', () => {});
+
+    // it('renders error message when saveProducts fails', () => {});
+  });
 });

@@ -14,7 +14,7 @@ app.register(databaseRouter);
 
 app.setErrorHandler((error, _request, reply) => {
   console.error(error);
-  reply.status(500).send();
+  reply.status(500).send(error);
 });
 
 interface ItemsQuerystring {

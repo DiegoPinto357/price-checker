@@ -2,30 +2,48 @@ import { useCallback, useState } from 'react';
 import { Button } from '@nextui-org/react';
 import { IoCameraOutline } from 'react-icons/io5';
 import Typography from '../lib/Typography';
+import ErrorMessage from '../lib/ErrorMessage';
+import Loader from '../lib/Loader';
 import QrCodeReader from './QrCodeReader';
 import QrResults from './QrResults';
-import Loader from '../lib/Loader';
 import { getNfData, saveNf } from '../../nfs';
 import { saveProducts } from '../../products';
-import { Nf, Product } from '../../types';
+
+import type { Nf, Product } from '../../types';
+import { AxiosError } from 'axios';
 
 type ContentPage = 'idle' | 'qr-reader' | 'qr-results';
 
 const NFScanner = () => {
   const [contentPage, setContentPage] = useState<ContentPage>('idle');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [nf, setNf] = useState<Nf | null>();
 
   const handleParseButtonClick = useCallback(async () => {
     setContentPage('qr-reader');
+    setErrorMessage(null);
   }, []);
 
   const handleQrCodeReaderClose = useCallback(async (data?: string) => {
     if (data) {
       setIsLoading(true);
       const key = data.match(/\?p=([^&]*)/)![1];
-      const nfData = await getNfData(key);
-      setNf(nfData);
+
+      try {
+        const nfData = await getNfData(key);
+        setNf(nfData);
+      } catch (error) {
+        let message;
+        if (error instanceof AxiosError) message = error.response?.data.message;
+        else message = String(error);
+
+        setErrorMessage(message);
+        setContentPage('idle');
+        setIsLoading(false);
+        return;
+      }
+
       setContentPage('qr-results');
       setIsLoading(false);
       return;
@@ -56,7 +74,7 @@ const NFScanner = () => {
       switch (selectedContentPage) {
         case 'idle': {
           return (
-            <div className="h-full flex items-center justify-center">
+            <div className="h-full flex flex-col gap-4 items-center justify-center">
               <Button
                 color="primary"
                 size="lg"
@@ -65,6 +83,9 @@ const NFScanner = () => {
               >
                 Escanear Nota Fiscal
               </Button>
+              {errorMessage ? (
+                <ErrorMessage className="px-6" message={errorMessage} />
+              ) : null}
             </div>
           );
         }
@@ -81,6 +102,7 @@ const NFScanner = () => {
     },
     [
       nf,
+      errorMessage,
       handleParseButtonClick,
       handleQrResultsSaveClick,
       handleQrResultsCancelClick,
