@@ -1,13 +1,22 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { QrCodeReaderProps } from './QrCodeReader';
 import { storage } from '../../proxies';
 import NFScanner from './NFScanner';
 import nfData from '../../../mockData/nf/nfData.json';
 import { useEffect } from 'react';
 
-vi.mock('axios');
+vi.mock('axios', async () => {
+  const actual: typeof axios = await vi.importActual('axios');
+  return {
+    ...actual,
+    default: {
+      get: vi.fn(),
+    },
+  };
+});
+
 vi.mock('../../proxies/storage');
 vi.mock('../../proxies/database');
 
@@ -62,9 +71,11 @@ describe('NFScanner', () => {
 
   describe('error handling', () => {
     it('renders error message when getNfData fails', async () => {
-      vi.mocked(axios.get).mockRejectedValue({
-        response: { data: { message: 'Something went wrong!' } },
-      });
+      vi.mocked(axios.get).mockRejectedValue(
+        new AxiosError(undefined, undefined, undefined, undefined, {
+          data: { message: 'Something went wrong!' },
+        } as AxiosResponse)
+      );
 
       render(<NFScanner />);
 

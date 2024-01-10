@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { AxiosError } from 'axios'; // TODO migrate to HttpError
 import { Button } from '@nextui-org/react';
 import { IoCameraOutline } from 'react-icons/io5';
 import Typography from '../lib/Typography';
@@ -10,7 +11,6 @@ import { getNfData, saveNf } from '../../nfs';
 import { saveProducts } from '../../products';
 
 import type { Nf, Product } from '../../types';
-import { AxiosError } from 'axios';
 
 type ContentPage = 'idle' | 'qr-reader' | 'qr-results';
 
@@ -35,6 +35,7 @@ const NFScanner = () => {
         setNf(nfData);
       } catch (error) {
         let message;
+        // TODO create a global error handler, so modules doesn't have to handle specific error types
         if (error instanceof AxiosError) message = error.response?.data.message;
         else message = String(error);
 
