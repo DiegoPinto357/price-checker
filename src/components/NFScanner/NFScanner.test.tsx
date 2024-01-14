@@ -7,6 +7,8 @@ import NFScanner from './NFScanner';
 import nfData from '../../../mockData/nf/nfData.json';
 import { useEffect } from 'react';
 
+global.console = { ...console, error: vi.fn() };
+
 vi.mock('axios', async () => {
   const actual: typeof axios = await vi.importActual('axios');
   return {

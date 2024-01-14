@@ -4,6 +4,7 @@ import { PiShoppingCart } from 'react-icons/pi';
 import { BsQrCodeScan } from 'react-icons/bs';
 import { GoGear } from 'react-icons/go';
 import ContextProvider from './Context';
+import Meals from './Meals';
 import NodejsLoader from './NodejsLoader';
 import ShoppingList from './ShoppingList';
 import NFScanner from './NFScanner';
@@ -33,7 +34,7 @@ const App = () => {
             aria-label="meals"
             title={<IoPizzaOutline className={iconClass} />}
           >
-            <div data-testid="meals">meals</div>
+            <Meals />
           </Tab>
 
           <Tab

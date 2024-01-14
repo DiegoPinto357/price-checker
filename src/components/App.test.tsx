@@ -13,6 +13,7 @@ describe('App', () => {
       name: 'shopping list',
     });
     await userEvent.click(shoppingListTab);
+    // TODO get elements by heading text
     content = screen.getByTestId('shopping-list');
     expect(content).toBeInTheDocument();
 
