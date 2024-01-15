@@ -34,7 +34,7 @@ const ProductListGroup = ({
         <Checkbox
           data-testid={`list-item-${item.name.toLowerCase()}`}
           key={`${item.name}-${item.checked}`}
-          className={`max-w-none w-full ml-0 ${bgColor}`}
+          className={`max-w-none w-full ml-0 px-4 ${bgColor}`}
           value={item.name}
           onChange={e =>
             onItemChange({

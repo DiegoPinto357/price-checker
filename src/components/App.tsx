@@ -21,9 +21,10 @@ const App = () => {
         <Tabs
           className="z-40"
           classNames={{
+            tabList: 'rounded-none',
             tab: 'overflow-hidden h-16',
             tabContent: 'overflow-hidden h-16 m-auto pt-3',
-            panel: 'relative overflow-y-scroll grow p-4',
+            panel: 'relative overflow-y-scroll grow py-4 px-0',
           }}
           color="primary"
           fullWidth

@@ -117,7 +117,9 @@ const NFScanner = () => {
         <QrCodeReader onClose={handleQrCodeReaderClose} />
       ) : (
         <>
-          <Typography variant="h1">Nota Fiscal</Typography>
+          <Typography className="mx-4" variant="h1">
+            Nota Fiscal
+          </Typography>
           {renderContentPage(contentPage)}{' '}
         </>
       )}

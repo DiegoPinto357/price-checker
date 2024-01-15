@@ -55,7 +55,9 @@ const ShoppingList = () => {
       data-testid="shopping-list"
       className="flex flex-col justify-between h-full"
     >
-      <Typography variant="h1">Lista de Compras</Typography>
+      <Typography className="mx-4" variant="h1">
+        Lista de Compras
+      </Typography>
       <ProductList
         items={items}
         onItemChange={handleListItemChange}

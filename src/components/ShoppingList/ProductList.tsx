@@ -58,7 +58,7 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
   );
 
   return (
-    <div className="h-full overflow-auto mb-4 pt-4">
+    <div className="h-full overflow-auto mb-2 pt-2">
       {unselectedItems.length ? (
         <ProductListGroup
           data-testid="unselected-items-group"
@@ -70,7 +70,7 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
 
       {selectedItems.length ? (
         <>
-          <div className="flex items-center gap-2 mt-4 mr-3 mb-4">
+          <div className="flex items-center gap-2 m-4">
             <Typography variant="h3" className="whitespace-nowrap">
               Produtos comprados
             </Typography>
