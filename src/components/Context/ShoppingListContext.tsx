@@ -16,7 +16,7 @@ export const ShoppingListContext = createContext<ShoppingListContextType>(
 export const ShoppingListContextProvider = ({
   children,
 }: {
-  children: ReactNode;
+  children: ReactNode; // TODO use PropsWithChildren
 }) => {
   const [items, setItems] = useState<ShoppingListItem[]>([]);
 

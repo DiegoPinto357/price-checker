@@ -1,12 +1,15 @@
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 
 type Props = {
   variant: 'h1' | 'h2' | 'h3';
   className?: string;
-  children: ReactNode;
 };
 
-const Typography = ({ variant, children, className }: Props) => {
+const Typography = ({
+  variant,
+  children,
+  className,
+}: PropsWithChildren<Props>) => {
   switch (variant) {
     case 'h1':
       return <h1 className={`mb-4 text-2xl ${className}`}>{children}</h1>;
