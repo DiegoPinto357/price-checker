@@ -9,6 +9,9 @@ import {
 import Observer from '../lib/Observer';
 import Typography from '../lib/Typography';
 
+const ITEMS_TO_ADD = 10;
+const MAX_NUM_OF_ITEMS = 30;
+
 // TODO move to some util lib
 const toCapitalCase = (text: string) =>
   text.charAt(0).toUpperCase() + text.slice(1);
@@ -41,9 +44,13 @@ const Meals = () => {
   const addItemsOnTop = useCallback(() => {
     setItems(currentItems => {
       const firstDate = new Date(currentItems[0].date);
-      const itemsToAdd = 10;
-      firstDate.setDate(firstDate.getDate() - itemsToAdd);
-      return [...generateDays(firstDate, itemsToAdd), ...currentItems];
+      firstDate.setDate(firstDate.getDate() - ITEMS_TO_ADD);
+
+      if (currentItems.length + ITEMS_TO_ADD > MAX_NUM_OF_ITEMS) {
+        currentItems.splice(-ITEMS_TO_ADD, ITEMS_TO_ADD);
+      }
+
+      return [...generateDays(firstDate, ITEMS_TO_ADD), ...currentItems];
     });
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 1;
@@ -54,12 +61,14 @@ const Meals = () => {
     setItems(currentItems => {
       const lastDate = new Date(currentItems[currentItems.length - 1].date);
       lastDate.setDate(lastDate.getDate() + 1);
-      const itemsToAdd = 10;
-      return [...currentItems, ...generateDays(lastDate, itemsToAdd)];
+
+      if (currentItems.length + ITEMS_TO_ADD > MAX_NUM_OF_ITEMS) {
+        currentItems.splice(0, ITEMS_TO_ADD);
+      }
+
+      return [...currentItems, ...generateDays(lastDate, ITEMS_TO_ADD)];
     });
   }, []);
-
-  console.log(items);
 
   return (
     <div data-testid="meals" className="flex flex-col justify-between h-full">
