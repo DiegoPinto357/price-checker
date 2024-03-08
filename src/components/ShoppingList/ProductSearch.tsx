@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Autocomplete, AutocompleteItem, Button } from '@nextui-org/react';
-import { FaPlus } from 'react-icons/fa';
+import { LuPlus } from 'react-icons/lu';
 
 import type { KeyboardEvent } from 'react';
 import type { ShoppingListItem } from './types';
@@ -45,12 +45,12 @@ const ProductSearch = ({ onAddItem }: Props) => {
       </Autocomplete>
       <Button
         className="self-end"
-        color="secondary"
+        color="primary"
         aria-label="add"
         isIconOnly
         onPress={handleAddButtonPress}
       >
-        <FaPlus />
+        <LuPlus className="w-6 h-6" />
       </Button>
     </div>
   );
