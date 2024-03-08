@@ -12,7 +12,9 @@ const Typography = ({
 }: PropsWithChildren<Props>) => {
   switch (variant) {
     case 'h1':
-      return <h1 className={`mb-4 text-2xl ${className}`}>{children}</h1>;
+      return (
+        <h1 className={`mb-4 text-2xl font-medium ${className}`}>{children}</h1>
+      );
 
     case 'h2':
       return <h2 className={`mb-2 text-xl ${className}`}>{children}</h2>;
