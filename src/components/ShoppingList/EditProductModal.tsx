@@ -72,6 +72,8 @@ const EditProductModal = ({ isOpen, itemName, onClose }: Props) => {
               type="text"
               label="Nome"
               isClearable
+              labelPlacement="outside"
+              variant="bordered"
               value={itemNameValue}
               onValueChange={setItemNameValue}
               onKeyDown={handleInputKeyPress}
