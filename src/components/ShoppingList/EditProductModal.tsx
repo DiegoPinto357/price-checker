@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Button,
   Input,
@@ -28,14 +28,6 @@ type Props = {
 const EditProductModal = ({ isOpen, itemName, onClose }: Props) => {
   const [itemNameValue, setItemNameValue] = useState<string>('');
   const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
-
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     setItemNameValue(itemName);
@@ -68,7 +60,6 @@ const EditProductModal = ({ isOpen, itemName, onClose }: Props) => {
           <ModalBody>
             <Input
               data-testid="edit-item-input"
-              ref={inputRef}
               type="text"
               label="Nome"
               isClearable

@@ -212,7 +212,6 @@ describe('ShoppingList', () => {
 
     const dialog = screen.getByRole('dialog', { name: 'Editar item' });
     const editNameInput = within(dialog).getByTestId('edit-item-input');
-    expect(editNameInput).toHaveFocus();
     expect(editNameInput).toHaveValue('Banan');
     await userEvent.type(editNameInput, 'a');
     expect(editNameInput).toHaveValue('Banana');
@@ -234,7 +233,6 @@ describe('ShoppingList', () => {
 
     const dialog = screen.getByRole('dialog', { name: 'Editar item' });
     const editNameInput = within(dialog).getByTestId('edit-item-input');
-    expect(editNameInput).toHaveFocus();
     expect(editNameInput).toHaveValue('Banan');
     await userEvent.type(editNameInput, 'a');
     expect(editNameInput).toHaveValue('Banana');
@@ -254,7 +252,6 @@ describe('ShoppingList', () => {
 
     const dialog = screen.getByRole('dialog', { name: 'Editar item' });
     const editNameInput = within(dialog).getByTestId('edit-item-input');
-    expect(editNameInput).toHaveFocus();
     expect(editNameInput).toHaveValue('Banan');
     await userEvent.type(editNameInput, 'a{enter}');
 
