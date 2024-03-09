@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { FindOptions, FindOneOptions, UpdateOneOptions } from './types';
 
-const serverHost = 'http://127.0.0.1:3001';
+const serverHost = 'http://127.0.0.1:3002';
 
 const find = async <T>(
   databaseName: string,

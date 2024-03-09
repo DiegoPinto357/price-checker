@@ -18,7 +18,7 @@ type MockNodeJS = typeof NodeJS & {
 const databaseName = 'products';
 const collectionName = 'items';
 
-const serverHost = 'http://127.0.0.1:3001';
+const serverHost = 'http://127.0.0.1:3002';
 
 interface DatabaseProxy {
   find: Find;

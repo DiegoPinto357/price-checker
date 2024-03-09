@@ -6,7 +6,7 @@ import { Nf } from '../types';
 const platform = Capacitor.getPlatform();
 
 const getNfDataHttp = async (key: string): Promise<Nf> => {
-  const { data } = await axios.get('http://127.0.0.1:3001/nf-data', {
+  const { data } = await axios.get('http://127.0.0.1:3002/nf-data', {
     params: { key },
   });
   return data;

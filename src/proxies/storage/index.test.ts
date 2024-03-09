@@ -17,7 +17,7 @@ describe('storage', () => {
 
         expect(axios.post).toBeCalledTimes(1);
         expect(axios.post).toBeCalledWith(
-          'http://127.0.0.1:3001/storage/write-file',
+          'http://127.0.0.1:3002/storage/write-file',
           { filename, data }
         );
       });
@@ -36,7 +36,7 @@ describe('storage', () => {
 
         expect(axios.get).toBeCalledTimes(1);
         expect(axios.get).toBeCalledWith(
-          `http://127.0.0.1:3001/storage/read-file/${encodeURIComponent(
+          `http://127.0.0.1:3002/storage/read-file/${encodeURIComponent(
             filename
           )}`
         );

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const writeFile = async <T>(filename: string, data: T) =>
-  await axios.post('http://127.0.0.1:3001/storage/write-file', {
+  await axios.post('http://127.0.0.1:3002/storage/write-file', {
     filename,
     data,
   });
@@ -9,7 +9,7 @@ const writeFile = async <T>(filename: string, data: T) =>
 const readFile = async <T>(filename: string) => {
   try {
     const { data } = await axios.get(
-      `http://127.0.0.1:3001/storage/read-file/${encodeURIComponent(filename)}`
+      `http://127.0.0.1:3002/storage/read-file/${encodeURIComponent(filename)}`
     );
     return data as T;
   } catch (error) {

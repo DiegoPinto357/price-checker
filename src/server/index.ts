@@ -30,7 +30,7 @@ app.get<{ Querystring: ItemsQuerystring }>(
   }
 );
 
-app.listen({ port: 3001 }, (err, address) => {
+app.listen({ port: 3002 }, (err, address) => {
   if (err) throw err;
   console.log(`Server is now listening on ${address}`);
 });
