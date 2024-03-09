@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
-import EditModal from '../ShoppingList/EditModal';
+import EditModal from '../lib/EditModal';
 import AddMealModal from './AddMealModal';
 import DayContainer from './DayContainer';
 
-import type { ItemEdit } from '../ShoppingList/EditModal'; // TODO make it a generic component
+import type { ItemEdit } from '../lib/EditModal';
 import type { MealItemData } from './MealItem';
 
 export type DayContainerData = { date: string; label: string };

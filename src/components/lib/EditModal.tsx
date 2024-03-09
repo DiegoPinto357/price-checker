@@ -8,10 +8,10 @@ import {
   ModalBody,
   ModalFooter,
 } from '@nextui-org/react';
-import ConfirmDialog from '../lib/ConfirmDialog';
+import ConfirmDialog from './ConfirmDialog';
 
 import type { KeyboardEvent } from 'react';
-import type { ConfirmDialogUserAction } from '../lib/ConfirmDialog';
+import type { ConfirmDialogUserAction } from './ConfirmDialog';
 
 export type ItemEdit = {
   name: string;

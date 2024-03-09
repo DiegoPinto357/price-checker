@@ -3,13 +3,13 @@ import { Divider, Button } from '@nextui-org/react';
 import { MdOutlineDeleteSweep } from 'react-icons/md';
 import Typography from '../lib/Typography';
 import ConfirmDialog from '../lib/ConfirmDialog';
+import EditModal from '../lib/EditModal';
 import ProductListGroup from './ProductListGroup';
-import EditModal from './EditModal';
 
 import type { ShoppingListItem } from './types';
 import type { ConfirmDialogUserAction } from '../lib/ConfirmDialog';
+import type { ItemEdit } from '../lib/EditModal';
 import type { ItemChange } from './ProductListGroup';
-import type { ItemEdit } from './EditModal';
 
 type Props = {
   items: ShoppingListItem[];
