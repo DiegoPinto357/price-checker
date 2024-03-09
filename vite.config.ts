@@ -8,6 +8,9 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   publicDir: '../static',
+  server: {
+    port: 5174,
+  },
   test: {
     globals: true,
     environment: 'jsdom',
