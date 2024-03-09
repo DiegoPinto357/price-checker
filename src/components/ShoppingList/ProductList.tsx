@@ -4,12 +4,12 @@ import { MdOutlineDeleteSweep } from 'react-icons/md';
 import Typography from '../lib/Typography';
 import ConfirmDialog from '../lib/ConfirmDialog';
 import ProductListGroup from './ProductListGroup';
-import EditProductModal from './EditProductModal';
+import EditModal from './EditModal';
 
 import type { ShoppingListItem } from './types';
 import type { ConfirmDialogUserAction } from '../lib/ConfirmDialog';
 import type { ItemChange } from './ProductListGroup';
-import type { ItemEdit } from './EditProductModal';
+import type { ItemEdit } from './EditModal';
 
 type Props = {
   items: ShoppingListItem[];
@@ -101,7 +101,7 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
         onClose={handleConfirmDialogClose}
       />
 
-      <EditProductModal
+      <EditModal
         isOpen={editItemDialogOpen}
         itemName={selectedItem}
         onClose={handleEditItemDialogClose}

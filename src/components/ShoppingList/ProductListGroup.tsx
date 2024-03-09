@@ -1,7 +1,7 @@
 import { CheckboxGroup, Checkbox } from '@nextui-org/react';
 
 import type { ShoppingListItem } from './types';
-import type { ItemEdit } from './EditProductModal';
+import type { ItemEdit } from './EditModal';
 
 // FIXME duplication
 export type ItemChange = ItemEdit & { checked?: boolean };

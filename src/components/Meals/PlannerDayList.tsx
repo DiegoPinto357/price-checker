@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
-import EditProductModal from '../ShoppingList/EditProductModal';
+import EditModal from '../ShoppingList/EditModal';
 import AddMealModal from './AddMealModal';
 import DayContainer from './DayContainer';
 
-import type { ItemEdit } from '../ShoppingList/EditProductModal';
+import type { ItemEdit } from '../ShoppingList/EditModal'; // TODO make it a generic component
 import type { MealItemData } from './MealItem';
 
 export type DayContainerData = { date: string; label: string };
@@ -92,7 +92,7 @@ const PlannerDayList = ({ days }: Props) => {
       )}
 
       {editMealDialogOpen && (
-        <EditProductModal
+        <EditModal
           isOpen={editMealDialogOpen}
           itemName={selectedMeal}
           onClose={handleEditMealDialogClose}
