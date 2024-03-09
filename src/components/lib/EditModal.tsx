@@ -25,7 +25,7 @@ type Props = {
   onClose: (itemData?: ItemEdit) => void;
 };
 
-const EditProductModal = ({ isOpen, itemName, onClose }: Props) => {
+const EditModal = ({ isOpen, itemName, onClose }: Props) => {
   const [itemNameValue, setItemNameValue] = useState<string>('');
   const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
 
@@ -113,4 +113,4 @@ const EditProductModal = ({ isOpen, itemName, onClose }: Props) => {
   );
 };
 
-export default EditProductModal;
+export default EditModal;
