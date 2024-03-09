@@ -11,9 +11,16 @@ type Props = {
   label: string;
   items: MealItemData[];
   onAddButtonClick: () => void;
+  onMealClick: (name: string) => void;
 };
 
-const DayContainer = ({ date, label, items, onAddButtonClick }: Props) => {
+const DayContainer = ({
+  date,
+  label,
+  items,
+  onAddButtonClick,
+  onMealClick,
+}: Props) => {
   const formattedDate = new Date(date).toLocaleDateString('pt-BR', {
     year: 'numeric',
     month: '2-digit',
@@ -45,7 +52,15 @@ const DayContainer = ({ date, label, items, onAddButtonClick }: Props) => {
         </div>
       </CardHeader>
       <CardBody className="flex gap-3">
-        {items ? items.map(item => <MealItem key={uuid()} {...item} />) : null}
+        {items
+          ? items.map(item => (
+              <MealItem
+                key={uuid()}
+                {...item}
+                onClick={() => onMealClick(item.label)}
+              />
+            ))
+          : null}
       </CardBody>
     </Card>
   );

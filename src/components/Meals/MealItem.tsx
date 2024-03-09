@@ -4,11 +4,13 @@ export type MealItemData = {
   label: string;
 };
 
-type Props = MealItemData;
+type Props = MealItemData & {
+  onClick: () => void;
+};
 
-const MealItem = ({ label }: Props) => {
+const MealItem = ({ label, onClick }: Props) => {
   return (
-    <Card>
+    <Card isPressable onPress={onClick}>
       <CardHeader>{label}</CardHeader>
       {/* <CardBody></CardBody> */}
     </Card>

@@ -2,10 +2,9 @@ import { useState, useRef, useCallback } from 'react';
 import { ScrollShadow } from '@nextui-org/react';
 import Observer from '../lib/Observer';
 import Typography from '../lib/Typography';
-import DayContainer from './DayContainer';
-import AddMealModal from './AddMealModal';
 
-import type { MealItemData } from './MealItem';
+import type { DayContainerData } from './PlannerDayList';
+import PlannerDayList from './PlannerDayList';
 
 const ITEMS_TO_ADD = 10;
 const MAX_NUM_OF_ITEMS = 30;
@@ -33,19 +32,15 @@ const generateDays = (startDate: Date, numOfDays: number) => {
 };
 
 const Meals = () => {
-  const [days, setDays] = useState<{ date: string; label: string }[]>(
+  const [days, setDays] = useState<DayContainerData[]>(
     generateDays(new Date(), 10)
   );
-  const [meals, setMeals] = useState<Record<string, MealItemData[]>>({});
-  const [addMealModalOpen, setAddMealModalOpen] = useState<boolean>(false);
-  const [dateToAdd, setDateToAdd] = useState<string>('');
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const addDaysOnTop = useCallback(() => {
     setDays(currentDays => {
       const firstDate = new Date(currentDays[0].date);
-      console.log({ firstDate });
       firstDate.setDate(firstDate.getDate() - ITEMS_TO_ADD);
 
       if (currentDays.length + ITEMS_TO_ADD > MAX_NUM_OF_ITEMS) {
@@ -72,31 +67,6 @@ const Meals = () => {
     });
   }, []);
 
-  const addMeal = useCallback((date: string, name: string) => {
-    setMeals(currentMeals => {
-      const newMeal = { label: name };
-      const newDay = currentMeals[date]
-        ? [...currentMeals[date], newMeal]
-        : [newMeal];
-      return { ...currentMeals, [date]: newDay };
-    });
-  }, []);
-
-  const handleAddButtonClick = useCallback((date: string) => {
-    setDateToAdd(date);
-    setAddMealModalOpen(true);
-  }, []);
-
-  const handleAddMealModalCLose = useCallback(
-    (mealName?: string) => {
-      if (mealName) {
-        addMeal(dateToAdd, mealName);
-      }
-      setAddMealModalOpen(false);
-    },
-    [addMeal, dateToAdd]
-  );
-
   return (
     <div data-testid="meals" className="flex flex-col justify-between h-full">
       <Typography className="mx-4" variant="h1">
@@ -111,28 +81,13 @@ const Meals = () => {
             addDaysOnTop();
           }}
         />
-        {days.map(({ date, label }) => (
-          <DayContainer
-            key={date}
-            date={date}
-            label={label}
-            items={meals[date]}
-            onAddButtonClick={() => handleAddButtonClick(date)}
-          />
-        ))}
+        <PlannerDayList days={days} />
         <Observer
           onIntersection={() => {
             addDaysOnBottom();
           }}
         />
       </ScrollShadow>
-
-      {addMealModalOpen && (
-        <AddMealModal
-          isOpen={addMealModalOpen}
-          onClose={handleAddMealModalCLose}
-        />
-      )}
     </div>
   );
 };
