@@ -65,7 +65,7 @@ describe('ShoppingList', () => {
   });
 
   it('loads shopping list file on start', async () => {
-    await storage.writeFile('shopping-list.json', [
+    await storage.writeFile('/shopping-list.json', [
       {
         name: 'Pão',
       },
@@ -100,7 +100,7 @@ describe('ShoppingList', () => {
 
     await editItem('Acepip', { newName: 'Acepipe' });
 
-    const shoppingListFile = await storage.readFile('shopping-list.json');
+    const shoppingListFile = await storage.readFile('/shopping-list.json');
 
     expect(shoppingListFile).toEqual([
       { name: 'Acepipe', checked: false },
