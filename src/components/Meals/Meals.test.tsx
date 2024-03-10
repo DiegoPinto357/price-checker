@@ -1,7 +1,10 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import MockDate from 'mockdate';
 import { renderWithContext } from '../testUtils';
 import Meals from '.';
+
+MockDate.set('2024-03-08');
 
 const MEALS = ['Peixe exuberante', 'Massa absurda', 'Leitão a pururuca'];
 
