@@ -2,7 +2,7 @@ import { storage } from './proxies';
 
 import type { ShoppingListItem } from './components/ShoppingList/types';
 
-const shoppingListFilename = 'shopping-list.json';
+const shoppingListFilename = '/shopping-list.json';
 
 export const getShoppintList = async () => {
   const shoppingList = await storage.readFile<ShoppingListItem[]>(

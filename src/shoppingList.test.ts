@@ -21,7 +21,7 @@ describe('shoppintList', () => {
   });
 
   it('gets shopping list from file', async () => {
-    await mockStorage.writeFile('shopping-list.json', defaultItems);
+    await mockStorage.writeFile('/shopping-list.json', defaultItems);
     const loadedItems = await getShoppintList();
     expect(loadedItems).toEqual(defaultItems);
   });
