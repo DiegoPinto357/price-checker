@@ -1,12 +1,17 @@
 import { ShoppingListContextProvider } from './ShoppingListContext';
+import { MealsPlannerContextProvider } from './MealsPlannerContext';
 
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 
 export { ShoppingListContext } from './ShoppingListContext';
+export { MealsPlannerContext } from './MealsPlannerContext';
 
-// TODO use PropsWithChildren
-const ContextProvider = ({ children }: { children: ReactNode }) => {
-  return <ShoppingListContextProvider>{children}</ShoppingListContextProvider>;
+const ContextProvider = ({ children }: PropsWithChildren) => {
+  return (
+    <ShoppingListContextProvider>
+      <MealsPlannerContextProvider>{children}</MealsPlannerContextProvider>
+    </ShoppingListContextProvider>
+  );
 };
 
 export default ContextProvider;

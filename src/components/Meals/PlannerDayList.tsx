@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useContext, useState, useCallback } from 'react';
 import EditModal from '../lib/EditModal';
 import AddMealModal from './AddMealModal';
 import DayContainer from './DayContainer';
+import { MealsPlannerContext } from '../Context';
 
 import type { ItemEdit } from '../lib/EditModal';
-import type { MealItemData } from './MealItem';
 
 export type DayContainerData = { date: string; label: string };
 
@@ -13,7 +13,8 @@ type Props = {
 };
 
 const PlannerDayList = ({ days }: Props) => {
-  const [meals, setMeals] = useState<Record<string, MealItemData[]>>({});
+  const { meals, addMeal, updateMeal } = useContext(MealsPlannerContext);
+
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [addMealModalOpen, setAddMealModalOpen] = useState<boolean>(false);
   const [selectedMeal, setSelectedMeal] = useState<string>('');
@@ -30,20 +31,10 @@ const PlannerDayList = ({ days }: Props) => {
     setEditMealDialogOpen(true);
   }, []);
 
-  const addMeal = useCallback((date: string, name: string) => {
-    setMeals(currentMeals => {
-      const newMeal = { label: name };
-      const newDay = currentMeals[date]
-        ? [...currentMeals[date], newMeal]
-        : [newMeal];
-      return { ...currentMeals, [date]: newDay };
-    });
-  }, []);
-
   const handleAddMealModalCLose = useCallback(
     (mealName?: string) => {
       if (mealName) {
-        addMeal(selectedDate, mealName);
+        addMeal(selectedDate, { label: mealName });
       }
       setAddMealModalOpen(false);
     },
@@ -54,24 +45,10 @@ const PlannerDayList = ({ days }: Props) => {
     (mealEdit?: ItemEdit) => {
       setEditMealDialogOpen(false);
       if (!mealEdit) return;
-
-      const { name, newName, deleted } = mealEdit;
-
-      const dateMeals = meals[selectedDate];
-      const meal = dateMeals.find(item => item.label === name);
-      if (meal) {
-        if (newName !== undefined) meal.label = newName;
-        if (deleted !== undefined) {
-          setMeals({
-            [selectedDate]: dateMeals.filter(item => item.label !== name),
-          });
-          return;
-        }
-      }
-      setMeals(meals);
+      updateMeal(selectedDate, mealEdit);
     },
 
-    [selectedDate, meals, setMeals]
+    [selectedDate, updateMeal]
   );
 
   return (

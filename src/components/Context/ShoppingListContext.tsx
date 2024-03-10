@@ -1,7 +1,7 @@
 import { createContext, useState, useCallback, useEffect } from 'react';
 import { getShoppintList, setShoppingList } from '../../shoppingList';
 
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 import type { ShoppingListItem } from '../ShoppingList/types';
 
 type ShoppingListContextType = {
@@ -15,9 +15,7 @@ export const ShoppingListContext = createContext<ShoppingListContextType>(
 
 export const ShoppingListContextProvider = ({
   children,
-}: {
-  children: ReactNode; // TODO use PropsWithChildren
-}) => {
+}: PropsWithChildren) => {
   const [items, setItems] = useState<ShoppingListItem[]>([]);
 
   const setShoppingListItems = useCallback(

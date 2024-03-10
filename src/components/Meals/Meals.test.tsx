@@ -1,5 +1,6 @@
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderWithContext } from '../testUtils';
 import Meals from '.';
 
 const MEALS = ['Peixe exuberante', 'Massa absurda', 'Leitão a pururuca'];
@@ -20,7 +21,7 @@ const addMeal = async (dayContainer: HTMLElement, mealName: string) => {
 
 describe('Meals', () => {
   it('add meals to day container', async () => {
-    render(<Meals />);
+    renderWithContext(<Meals />);
 
     const dayContainer = screen.getByRole('group', {
       name: 'Domingo, 10 de mar.',
@@ -33,7 +34,7 @@ describe('Meals', () => {
   });
 
   it('edits meal', async () => {
-    render(<Meals />);
+    renderWithContext(<Meals />);
 
     const dayContainer = screen.getByRole('group', {
       name: 'Domingo, 10 de mar.',
@@ -61,7 +62,7 @@ describe('Meals', () => {
   });
 
   it('deletes meal', async () => {
-    render(<Meals />);
+    renderWithContext(<Meals />);
 
     const dayContainer = screen.getByRole('group', {
       name: 'Domingo, 10 de mar.',
