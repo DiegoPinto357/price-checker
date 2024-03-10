@@ -55,15 +55,18 @@ const PlannerDayList = ({ days }: Props) => {
       setEditMealDialogOpen(false);
       if (!mealEdit) return;
 
-      const { name, newName } = mealEdit;
+      const { name, newName, deleted } = mealEdit;
 
-      const meal = meals[selectedDate].find(item => item.label === name);
+      const dateMeals = meals[selectedDate];
+      const meal = dateMeals.find(item => item.label === name);
       if (meal) {
         if (newName !== undefined) meal.label = newName;
-        // if (deleted !== undefined) {
-        //   setItems(items.filter(item => item.name !== name));
-        //   return;
-        // }
+        if (deleted !== undefined) {
+          setMeals({
+            [selectedDate]: dateMeals.filter(item => item.label !== name),
+          });
+          return;
+        }
       }
       setMeals(meals);
     },
