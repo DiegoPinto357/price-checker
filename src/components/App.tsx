@@ -1,5 +1,6 @@
 import { Tabs, Tab } from '@nextui-org/react';
-import { IoPizzaOutline } from 'react-icons/io5';
+// import { IoPizzaOutline } from 'react-icons/io5';
+import { IoCalendarOutline } from 'react-icons/io5';
 import { PiShoppingCart } from 'react-icons/pi';
 import { BsQrCodeScan } from 'react-icons/bs';
 import { GoGear } from 'react-icons/go';
@@ -31,9 +32,9 @@ const App = () => {
           disableAnimation
         >
           <Tab
-            key="meals"
-            aria-label="meals"
-            title={<IoPizzaOutline className={iconClass} />}
+            key="meals-planner"
+            aria-label="meals planner"
+            title={<IoCalendarOutline className={iconClass} />}
           >
             <Meals />
           </Tab>

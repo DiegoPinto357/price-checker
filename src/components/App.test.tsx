@@ -6,7 +6,7 @@ describe('App', () => {
   it('renders each module for each selected tab', async () => {
     render(<App />);
 
-    let content = screen.getByTestId('meals');
+    let content = screen.getByTestId('meals-planner');
     expect(content).toBeInTheDocument();
 
     const shoppingListTab = screen.getByRole('tab', {
@@ -28,10 +28,10 @@ describe('App', () => {
     expect(content).toBeInTheDocument();
 
     const mealsTab = screen.getByRole('tab', {
-      name: 'meals',
+      name: 'meals planner',
     });
     await userEvent.click(mealsTab);
-    content = screen.getByTestId('meals');
+    content = screen.getByTestId('meals-planner');
     expect(content).toBeInTheDocument();
   });
 });
