@@ -29,7 +29,7 @@ const ProductListGroup = ({
     value={items.filter(({ checked }) => checked).map(({ name }) => name)}
   >
     {items.map((item, index) => {
-      const bgColor = index % 2 === 0 ? 'bg-gray-200' : 'bg-gray-50';
+      const bgColor = index % 2 === 0 ? 'bg-gray-100' : 'bg-gray-50';
       return (
         <Checkbox
           data-testid={`list-item-${item.name.toLowerCase()}`}

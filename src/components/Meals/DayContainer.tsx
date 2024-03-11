@@ -35,7 +35,7 @@ const DayContainer = ({
       role="group"
       aria-labelledby={headerId}
     >
-      <CardHeader className="rounded-none bg-gray-200 py-2">
+      <CardHeader className="rounded-none bg-gray-100 py-2">
         <div className="flex justify-between items-center w-full">
           <Typography id={headerId} variant="h4" className="font-medium m-0">
             {label}
@@ -51,17 +51,17 @@ const DayContainer = ({
           </Button>
         </div>
       </CardHeader>
-      <CardBody className="flex gap-3">
-        {items
-          ? items.map(item => (
-              <MealItem
-                key={uuid()}
-                {...item}
-                onClick={() => onMealClick(item.label)}
-              />
-            ))
-          : null}
-      </CardBody>
+      {items ? (
+        <CardBody className="flex gap-3">
+          {items.map(item => (
+            <MealItem
+              key={uuid()}
+              {...item}
+              onClick={() => onMealClick(item.label)}
+            />
+          ))}
+        </CardBody>
+      ) : null}
     </Card>
   );
 };
