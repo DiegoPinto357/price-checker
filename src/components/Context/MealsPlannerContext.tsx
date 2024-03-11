@@ -2,7 +2,7 @@ import { createContext, useState, useCallback } from 'react';
 
 import type { PropsWithChildren } from 'react';
 import type { ItemEdit } from '../lib/EditModal';
-import type { MealItemData } from '../Meals/MealItem';
+import type { MealItemData } from '../MealsPlanner/MealItem';
 
 type MealsRecord = Record<string, MealItemData[]>;
 

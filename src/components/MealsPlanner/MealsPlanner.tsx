@@ -31,7 +31,7 @@ const generateDays = (startDate: Date, numOfDays: number) => {
   });
 };
 
-const Meals = () => {
+const MealsPlanner = () => {
   const [days, setDays] = useState<DayContainerData[]>(
     generateDays(new Date(), 10)
   );
@@ -92,4 +92,4 @@ const Meals = () => {
   );
 };
 
-export default Meals;
+export default MealsPlanner;

@@ -22,7 +22,7 @@ const addMeal = async (dayContainer: HTMLElement, mealName: string) => {
   await userEvent.click(dialogAddButton);
 };
 
-describe('Meals', () => {
+describe('MealsPlanner', () => {
   it('add meals to day container', async () => {
     renderWithContext(<Meals />);
 
