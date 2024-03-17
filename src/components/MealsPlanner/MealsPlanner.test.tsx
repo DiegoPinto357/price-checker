@@ -23,6 +23,17 @@ const addMeal = async (dayContainer: HTMLElement, mealName: string) => {
 };
 
 describe('MealsPlanner', () => {
+  it('renders a 3 month list of days', async () => {
+    renderWithContext(<Meals />);
+
+    const dayContainers = screen.getAllByRole('group');
+    expect(dayContainers).toHaveLength(29 + 31 + 30);
+    expect(dayContainers[0]).toHaveAccessibleName('Quinta-feira, 1 de fev.');
+    expect(dayContainers[dayContainers.length - 1]).toHaveAccessibleName(
+      'Terça-feira, 30 de abr.'
+    );
+  });
+
   it('add meals to day container', async () => {
     renderWithContext(<Meals />);
 

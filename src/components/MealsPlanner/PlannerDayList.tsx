@@ -1,4 +1,4 @@
-import { useContext, useState, useCallback } from 'react';
+import { useContext, useRef, useState, useEffect, useCallback } from 'react';
 import EditModal from '../lib/EditModal';
 import AddMealModal from './AddMealModal';
 import DayContainer from './DayContainer';
@@ -19,6 +19,17 @@ const PlannerDayList = ({ days }: Props) => {
   const [addMealModalOpen, setAddMealModalOpen] = useState<boolean>(false);
   const [selectedMeal, setSelectedMeal] = useState<string>('');
   const [editMealDialogOpen, setEditMealDialogOpen] = useState<boolean>(false);
+
+  const todayElement = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (todayElement.current) {
+      todayElement.current.scrollIntoView({
+        behavior: 'instant',
+        block: 'start',
+      });
+    }
+  }, []);
 
   const handleAddButtonClick = useCallback((date: string) => {
     setSelectedDate(date);
@@ -55,6 +66,7 @@ const PlannerDayList = ({ days }: Props) => {
     <>
       {days.map(({ date, label }) => (
         <DayContainer
+          ref={date === 'Tue Mar 12 2024' ? todayElement : null} // isSameDay
           key={date}
           date={date}
           label={label}

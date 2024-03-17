@@ -6,14 +6,22 @@ import Typography from '../lib/Typography';
 import type { DayContainerData } from './PlannerDayList';
 import PlannerDayList from './PlannerDayList';
 
-const ITEMS_TO_ADD = 10;
-const MAX_NUM_OF_ITEMS = 30;
+const MAX_NUM_OF_MONTHS = 3;
 
 // TODO move to some util lib
 const toCapitalCase = (text: string) =>
   text.charAt(0).toUpperCase() + text.slice(1);
 
-const generateDays = (startDate: Date, numOfDays: number) => {
+const generateDaysOfMonth = ({
+  year,
+  month,
+}: {
+  year: number;
+  month: number;
+}) => {
+  const startDate = new Date(year, month - 1, 1);
+  const numOfDays = new Date(year, month, 0).getDate();
+
   return new Array(numOfDays).fill(null).map((_item, index) => {
     const date = new Date(startDate);
     date.setDate(date.getDate() + index);
@@ -25,29 +33,49 @@ const generateDays = (startDate: Date, numOfDays: number) => {
           weekday: 'long',
           day: 'numeric',
           month: 'short',
+          year:
+            new Date().getFullYear() === date.getFullYear()
+              ? undefined
+              : 'numeric',
         })
       ),
     };
   });
 };
 
+// TODO move to some date utils file
+const getYearAndMonth = (relativeMonthIndex = 0) => {
+  const date = new Date();
+  date.setMonth(date.getMonth() + relativeMonthIndex);
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  return { month, year };
+};
+
 const MealsPlanner = () => {
-  const [days, setDays] = useState<DayContainerData[]>(
-    generateDays(new Date(), 10)
-  );
+  const [days, setDays] = useState<DayContainerData[]>([
+    ...generateDaysOfMonth(getYearAndMonth(-1)),
+    ...generateDaysOfMonth(getYearAndMonth(0)),
+    ...generateDaysOfMonth(getYearAndMonth(1)),
+  ]);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const addDaysOnTop = useCallback(() => {
     setDays(currentDays => {
       const firstDate = new Date(currentDays[0].date);
-      firstDate.setDate(firstDate.getDate() - ITEMS_TO_ADD);
-
-      if (currentDays.length + ITEMS_TO_ADD > MAX_NUM_OF_ITEMS) {
-        currentDays.splice(-ITEMS_TO_ADD, ITEMS_TO_ADD);
-      }
-
-      return [...generateDays(firstDate, ITEMS_TO_ADD), ...currentDays];
+      firstDate.setMonth(firstDate.getMonth() - 1);
+      const month = firstDate.getMonth() + 1;
+      const year = firstDate.getFullYear();
+      const monthToRemove = (month + MAX_NUM_OF_MONTHS) % 12;
+      return [
+        ...generateDaysOfMonth({ month, year }),
+        ...currentDays.filter(day => {
+          const date = new Date(day.date);
+          const month = date.getMonth() + 1;
+          return month < monthToRemove;
+        }),
+      ];
     });
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 1;
@@ -57,13 +85,21 @@ const MealsPlanner = () => {
   const addDaysOnBottom = useCallback(() => {
     setDays(currentDays => {
       const lastDate = new Date(currentDays[currentDays.length - 1].date);
-      lastDate.setDate(lastDate.getDate() + 1);
-
-      if (currentDays.length + ITEMS_TO_ADD > MAX_NUM_OF_ITEMS) {
-        currentDays.splice(0, ITEMS_TO_ADD);
-      }
-
-      return [...currentDays, ...generateDays(lastDate, ITEMS_TO_ADD)];
+      lastDate.setDate(lastDate.getDate() - 5); // prevent resulting the worng month below
+      lastDate.setMonth(lastDate.getMonth() + 1);
+      const month = lastDate.getMonth() + 1;
+      const year = lastDate.getFullYear();
+      const monthToRemoveMod = (month - MAX_NUM_OF_MONTHS) % 12;
+      const monthToRemove =
+        monthToRemoveMod <= 0 ? monthToRemoveMod + 12 : monthToRemoveMod;
+      return [
+        ...currentDays.filter(day => {
+          const date = new Date(day.date);
+          const month = date.getMonth() + 1;
+          return month > monthToRemove;
+        }),
+        ...generateDaysOfMonth({ month, year }),
+      ];
     });
   }, []);
 
