@@ -1,9 +1,6 @@
 import { Card, CardHeader } from '@nextui-org/react';
 
-// TODO move to types file
-export type MealItemData = {
-  label: string;
-};
+import type { MealItemData } from './types';
 
 type Props = MealItemData & {
   onClick: () => void;

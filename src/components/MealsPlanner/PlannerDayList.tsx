@@ -1,4 +1,5 @@
 import { useContext, useRef, useState, useEffect, useCallback } from 'react';
+import { isToday } from '../../libs/date';
 import EditModal from '../lib/EditModal';
 import AddMealModal from './AddMealModal';
 import DayContainer from './DayContainer';
@@ -23,7 +24,7 @@ const PlannerDayList = ({ days }: Props) => {
   const todayElement = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (todayElement.current) {
+    if (todayElement.current && todayElement.current.scrollIntoView) {
       todayElement.current.scrollIntoView({
         behavior: 'instant',
         block: 'start',
@@ -66,7 +67,7 @@ const PlannerDayList = ({ days }: Props) => {
     <>
       {days.map(({ date, label }) => (
         <DayContainer
-          ref={date === 'Tue Mar 12 2024' ? todayElement : null} // isSameDay
+          ref={isToday(date) ? todayElement : null}
           key={date}
           date={date}
           label={label}

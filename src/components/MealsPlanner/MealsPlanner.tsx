@@ -1,5 +1,11 @@
 import { useState, useRef, useCallback } from 'react';
 import { ScrollShadow } from '@nextui-org/react';
+import {
+  formatDateToLocaleString,
+  getRelativeMonthAndYear,
+  addMonths,
+} from '../../libs/date';
+import { toCapitalCase } from '../../libs/string';
 import Observer from '../lib/Observer';
 import Typography from '../lib/Typography';
 
@@ -7,10 +13,6 @@ import type { DayContainerData } from './PlannerDayList';
 import PlannerDayList from './PlannerDayList';
 
 const MAX_NUM_OF_MONTHS = 3;
-
-// TODO move to some util lib
-const toCapitalCase = (text: string) =>
-  text.charAt(0).toUpperCase() + text.slice(1);
 
 const generateDaysOfMonth = ({
   year,
@@ -25,38 +27,25 @@ const generateDaysOfMonth = ({
   return new Array(numOfDays).fill(null).map((_item, index) => {
     const date = new Date(startDate);
     date.setDate(date.getDate() + index);
-    // TODO add year if not current year
     return {
       date: date.toDateString(),
-      label: toCapitalCase(
-        date.toLocaleDateString('pt-BR', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'short',
-          year:
-            new Date().getFullYear() === date.getFullYear()
-              ? undefined
-              : 'numeric',
-        })
-      ),
+      label: toCapitalCase(formatDateToLocaleString(date)),
     };
   });
 };
 
-// TODO move to some date utils file
-const getYearAndMonth = (relativeMonthIndex = 0) => {
-  const date = new Date();
-  date.setMonth(date.getMonth() + relativeMonthIndex);
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  return { month, year };
-};
+const filterDaysByMonth = (days: DayContainerData[], monthToRemove: number) =>
+  days.filter(day => {
+    const date = new Date(day.date);
+    const month = date.getMonth() + 1;
+    return month !== monthToRemove;
+  });
 
 const MealsPlanner = () => {
   const [days, setDays] = useState<DayContainerData[]>([
-    ...generateDaysOfMonth(getYearAndMonth(-1)),
-    ...generateDaysOfMonth(getYearAndMonth(0)),
-    ...generateDaysOfMonth(getYearAndMonth(1)),
+    ...generateDaysOfMonth(getRelativeMonthAndYear({ relativeMonthIndex: -1 })),
+    ...generateDaysOfMonth(getRelativeMonthAndYear()),
+    ...generateDaysOfMonth(getRelativeMonthAndYear({ relativeMonthIndex: 1 })),
   ]);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -64,40 +53,31 @@ const MealsPlanner = () => {
   const addDaysOnTop = useCallback(() => {
     setDays(currentDays => {
       const firstDate = new Date(currentDays[0].date);
-      firstDate.setMonth(firstDate.getMonth() - 1);
-      const month = firstDate.getMonth() + 1;
-      const year = firstDate.getFullYear();
-      const monthToRemove = (month + MAX_NUM_OF_MONTHS) % 12;
+      const { month, year } = getRelativeMonthAndYear({
+        date: firstDate,
+        relativeMonthIndex: -1,
+      });
+      const monthToRemove = addMonths(month, MAX_NUM_OF_MONTHS);
       return [
         ...generateDaysOfMonth({ month, year }),
-        ...currentDays.filter(day => {
-          const date = new Date(day.date);
-          const month = date.getMonth() + 1;
-          return month < monthToRemove;
-        }),
+        ...filterDaysByMonth(currentDays, monthToRemove),
       ];
     });
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = 1;
+      scrollRef.current.scrollTop = 100;
     }
   }, []);
 
   const addDaysOnBottom = useCallback(() => {
     setDays(currentDays => {
       const lastDate = new Date(currentDays[currentDays.length - 1].date);
-      lastDate.setDate(lastDate.getDate() - 5); // prevent resulting the worng month below
-      lastDate.setMonth(lastDate.getMonth() + 1);
-      const month = lastDate.getMonth() + 1;
-      const year = lastDate.getFullYear();
-      const monthToRemoveMod = (month - MAX_NUM_OF_MONTHS) % 12;
-      const monthToRemove =
-        monthToRemoveMod <= 0 ? monthToRemoveMod + 12 : monthToRemoveMod;
+      const { month, year } = getRelativeMonthAndYear({
+        date: lastDate,
+        relativeMonthIndex: 1,
+      });
+      const monthToRemove = addMonths(month, -MAX_NUM_OF_MONTHS);
       return [
-        ...currentDays.filter(day => {
-          const date = new Date(day.date);
-          const month = date.getMonth() + 1;
-          return month > monthToRemove;
-        }),
+        ...filterDaysByMonth(currentDays, monthToRemove),
         ...generateDaysOfMonth({ month, year }),
       ];
     });

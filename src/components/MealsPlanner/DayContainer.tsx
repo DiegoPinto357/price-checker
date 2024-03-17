@@ -2,10 +2,11 @@ import { forwardRef } from 'react';
 import { Card, CardHeader, CardBody, Button } from '@nextui-org/react';
 import { LuPlus } from 'react-icons/lu';
 import { v4 as uuid } from 'uuid';
+import { formatDateToDDMMYYYY } from '../../libs/date';
 import Typography from '../lib/Typography';
 import MealItem from './MealItem';
 
-import type { MealItemData } from './MealItem';
+import type { MealItemData } from './types';
 
 type Props = {
   date: string;
@@ -17,11 +18,7 @@ type Props = {
 
 const DayContainer = forwardRef<HTMLDivElement, Props>(
   ({ date, label, items, onAddButtonClick, onMealClick }, ref) => {
-    const formattedDate = new Date(date).toLocaleDateString('pt-BR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
+    const formattedDate = formatDateToDDMMYYYY(date);
     const headerId = `day-container-title-${formattedDate}`;
 
     return (

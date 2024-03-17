@@ -14,7 +14,7 @@ const Observer = ({ onIntersection }: ObserverProps) => {
           onIntersection();
         }
       },
-      { threshold: 0.001 }
+      { threshold: [0, 0.5, 1] }
     );
 
     if (ref.current) {
