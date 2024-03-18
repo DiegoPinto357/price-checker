@@ -1,10 +1,14 @@
 import { useRef, useEffect } from 'react';
 
-type ObserverProps = {
+export type ObserverProps = {
+  'data-testid'?: string;
   onIntersection: () => void;
 };
 
-const Observer = ({ onIntersection }: ObserverProps) => {
+const Observer = ({
+  'data-testid': dataTestId,
+  onIntersection,
+}: ObserverProps) => {
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -30,7 +34,7 @@ const Observer = ({ onIntersection }: ObserverProps) => {
     };
   }, [ref, onIntersection]);
 
-  return <div ref={ref} />;
+  return <div ref={ref} data-testid={dataTestId} />;
 };
 
 export default Observer;

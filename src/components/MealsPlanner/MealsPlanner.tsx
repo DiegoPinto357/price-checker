@@ -84,24 +84,24 @@ const MealsPlanner = () => {
   }, []);
 
   return (
-    <div
-      data-testid="meals-planner"
-      className="flex flex-col justify-between h-full"
-    >
+    <div className="flex flex-col justify-between h-full">
       <Typography className="mx-4" variant="h1">
         Planejamento
       </Typography>
       <ScrollShadow
+        data-testid="scroll-container"
         className="overflow-y-scroll overflow-x-visible"
         ref={scrollRef}
       >
         <Observer
+          data-testid="observer-top"
           onIntersection={() => {
             addDaysOnTop();
           }}
         />
         <PlannerDayList days={days} />
         <Observer
+          data-testid="observer-bottom"
           onIntersection={() => {
             addDaysOnBottom();
           }}

@@ -2,7 +2,10 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MockDate from 'mockdate';
 import { renderWithContext } from '../testUtils';
+import { triggerIntersectionOnInstance } from '../lib/__mocks__/Observer';
 import Meals from '.';
+
+vi.mock('../lib/Observer');
 
 MockDate.set('2024-03-08');
 
@@ -31,6 +34,32 @@ describe('MealsPlanner', () => {
     expect(dayContainers[0]).toHaveAccessibleName('Quinta-feira, 1 de fev.');
     expect(dayContainers[dayContainers.length - 1]).toHaveAccessibleName(
       'Terça-feira, 30 de abr.'
+    );
+  });
+
+  it('adds month at the top of the list and removes the last one when user scrolls to top', () => {
+    renderWithContext(<Meals />);
+
+    triggerIntersectionOnInstance['observer-top']();
+
+    const dayContainers = screen.getAllByRole('group');
+    expect(dayContainers).toHaveLength(31 + 29 + 31);
+    expect(dayContainers[0]).toHaveAccessibleName('Segunda-feira, 1 de jan.');
+    expect(dayContainers[dayContainers.length - 1]).toHaveAccessibleName(
+      'Domingo, 31 de mar.'
+    );
+  });
+
+  it('adds month at the bottom of the list and removes the first one when user scrolls to top', () => {
+    renderWithContext(<Meals />);
+
+    triggerIntersectionOnInstance['observer-bottom']();
+
+    const dayContainers = screen.getAllByRole('group');
+    expect(dayContainers).toHaveLength(31 + 30 + 31);
+    expect(dayContainers[0]).toHaveAccessibleName('Sexta-feira, 1 de mar.');
+    expect(dayContainers[dayContainers.length - 1]).toHaveAccessibleName(
+      'Sexta-feira, 31 de mai.'
     );
   });
 
