@@ -84,7 +84,10 @@ const MealsPlanner = () => {
   }, []);
 
   return (
-    <div className="flex flex-col justify-between h-full">
+    <div
+      data-testid="meals-planner"
+      className="flex flex-col justify-between h-full"
+    >
       <Typography className="mx-4" variant="h1">
         Planejamento
       </Typography>

@@ -1,11 +1,17 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MockDate from 'mockdate';
-import { renderWithContext } from '../testUtils';
+import { createRender } from '../testUtils';
 import { triggerIntersectionOnInstance } from '../lib/__mocks__/Observer';
+import { storage } from '../../proxies';
 import Meals from '.';
 
 vi.mock('../lib/Observer');
+vi.mock('../../proxies/storage');
+
+type MockStorage = typeof storage & { clearFiles: () => void };
+
+const mockStorage = storage as MockStorage;
 
 MockDate.set('2024-03-08');
 
@@ -25,9 +31,16 @@ const addMeal = async (dayContainer: HTMLElement, mealName: string) => {
   await userEvent.click(dialogAddButton);
 };
 
+const render = createRender({ mealsPlannerProviderEnabled: true });
+
 describe('MealsPlanner', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockStorage.clearFiles();
+  });
+
   it('renders a 3 month list of days', async () => {
-    renderWithContext(<Meals />);
+    render(<Meals />);
 
     const dayContainers = screen.getAllByRole('group');
     expect(dayContainers).toHaveLength(29 + 31 + 30);
@@ -35,10 +48,12 @@ describe('MealsPlanner', () => {
     expect(dayContainers[dayContainers.length - 1]).toHaveAccessibleName(
       'Terça-feira, 30 de abr.'
     );
+
+    // expect(storage.readFile).toBeCalledTimes(3);
   });
 
   it('adds month at the top of the list and removes the last one when user scrolls to top', () => {
-    renderWithContext(<Meals />);
+    render(<Meals />);
 
     triggerIntersectionOnInstance['observer-top']();
 
@@ -51,7 +66,7 @@ describe('MealsPlanner', () => {
   });
 
   it('adds month at the bottom of the list and removes the first one when user scrolls to top', () => {
-    renderWithContext(<Meals />);
+    render(<Meals />);
 
     triggerIntersectionOnInstance['observer-bottom']();
 
@@ -64,7 +79,7 @@ describe('MealsPlanner', () => {
   });
 
   it('add meals to day container', async () => {
-    renderWithContext(<Meals />);
+    render(<Meals />);
 
     const dayContainer = screen.getByRole('group', {
       name: 'Domingo, 10 de mar.',
@@ -77,7 +92,7 @@ describe('MealsPlanner', () => {
   });
 
   it('edits meal', async () => {
-    renderWithContext(<Meals />);
+    render(<Meals />);
 
     const dayContainer = screen.getByRole('group', {
       name: 'Domingo, 10 de mar.',
@@ -105,7 +120,7 @@ describe('MealsPlanner', () => {
   });
 
   it('deletes meal', async () => {
-    renderWithContext(<Meals />);
+    render(<Meals />);
 
     const dayContainer = screen.getByRole('group', {
       name: 'Domingo, 10 de mar.',

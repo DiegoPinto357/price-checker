@@ -1,6 +1,6 @@
 import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithContext } from '../testUtils';
+import { createRender } from '../testUtils';
 import { storage } from '../../proxies';
 import ShoppingList from '.';
 
@@ -58,6 +58,8 @@ const editItem = async (
   await userEvent.click(dialogOkButton);
 };
 
+const render = createRender({ shoppingListProviderEnabled: true });
+
 describe('ShoppingList', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -75,7 +77,7 @@ describe('ShoppingList', () => {
       },
     ]);
 
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     await waitFor(() => {
       const unselectedItemsGroup = screen.getByTestId('unselected-items-group');
@@ -89,7 +91,7 @@ describe('ShoppingList', () => {
   });
 
   it('saves shopping list to a file', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     await addItems(['Suculenta', 'Banana', 'Vinho', 'Acepip']);
 
@@ -110,7 +112,7 @@ describe('ShoppingList', () => {
   });
 
   it('inserts item by typing and pressing add button', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     const addButton = screen.getByRole('button', { name: 'add' });
@@ -123,7 +125,7 @@ describe('ShoppingList', () => {
   });
 
   it('inserts item by typing and pressing enter', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     await userEvent.type(input, 'Banana{enter}');
@@ -134,7 +136,7 @@ describe('ShoppingList', () => {
   });
 
   it('sorts inserted items alphabeticaly', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     await addItems(['Suculenta', 'Banana']);
 
@@ -144,7 +146,7 @@ describe('ShoppingList', () => {
   });
 
   it('moves checked item to the selected items group', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     await addItems(['Suculenta', 'Banana', 'Vinho', 'Batata']);
     await selectItems([1, 2]);
@@ -157,7 +159,7 @@ describe('ShoppingList', () => {
   });
 
   it('trims spaces before adding new item', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     const input = screen.getByRole('combobox', { name: 'Buscar produto' });
     await userEvent.type(input, '    Banana   {enter}');
@@ -167,7 +169,7 @@ describe('ShoppingList', () => {
   });
 
   it('does not insert an existing item', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     await addItems(['Banana', 'Banana']);
 
@@ -176,7 +178,7 @@ describe('ShoppingList', () => {
   });
 
   it('does not insert an existing item with different case', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     await addItems(['Banana', 'banana']);
 
@@ -185,7 +187,7 @@ describe('ShoppingList', () => {
   });
 
   it('deletes selected items when delete button is pressed and and dialog is confirmed', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     await addItems(['Suculenta', 'Banana', 'Vinho', 'Batata']);
     await selectItems([1, 2]);
@@ -204,7 +206,7 @@ describe('ShoppingList', () => {
   });
 
   it('edits unselected item', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     await addItems(['Suculenta', 'Banan']);
     const itemToEdit = screen.getByTestId('list-item-banan');
@@ -224,7 +226,7 @@ describe('ShoppingList', () => {
   });
 
   it('edits selected item', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     await addItems(['Suculenta', 'Banan']);
     const unselectedItem = screen.getByTestId('list-item-banan');
@@ -246,7 +248,7 @@ describe('ShoppingList', () => {
   });
 
   it('edits item and cofirm by pressing enter', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     await addItems(['Suculenta', 'Banan']);
     const itemToEdit = screen.getByTestId('list-item-banan');
@@ -263,7 +265,7 @@ describe('ShoppingList', () => {
   });
 
   it('deletes item', async () => {
-    renderWithContext(<ShoppingList />);
+    render(<ShoppingList />);
 
     await addItems(['Suculenta', 'Banana']);
 

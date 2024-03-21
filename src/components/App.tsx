@@ -5,7 +5,7 @@ import { PiShoppingCart } from 'react-icons/pi';
 import { BsQrCodeScan } from 'react-icons/bs';
 import { GoGear } from 'react-icons/go';
 import ContextProvider from './Context';
-import Meals from './MealsPlanner';
+import MealsPlanner from './MealsPlanner';
 import NodejsLoader from './NodejsLoader';
 import ShoppingList from './ShoppingList';
 import NFScanner from './NFScanner';
@@ -36,7 +36,7 @@ const App = () => {
             aria-label="meals planner"
             title={<IoCalendarOutline className={iconClass} />}
           >
-            <Meals />
+            <MealsPlanner />
           </Tab>
 
           <Tab
