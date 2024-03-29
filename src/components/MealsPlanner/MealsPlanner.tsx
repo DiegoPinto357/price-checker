@@ -1,6 +1,14 @@
-import { useState, useRef, useCallback } from 'react';
+import {
+  useContext,
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+} from 'react';
 import { ScrollShadow } from '@nextui-org/react';
 import {
+  formatDateToYYYMMDD,
   formatDateToLocaleString,
   getRelativeMonthAndYear,
   addMonths,
@@ -8,9 +16,10 @@ import {
 import { toCapitalCase } from '../../libs/string';
 import Observer from '../lib/Observer';
 import Typography from '../lib/Typography';
+import { MealsPlannerContext } from '../Context';
+import PlannerDayList from './PlannerDayList';
 
 import type { DayContainerData } from './PlannerDayList';
-import PlannerDayList from './PlannerDayList';
 
 const MAX_NUM_OF_MONTHS = 3;
 
@@ -28,7 +37,7 @@ const generateDaysOfMonth = ({
     const date = new Date(startDate);
     date.setDate(date.getDate() + index);
     return {
-      date: date.toDateString(),
+      date: formatDateToYYYMMDD(date),
       label: toCapitalCase(formatDateToLocaleString(date)),
     };
   });
@@ -42,11 +51,26 @@ const filterDaysByMonth = (days: DayContainerData[], monthToRemove: number) =>
   });
 
 const MealsPlanner = () => {
+  const initialDateRange = useMemo(
+    () => [
+      getRelativeMonthAndYear({ relativeMonthIndex: -1 }),
+      getRelativeMonthAndYear(),
+      getRelativeMonthAndYear({ relativeMonthIndex: 1 }),
+    ],
+    []
+  );
+
   const [days, setDays] = useState<DayContainerData[]>([
-    ...generateDaysOfMonth(getRelativeMonthAndYear({ relativeMonthIndex: -1 })),
-    ...generateDaysOfMonth(getRelativeMonthAndYear()),
-    ...generateDaysOfMonth(getRelativeMonthAndYear({ relativeMonthIndex: 1 })),
+    ...generateDaysOfMonth(initialDateRange[0]),
+    ...generateDaysOfMonth(initialDateRange[1]),
+    ...generateDaysOfMonth(initialDateRange[2]),
   ]);
+
+  const { loadMeals } = useContext(MealsPlannerContext);
+
+  useEffect(() => {
+    loadMeals(initialDateRange);
+  }, [initialDateRange, loadMeals]);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 

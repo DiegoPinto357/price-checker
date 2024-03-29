@@ -1,10 +1,11 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MockDate from 'mockdate';
 import { createRender } from '../testUtils';
 import { triggerIntersectionOnInstance } from '../lib/__mocks__/Observer';
 import { storage } from '../../proxies';
 import Meals from '.';
+import { MealsRecord } from '../Context/MealsPlannerContext';
 
 vi.mock('../lib/Observer');
 vi.mock('../../proxies/storage');
@@ -15,7 +16,76 @@ const mockStorage = storage as MockStorage;
 
 MockDate.set('2024-03-08');
 
-const MEALS = ['Peixe exuberante', 'Massa absurda', 'Leitão a pururuca'];
+const USER_MEALS = ['Peixe exuberante', 'Massa absurda', 'Leitão a pururuca'];
+
+const MEALS_FILES = {
+  jan: {
+    filename: '2024-01.json',
+    data: {
+      '2024-1-3': [{ label: 'Bife illuminati' }],
+    },
+  },
+  feb: {
+    filename: '2024-02.json',
+    data: {
+      '2024-2-8': [
+        { label: 'Banana portuguesa' },
+        { label: 'Sophie no rolete' },
+      ],
+    },
+  },
+  mar: {
+    filename: '2024-03.json',
+    data: {
+      '2024-3-12': [
+        { label: 'Frango quadriculado' },
+        { label: 'Pizza de pudim' },
+      ],
+      '2024-3-21': [
+        { label: 'Batata a milanesa' },
+        { label: 'Carpa cabeçuda' },
+      ],
+    },
+  },
+  may: {
+    filename: '2024-05.json',
+    data: {
+      '2024-5-13': [{ label: 'Pizza napolitana' }],
+    },
+  },
+} as const satisfies Record<string, { filename: string; data: MealsRecord }>;
+
+const setupFiles = async () => {
+  Object.values(MEALS_FILES).forEach(
+    async ({ filename, data }) =>
+      await storage.writeFile(`/meals/${filename}`, data)
+  );
+};
+
+const verifyLoadedData = async (
+  data: MealsRecord,
+  { notInTheDocument } = { notInTheDocument: false }
+) => {
+  await Promise.all(
+    Object.entries(data).map(async ([day, meals]) => {
+      const dayContainer = screen.queryByTestId(day);
+
+      if (notInTheDocument) {
+        expect(dayContainer).not.toBeInTheDocument();
+        return;
+      }
+
+      await Promise.all(
+        meals.map(async meal => {
+          await waitFor(() => {
+            const mealCard = within(dayContainer!).getByText(meal.label);
+            expect(mealCard).toBeInTheDocument();
+          });
+        })
+      );
+    })
+  );
+};
 
 const addMeal = async (dayContainer: HTMLElement, mealName: string) => {
   const addButton = within(dayContainer).getByRole('button', { name: 'add' });
@@ -40,6 +110,8 @@ describe('MealsPlanner', () => {
   });
 
   it('renders a 3 month list of days', async () => {
+    await setupFiles();
+
     render(<Meals />);
 
     const dayContainers = screen.getAllByRole('group');
@@ -49,7 +121,10 @@ describe('MealsPlanner', () => {
       'Terça-feira, 30 de abr.'
     );
 
-    // expect(storage.readFile).toBeCalledTimes(3);
+    await verifyLoadedData(MEALS_FILES.jan.data, { notInTheDocument: true });
+    await verifyLoadedData(MEALS_FILES.feb.data);
+    await verifyLoadedData(MEALS_FILES.mar.data);
+    await verifyLoadedData(MEALS_FILES.may.data, { notInTheDocument: true });
   });
 
   it('adds month at the top of the list and removes the last one when user scrolls to top', () => {
@@ -84,11 +159,11 @@ describe('MealsPlanner', () => {
     const dayContainer = screen.getByRole('group', {
       name: 'Domingo, 10 de mar.',
     });
-    await addMeal(dayContainer, MEALS[0]);
-    await addMeal(dayContainer, MEALS[1]);
+    await addMeal(dayContainer, USER_MEALS[0]);
+    await addMeal(dayContainer, USER_MEALS[1]);
 
-    expect(within(dayContainer).getByText(MEALS[0])).toBeInTheDocument();
-    expect(within(dayContainer).getByText(MEALS[1])).toBeInTheDocument();
+    expect(within(dayContainer).getByText(USER_MEALS[0])).toBeInTheDocument();
+    expect(within(dayContainer).getByText(USER_MEALS[1])).toBeInTheDocument();
   });
 
   it('edits meal', async () => {
@@ -97,10 +172,10 @@ describe('MealsPlanner', () => {
     const dayContainer = screen.getByRole('group', {
       name: 'Domingo, 10 de mar.',
     });
-    await addMeal(dayContainer, MEALS[0]);
-    await addMeal(dayContainer, MEALS[1]);
+    await addMeal(dayContainer, USER_MEALS[0]);
+    await addMeal(dayContainer, USER_MEALS[1]);
 
-    const mealToEdit = within(dayContainer).getByText(MEALS[1]);
+    const mealToEdit = within(dayContainer).getByText(USER_MEALS[1]);
     await userEvent.click(mealToEdit);
 
     const editDialog = screen.getByRole('dialog', { name: 'Editar item' });
@@ -108,15 +183,17 @@ describe('MealsPlanner', () => {
     expect(nameInput).toHaveFocus();
 
     await userEvent.clear(nameInput);
-    await userEvent.type(nameInput, MEALS[2]);
+    await userEvent.type(nameInput, USER_MEALS[2]);
     const dialogOkButton = within(editDialog).getByRole('button', {
       name: 'Ok',
     });
     await userEvent.click(dialogOkButton);
 
-    expect(within(dayContainer).getByText(MEALS[0])).toBeInTheDocument();
-    expect(within(dayContainer).queryByText(MEALS[1])).not.toBeInTheDocument();
-    expect(within(dayContainer).getByText(MEALS[2])).toBeInTheDocument();
+    expect(within(dayContainer).getByText(USER_MEALS[0])).toBeInTheDocument();
+    expect(
+      within(dayContainer).queryByText(USER_MEALS[1])
+    ).not.toBeInTheDocument();
+    expect(within(dayContainer).getByText(USER_MEALS[2])).toBeInTheDocument();
   });
 
   it('deletes meal', async () => {
@@ -125,10 +202,10 @@ describe('MealsPlanner', () => {
     const dayContainer = screen.getByRole('group', {
       name: 'Domingo, 10 de mar.',
     });
-    await addMeal(dayContainer, MEALS[0]);
-    await addMeal(dayContainer, MEALS[1]);
+    await addMeal(dayContainer, USER_MEALS[0]);
+    await addMeal(dayContainer, USER_MEALS[1]);
 
-    const mealToEdit = within(dayContainer).getByText(MEALS[1]);
+    const mealToEdit = within(dayContainer).getByText(USER_MEALS[1]);
     await userEvent.click(mealToEdit);
 
     const editDialog = screen.getByRole('dialog', { name: 'Editar item' });
@@ -143,7 +220,9 @@ describe('MealsPlanner', () => {
     });
     await userEvent.click(confirmButton);
 
-    expect(within(dayContainer).getByText(MEALS[0])).toBeInTheDocument();
-    expect(within(dayContainer).queryByText(MEALS[1])).not.toBeInTheDocument();
+    expect(within(dayContainer).getByText(USER_MEALS[0])).toBeInTheDocument();
+    expect(
+      within(dayContainer).queryByText(USER_MEALS[1])
+    ).not.toBeInTheDocument();
   });
 });

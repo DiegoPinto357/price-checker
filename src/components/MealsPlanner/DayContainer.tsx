@@ -2,7 +2,6 @@ import { forwardRef } from 'react';
 import { Card, CardHeader, CardBody, Button } from '@nextui-org/react';
 import { LuPlus } from 'react-icons/lu';
 import { v4 as uuid } from 'uuid';
-import { formatDateToDDMMYYYY } from '../../libs/date';
 import Typography from '../lib/Typography';
 import MealItem from './MealItem';
 
@@ -18,11 +17,11 @@ type Props = {
 
 const DayContainer = forwardRef<HTMLDivElement, Props>(
   ({ date, label, items, onAddButtonClick, onMealClick }, ref) => {
-    const formattedDate = formatDateToDDMMYYYY(date);
-    const headerId = `day-container-title-${formattedDate}`;
+    const headerId = `day-container-title-${date}`;
 
     return (
       <Card
+        data-testid={date}
         ref={ref}
         className="border-1 rounded-none"
         shadow="none"

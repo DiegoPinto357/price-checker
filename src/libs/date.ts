@@ -1,9 +1,9 @@
-export const formatDateToDDMMYYYY = (dateString: string) =>
-  new Date(dateString).toLocaleDateString('pt-BR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
+export const formatDateToYYYMMDD = (date: Date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${year}-${month}-${day}`;
+};
 
 export const formatDateToLocaleString = (date: Date) =>
   date.toLocaleDateString('pt-BR', {
