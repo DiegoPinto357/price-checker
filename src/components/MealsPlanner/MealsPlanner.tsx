@@ -82,6 +82,8 @@ const MealsPlanner = () => {
         relativeMonthIndex: -1,
       });
       const monthToRemove = addMonths(month, MAX_NUM_OF_MONTHS);
+      // TODO remove month from context
+      loadMeals([{ month, year }]);
       return [
         ...generateDaysOfMonth({ month, year }),
         ...filterDaysByMonth(currentDays, monthToRemove),
@@ -90,7 +92,7 @@ const MealsPlanner = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 100;
     }
-  }, []);
+  }, [loadMeals]);
 
   const addDaysOnBottom = useCallback(() => {
     setDays(currentDays => {
@@ -100,12 +102,14 @@ const MealsPlanner = () => {
         relativeMonthIndex: 1,
       });
       const monthToRemove = addMonths(month, -MAX_NUM_OF_MONTHS);
+      // TODO remove month from context
+      loadMeals([{ month, year }]);
       return [
         ...filterDaysByMonth(currentDays, monthToRemove),
         ...generateDaysOfMonth({ month, year }),
       ];
     });
-  }, []);
+  }, [loadMeals]);
 
   return (
     <div
@@ -120,18 +124,11 @@ const MealsPlanner = () => {
         className="overflow-y-scroll overflow-x-visible"
         ref={scrollRef}
       >
-        <Observer
-          data-testid="observer-top"
-          onIntersection={() => {
-            addDaysOnTop();
-          }}
-        />
+        <Observer data-testid="observer-top" onIntersection={addDaysOnTop} />
         <PlannerDayList days={days} />
         <Observer
           data-testid="observer-bottom"
-          onIntersection={() => {
-            addDaysOnBottom();
-          }}
+          onIntersection={addDaysOnBottom}
         />
       </ScrollShadow>
     </div>

@@ -34,14 +34,14 @@ const MEALS_FILES = {
       ],
     },
   },
-  mar: {
-    filename: '2024-03.json',
+  apr: {
+    filename: '2024-04.json',
     data: {
-      '2024-3-12': [
+      '2024-4-12': [
         { label: 'Frango quadriculado' },
         { label: 'Pizza de pudim' },
       ],
-      '2024-3-21': [
+      '2024-4-21': [
         { label: 'Batata a milanesa' },
         { label: 'Carpa cabeçuda' },
       ],
@@ -56,6 +56,7 @@ const MEALS_FILES = {
 } as const satisfies Record<string, { filename: string; data: MealsRecord }>;
 
 const setupFiles = async () => {
+  mockStorage.clearFiles();
   Object.values(MEALS_FILES).forEach(
     async ({ filename, data }) =>
       await storage.writeFile(`/meals/${filename}`, data)
@@ -104,9 +105,9 @@ const addMeal = async (dayContainer: HTMLElement, mealName: string) => {
 const render = createRender({ mealsPlannerProviderEnabled: true });
 
 describe('MealsPlanner', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
-    mockStorage.clearFiles();
+    await setupFiles();
   });
 
   it('renders a 3 month list of days', async () => {
@@ -123,11 +124,11 @@ describe('MealsPlanner', () => {
 
     await verifyLoadedData(MEALS_FILES.jan.data, { notInTheDocument: true });
     await verifyLoadedData(MEALS_FILES.feb.data);
-    await verifyLoadedData(MEALS_FILES.mar.data);
+    await verifyLoadedData(MEALS_FILES.apr.data);
     await verifyLoadedData(MEALS_FILES.may.data, { notInTheDocument: true });
   });
 
-  it('adds month at the top of the list and removes the last one when user scrolls to top', () => {
+  it('adds month at the top of the list and removes the last one when user scrolls to top', async () => {
     render(<Meals />);
 
     triggerIntersectionOnInstance['observer-top']();
@@ -138,9 +139,12 @@ describe('MealsPlanner', () => {
     expect(dayContainers[dayContainers.length - 1]).toHaveAccessibleName(
       'Domingo, 31 de mar.'
     );
+
+    await verifyLoadedData(MEALS_FILES.jan.data);
+    await verifyLoadedData(MEALS_FILES.apr.data, { notInTheDocument: true });
   });
 
-  it('adds month at the bottom of the list and removes the first one when user scrolls to top', () => {
+  it('adds month at the bottom of the list and removes the first one when user scrolls to top', async () => {
     render(<Meals />);
 
     triggerIntersectionOnInstance['observer-bottom']();
@@ -151,6 +155,9 @@ describe('MealsPlanner', () => {
     expect(dayContainers[dayContainers.length - 1]).toHaveAccessibleName(
       'Sexta-feira, 31 de mai.'
     );
+
+    await verifyLoadedData(MEALS_FILES.feb.data, { notInTheDocument: true });
+    await verifyLoadedData(MEALS_FILES.may.data);
   });
 
   it('add meals to day container', async () => {
