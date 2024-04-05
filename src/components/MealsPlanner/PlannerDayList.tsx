@@ -43,7 +43,7 @@ const PlannerDayList = ({ days }: Props) => {
     setEditMealDialogOpen(true);
   }, []);
 
-  const handleAddMealModalCLose = useCallback(
+  const handleAddMealModalClose = useCallback(
     (mealName?: string) => {
       if (mealName) {
         addMeal(selectedDate, { label: mealName });
@@ -80,7 +80,7 @@ const PlannerDayList = ({ days }: Props) => {
       {addMealModalOpen && (
         <AddMealModal
           isOpen={addMealModalOpen}
-          onClose={handleAddMealModalCLose}
+          onClose={handleAddMealModalClose}
         />
       )}
 
