@@ -171,6 +171,11 @@ describe('MealsPlanner', () => {
 
     expect(within(dayContainer).getByText(USER_MEALS[0])).toBeInTheDocument();
     expect(within(dayContainer).getByText(USER_MEALS[1])).toBeInTheDocument();
+
+    const mealsFile = await storage.readFile('/meals/2024-03.json');
+    expect(mealsFile).toEqual({
+      '2024-3-10': [{ label: USER_MEALS[0] }, { label: USER_MEALS[1] }],
+    });
   });
 
   it('edits meal', async () => {

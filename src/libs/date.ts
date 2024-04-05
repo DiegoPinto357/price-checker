@@ -1,7 +1,13 @@
-export const formatDateToYYYMMDD = (date: Date) => {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
+export const splitDate = (date: Date | string) => {
+  const parsedDate = typeof date === 'string' ? new Date(date) : date;
+  const year = parsedDate.getFullYear();
+  const month = parsedDate.getMonth() + 1;
+  const day = parsedDate.getDate();
+  return { year, month, day };
+};
+
+export const formatDateToYYYYMMDD = (date: Date) => {
+  const { year, month, day } = splitDate(date);
   return `${year}-${month}-${day}`;
 };
 

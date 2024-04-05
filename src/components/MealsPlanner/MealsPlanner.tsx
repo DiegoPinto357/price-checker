@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { ScrollShadow } from '@nextui-org/react';
 import {
-  formatDateToYYYMMDD,
+  formatDateToYYYYMMDD,
   formatDateToLocaleString,
   getRelativeMonthAndYear,
   addMonths,
@@ -37,7 +37,7 @@ const generateDaysOfMonth = ({
     const date = new Date(startDate);
     date.setDate(date.getDate() + index);
     return {
-      date: formatDateToYYYMMDD(date),
+      date: formatDateToYYYYMMDD(date),
       label: toCapitalCase(formatDateToLocaleString(date)),
     };
   });

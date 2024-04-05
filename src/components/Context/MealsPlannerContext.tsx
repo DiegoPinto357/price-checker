@@ -1,5 +1,9 @@
 import { createContext, useState, useCallback } from 'react';
-import { loadMeals as loadMealsFromFile } from '../../mealsPlanner';
+import {
+  loadMeals as loadMealsFromFile,
+  saveMeals as saveMealsToFile,
+} from '../../mealsPlanner';
+import { splitDate } from '../../libs/date';
 
 import type { PropsWithChildren } from 'react';
 import type { ItemEdit } from '../lib/EditModal';
@@ -17,6 +21,19 @@ type MealsPlannerContextType = {
 export const MealsPlannerContext = createContext<MealsPlannerContextType>(
   {} as MealsPlannerContextType
 );
+
+const filterMealsByMonth = (meals: MealsRecord, month: number) =>
+  Object.keys(meals).reduce((result, key) => {
+    if (parseInt(key.split('-')[1]) === month) {
+      result[key] = meals[key];
+    }
+    return result;
+  }, {} as MealsRecord);
+
+const saveMonthFile = async (items: MealsRecord, month: number) => {
+  const monthItems = filterMealsByMonth(items, month);
+  return await saveMealsToFile(monthItems);
+};
 
 export const MealsPlannerContextProvider = ({
   children,
@@ -56,7 +73,12 @@ export const MealsPlannerContextProvider = ({
       const updatedDay = currentMeals[date]
         ? [...currentMeals[date], newMeal]
         : [newMeal];
-      return { ...currentMeals, [date]: updatedDay };
+      const newItems = { ...currentMeals, [date]: updatedDay };
+
+      const { month } = splitDate(date);
+      saveMonthFile(newItems, month);
+
+      return newItems;
     });
   };
 
