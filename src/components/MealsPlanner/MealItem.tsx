@@ -8,7 +8,7 @@ type Props = MealItemData & {
 
 const MealItem = ({ label, onClick }: Props) => {
   return (
-    <Card className="bg-gray-50" isPressable onPress={onClick}>
+    <Card className="bg-gray-50 text-start" isPressable onPress={onClick}>
       <CardHeader>{label}</CardHeader>
       {/* <CardBody></CardBody> */}
     </Card>
