@@ -44,7 +44,7 @@ const DayContainer = forwardRef<HTMLDivElement, Props>(
             </Button>
           </div>
         </CardHeader>
-        {items ? (
+        {items && items.length ? (
           <CardBody className="flex gap-3">
             {items.map(item => (
               <MealItem

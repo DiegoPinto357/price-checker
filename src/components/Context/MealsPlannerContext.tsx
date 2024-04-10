@@ -85,17 +85,23 @@ export const MealsPlannerContextProvider = ({
   const updateMeal = (date: string, mealEdit: ItemEdit) => {
     const { name, newName, deleted } = mealEdit;
 
+    const { month } = splitDate(date);
+
     const dateMeals = items[date];
     const meal = dateMeals.find(item => item.label === name);
     if (meal) {
       if (newName !== undefined) meal.label = newName;
       if (deleted !== undefined) {
-        setItems({
+        const newItems = {
           [date]: dateMeals.filter(item => item.label !== name),
-        });
+        };
+        saveMonthFile(newItems, month);
+        setItems(newItems);
         return;
       }
     }
+
+    saveMonthFile(items, month);
     setItems(items);
   };
 

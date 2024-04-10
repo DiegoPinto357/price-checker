@@ -206,6 +206,11 @@ describe('MealsPlanner', () => {
       within(dayContainer).queryByText(USER_MEALS[1])
     ).not.toBeInTheDocument();
     expect(within(dayContainer).getByText(USER_MEALS[2])).toBeInTheDocument();
+
+    const mealsFile = await storage.readFile('/meals/2024-03.json');
+    expect(mealsFile).toEqual({
+      '2024-3-10': [{ label: USER_MEALS[0] }, { label: USER_MEALS[2] }],
+    });
   });
 
   it('deletes meal', async () => {
@@ -236,5 +241,10 @@ describe('MealsPlanner', () => {
     expect(
       within(dayContainer).queryByText(USER_MEALS[1])
     ).not.toBeInTheDocument();
+
+    const mealsFile = await storage.readFile('/meals/2024-03.json');
+    expect(mealsFile).toEqual({
+      '2024-3-10': [{ label: USER_MEALS[0] }],
+    });
   });
 });
