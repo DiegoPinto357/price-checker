@@ -86,7 +86,7 @@ describe('nfs', () => {
           ...indexEntry,
         })
       );
-      expect(localItemResult).toBe(nfData);
+      expect(localItemResult).toEqual(nfData);
 
       expect(remoteItemResult).toHaveLength(1);
       expect(remoteItemResult[0]).toEqual({ ...nfData, index: indexEntry });

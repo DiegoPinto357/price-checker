@@ -1,15 +1,12 @@
-interface StringIndexed {
-  [key: string]: unknown;
-}
-
-let files: StringIndexed = {};
+let files: Record<string, string> = {};
 
 const writeFile = vi.fn(async (filename: string, data: unknown) => {
-  files[filename] = data;
+  files[filename] = JSON.stringify(data);
 });
 
 const readFile = vi.fn(async (filename: string): Promise<unknown> => {
-  return files[filename];
+  const file = files[filename];
+  return file ? JSON.parse(files[filename]) : undefined;
 });
 
 const clearFiles = () => {
