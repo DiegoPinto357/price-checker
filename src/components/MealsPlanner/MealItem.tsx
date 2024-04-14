@@ -8,7 +8,9 @@ type Props = MealItemData & {
 };
 
 const MealItem = ({ label, onClick }: Props) => {
-  const { dragRef, isDragging } = useDragAndDrop();
+  const { dragRef, isDragging } = useDragAndDrop({
+    scrollContainerId: 'scroll-container',
+  });
 
   return (
     <Card

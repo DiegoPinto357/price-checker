@@ -6,10 +6,14 @@ import type { GestureDetail } from '@ionic/react';
 const AUTO_SCROLL_MARGIN = 60;
 const SCROLL_JUMP = 10;
 
-const useDragAndDrop = () => {
+type Options = {
+  scrollContainerId?: string;
+};
+
+const useDragAndDrop = (options?: Options) => {
   const dragRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef(
-    document.getElementById('scroll-container')
+    document.getElementById(options?.scrollContainerId || '')
   );
 
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -44,41 +48,36 @@ const useDragAndDrop = () => {
 
   const onStart = useCallback((ev: GestureDetail) => {
     ev.event.preventDefault();
-    setIsDragging(true);
-
-    dragRef.current?.classList.add('active');
 
     if (scrollContainerRef.current) {
       // eslint-disable-next-line react-hooks/exhaustive-deps
       initialScrollPosition = scrollContainerRef.current.scrollTop;
     }
+
+    if (dragRef.current) {
+      dragRef.current.removeAttribute('onmouseup');
+      dragRef.current.style.position = 'static';
+      dragRef.current.style.zIndex = '100';
+    }
   }, []);
 
   const onMove = useCallback(
     (ev: GestureDetail) => {
+      setIsDragging(true);
       const scroll = autoscroll(ev.currentY, initialScrollPosition);
       const currentY = ev.currentY;
       const deltaY = scroll + currentY - ev.startY;
-      // const normalizedY = currentY - top;
-      // const toIndex = this.itemIndexForTop(normalizedY);
-      // console.log({ currentY });
 
-      // console.log(ev.startY, { deltaY, normalizedY });
-
-      // console.log({ selectedItemEl });
       if (dragRef.current) {
-        dragRef.current.style.position = 'static';
-        dragRef.current.style.zIndex = '100';
         dragRef.current.style.transform = `translateY(${deltaY}px)`;
       }
     },
     [autoscroll, initialScrollPosition]
   );
 
-  const onEnd = useCallback((ev: GestureDetail) => {
-    ev.event.preventDefault();
-
+  const onEnd = useCallback(() => {
     if (dragRef.current) {
+      // TODO reset original styles?
       dragRef.current.style.position = 'unset';
       dragRef.current.style.zIndex = 'unset';
       dragRef.current.style.transform = 'unset';
@@ -90,9 +89,8 @@ const useDragAndDrop = () => {
   useEffect(() => {
     if (dragRef.current) {
       const gesture = createGesture({
-        gestureName: 'example',
+        gestureName: 'drag-and-drop',
         el: dragRef.current,
-        gesturePriority: 110,
         threshold: 0,
         direction: 'y',
         passive: false,
