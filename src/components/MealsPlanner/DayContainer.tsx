@@ -23,7 +23,7 @@ const DayContainer = forwardRef<HTMLDivElement, Props>(
       <Card
         data-testid={date}
         ref={ref}
-        className="border-1 rounded-none"
+        className="border-1 rounded-none overflow-visible"
         shadow="none"
         role="group"
         aria-labelledby={headerId}
@@ -45,7 +45,7 @@ const DayContainer = forwardRef<HTMLDivElement, Props>(
           </div>
         </CardHeader>
         {items && items.length ? (
-          <CardBody className="flex gap-3">
+          <CardBody className="flex flex-col gap-3 overflow-visible">
             {items.map(item => (
               <MealItem
                 key={uuid()}

@@ -114,13 +114,14 @@ const MealsPlanner = () => {
   return (
     <div
       data-testid="meals-planner"
-      className="flex flex-col justify-between h-full"
+      className="flex flex-col justify-between h-full relative"
     >
       <Typography className="mx-4" variant="h1">
         Planejamento
       </Typography>
       <ScrollShadow
         data-testid="scroll-container"
+        id="scroll-container"
         className="overflow-y-scroll overflow-x-visible"
         ref={scrollRef}
       >
