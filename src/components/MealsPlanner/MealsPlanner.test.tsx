@@ -16,7 +16,12 @@ const mockStorage = storage as MockStorage;
 
 MockDate.set('2024-03-08');
 
-const USER_MEALS = ['Peixe exuberante', 'Massa absurda', 'Leitão a pururuca'];
+const USER_MEALS = [
+  'Peixe exuberante',
+  'Massa absurda',
+  'Leitão a pururuca',
+  'Crepioca',
+];
 
 const MEALS_FILES = {
   jan: {
@@ -216,13 +221,19 @@ describe('MealsPlanner', () => {
   it('deletes meal', async () => {
     render(<Meals />);
 
-    const dayContainer = screen.getByRole('group', {
+    const dayContainer1 = screen.getByRole('group', {
       name: 'Domingo, 10 de mar.',
     });
-    await addMeal(dayContainer, USER_MEALS[0]);
-    await addMeal(dayContainer, USER_MEALS[1]);
+    await addMeal(dayContainer1, USER_MEALS[0]);
+    await addMeal(dayContainer1, USER_MEALS[1]);
 
-    const mealToEdit = within(dayContainer).getByText(USER_MEALS[1]);
+    const dayContainer2 = screen.getByRole('group', {
+      name: 'Segunda-feira, 11 de mar.',
+    });
+    await addMeal(dayContainer2, USER_MEALS[2]);
+    await addMeal(dayContainer2, USER_MEALS[3]);
+
+    const mealToEdit = within(dayContainer1).getByText(USER_MEALS[1]);
     await userEvent.click(mealToEdit);
 
     const editDialog = screen.getByRole('dialog', { name: 'Editar item' });
@@ -237,14 +248,17 @@ describe('MealsPlanner', () => {
     });
     await userEvent.click(confirmButton);
 
-    expect(within(dayContainer).getByText(USER_MEALS[0])).toBeInTheDocument();
+    expect(within(dayContainer1).getByText(USER_MEALS[0])).toBeInTheDocument();
     expect(
-      within(dayContainer).queryByText(USER_MEALS[1])
+      within(dayContainer1).queryByText(USER_MEALS[1])
     ).not.toBeInTheDocument();
+    expect(within(dayContainer2).getByText(USER_MEALS[2])).toBeInTheDocument();
+    expect(within(dayContainer2).getByText(USER_MEALS[3])).toBeInTheDocument();
 
     const mealsFile = await storage.readFile('/meals/2024-03.json');
     expect(mealsFile).toEqual({
       '2024-3-10': [{ label: USER_MEALS[0] }],
+      '2024-3-11': [{ label: USER_MEALS[2] }, { label: USER_MEALS[3] }],
     });
   });
 });

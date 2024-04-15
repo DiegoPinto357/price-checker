@@ -93,6 +93,7 @@ export const MealsPlannerContextProvider = ({
       if (newName !== undefined) meal.label = newName;
       if (deleted !== undefined) {
         const newItems = {
+          ...items,
           [date]: dateMeals.filter(item => item.label !== name),
         };
         saveMonthFile(newItems, month);
