@@ -1,13 +1,45 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { createGesture } from '@ionic/react';
+import { throttle } from 'lodash';
 
+import type { PropsWithChildren } from 'react';
 import type { GestureDetail } from '@ionic/react';
 
 const AUTO_SCROLL_MARGIN = 60;
 const SCROLL_JUMP = 10;
 
+export const DropArea = ({
+  id,
+  onDrop,
+  children,
+}: PropsWithChildren<{ id: string; onDrop: () => void }>) => {
+  const handleOnDrop = useRef(
+    throttle((ev: CustomEventInit) => {
+      if (ev.detail === id) {
+        onDrop();
+      }
+    }, 100)
+  );
+
+  useEffect(() => {
+    document.addEventListener(`on-drop-${id}`, handleOnDrop.current);
+
+    return () =>
+      document.removeEventListener(`on-drop-${id}`, () =>
+        console.log('remove', `on-drop-${id}`)
+      );
+  }, [id, onDrop, handleOnDrop]);
+
+  return (
+    <div data-id={id} data-droppable>
+      {children}
+    </div>
+  );
+};
+
 type Options = {
   scrollContainerId?: string;
+  onDrop?: () => void;
 };
 
 const useDragAndDrop = (options?: Options) => {
@@ -75,7 +107,18 @@ const useDragAndDrop = (options?: Options) => {
     [autoscroll, initialScrollPosition]
   );
 
-  const onEnd = useCallback(() => {
+  const onEnd = useCallback((ev: GestureDetail) => {
+    const dropElements = document.elementsFromPoint(ev.currentX, ev.currentY);
+    const dropElement = dropElements.filter(
+      element => element.attributes.getNamedItem('data-droppable')?.value
+    )[0];
+    const dropId = dropElement?.attributes.getNamedItem('data-id')?.value;
+    if (dropId) {
+      const event = new CustomEvent(`on-drop-${dropId}`, { detail: dropId });
+      console.log('event');
+      document.dispatchEvent(event);
+    }
+
     if (dragRef.current) {
       // TODO reset original styles?
       dragRef.current.style.position = 'unset';

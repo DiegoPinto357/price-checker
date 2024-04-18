@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { Card, CardHeader, CardBody, Button } from '@nextui-org/react';
 import { LuPlus } from 'react-icons/lu';
 import { v4 as uuid } from 'uuid';
+import { DropArea } from './useDragAndDrop';
 import Typography from '../lib/Typography';
 import MealItem from './MealItem';
 
@@ -20,42 +21,48 @@ const DayContainer = forwardRef<HTMLDivElement, Props>(
     const headerId = `day-container-title-${date}`;
 
     return (
-      <Card
-        data-testid={date}
-        ref={ref}
-        className="border-1 rounded-none overflow-visible"
-        shadow="none"
-        role="group"
-        aria-labelledby={headerId}
-      >
-        <CardHeader className="rounded-none bg-gray-100 py-2">
-          <div className="flex justify-between items-center w-full">
-            <Typography id={headerId} variant="h4" className="font-medium m-0">
-              {label}
-            </Typography>
-            <Button
-              aria-label="add"
-              variant="light"
-              size="sm"
-              isIconOnly
-              onClick={onAddButtonClick}
-            >
-              <LuPlus className="w-6 h-6 text-gray-600" />
-            </Button>
-          </div>
-        </CardHeader>
-        {items && items.length ? (
-          <CardBody className="flex flex-col gap-3 overflow-visible">
-            {items.map(item => (
-              <MealItem
-                key={uuid()}
-                {...item}
-                onClick={() => onMealClick(item.label)}
-              />
-            ))}
-          </CardBody>
-        ) : null}
-      </Card>
+      <DropArea id={date} onDrop={() => console.log('on drop', date)}>
+        <Card
+          data-testid={date}
+          ref={ref}
+          className="border-1 rounded-none overflow-visible"
+          shadow="none"
+          role="group"
+          aria-labelledby={headerId}
+        >
+          <CardHeader className="rounded-none bg-gray-100 py-2">
+            <div className="flex justify-between items-center w-full">
+              <Typography
+                id={headerId}
+                variant="h4"
+                className="font-medium m-0"
+              >
+                {label}
+              </Typography>
+              <Button
+                aria-label="add"
+                variant="light"
+                size="sm"
+                isIconOnly
+                onClick={onAddButtonClick}
+              >
+                <LuPlus className="w-6 h-6 text-gray-600" />
+              </Button>
+            </div>
+          </CardHeader>
+          {items && items.length ? (
+            <CardBody className="flex flex-col gap-3 overflow-visible">
+              {items.map(item => (
+                <MealItem
+                  key={uuid()}
+                  {...item}
+                  onClick={() => onMealClick(item.label)}
+                />
+              ))}
+            </CardBody>
+          ) : null}
+        </Card>
+      </DropArea>
     );
   }
 );
