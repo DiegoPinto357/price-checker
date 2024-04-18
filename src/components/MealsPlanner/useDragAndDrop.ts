@@ -8,11 +8,12 @@ import type { GestureDetail } from '@ionic/react';
 const AUTO_SCROLL_MARGIN = 60;
 const SCROLL_JUMP = 10;
 
-export const DropArea = ({
+export const useDrop = ({
   id,
   onDrop,
-  children,
 }: PropsWithChildren<{ id: string; onDrop: () => void }>) => {
+  const dropRef = useRef<HTMLDivElement>(null);
+
   const handleOnDrop = useRef(
     throttle((ev: CustomEventInit) => {
       if (ev.detail === id) {
@@ -22,24 +23,29 @@ export const DropArea = ({
   );
 
   useEffect(() => {
-    document.addEventListener(`on-drop-${id}`, handleOnDrop.current);
+    if (dropRef) {
+      dropRef.current?.setAttribute('data-droppable', 'true');
+      dropRef.current?.setAttribute('data-id', id);
+    }
+  }, [dropRef, id]);
+
+  useEffect(() => {
+    const eventName = 'on-drop';
+    document.addEventListener(eventName, handleOnDrop.current);
 
     return () =>
-      document.removeEventListener(`on-drop-${id}`, () =>
-        console.log('remove', `on-drop-${id}`)
+      document.removeEventListener(eventName, () =>
+        console.log('remove', eventName)
       );
   }, [id, onDrop, handleOnDrop]);
 
-  return (
-    <div data-id={id} data-droppable>
-      {children}
-    </div>
-  );
+  return {
+    dropRef,
+  };
 };
 
 type Options = {
   scrollContainerId?: string;
-  onDrop?: () => void;
 };
 
 const useDragAndDrop = (options?: Options) => {
@@ -114,7 +120,7 @@ const useDragAndDrop = (options?: Options) => {
     )[0];
     const dropId = dropElement?.attributes.getNamedItem('data-id')?.value;
     if (dropId) {
-      const event = new CustomEvent(`on-drop-${dropId}`, { detail: dropId });
+      const event = new CustomEvent('on-drop', { detail: dropId });
       console.log('event');
       document.dispatchEvent(event);
     }
