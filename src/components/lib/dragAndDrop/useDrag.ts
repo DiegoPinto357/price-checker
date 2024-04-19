@@ -1,54 +1,16 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { createGesture } from '@ionic/react';
-import { throttle } from 'lodash';
 
-import type { PropsWithChildren } from 'react';
 import type { GestureDetail } from '@ionic/react';
 
 const AUTO_SCROLL_MARGIN = 60;
 const SCROLL_JUMP = 10;
 
-export const useDrop = ({
-  id,
-  onDrop,
-}: PropsWithChildren<{ id: string; onDrop: () => void }>) => {
-  const dropRef = useRef<HTMLDivElement>(null);
-
-  const handleOnDrop = useRef(
-    throttle((ev: CustomEventInit) => {
-      if (ev.detail === id) {
-        onDrop();
-      }
-    }, 100)
-  );
-
-  useEffect(() => {
-    if (dropRef) {
-      dropRef.current?.setAttribute('data-droppable', 'true');
-      dropRef.current?.setAttribute('data-id', id);
-    }
-  }, [dropRef, id]);
-
-  useEffect(() => {
-    const eventName = 'on-drop';
-    document.addEventListener(eventName, handleOnDrop.current);
-
-    return () =>
-      document.removeEventListener(eventName, () =>
-        console.log('remove', eventName)
-      );
-  }, [id, onDrop, handleOnDrop]);
-
-  return {
-    dropRef,
-  };
-};
-
-type Options = {
+type DragOptions = {
   scrollContainerId?: string;
 };
 
-const useDragAndDrop = (options?: Options) => {
+export const useDrag = (options?: DragOptions) => {
   const dragRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef(
     document.getElementById(options?.scrollContainerId || '')
@@ -93,7 +55,7 @@ const useDragAndDrop = (options?: Options) => {
     }
 
     if (dragRef.current) {
-      dragRef.current.removeAttribute('onmouseup');
+      // dragRef.current.removeAttribute('onmouseup');
       dragRef.current.style.position = 'static';
       dragRef.current.style.zIndex = '100';
     }
@@ -118,10 +80,9 @@ const useDragAndDrop = (options?: Options) => {
     const dropElement = dropElements.filter(
       element => element.attributes.getNamedItem('data-droppable')?.value
     )[0];
-    const dropId = dropElement?.attributes.getNamedItem('data-id')?.value;
+    const dropId = dropElement?.attributes.getNamedItem('data-drop-id')?.value;
     if (dropId) {
       const event = new CustomEvent('on-drop', { detail: dropId });
-      console.log('event');
       document.dispatchEvent(event);
     }
 
@@ -158,5 +119,3 @@ const useDragAndDrop = (options?: Options) => {
     isDragging,
   };
 };
-
-export default useDragAndDrop;

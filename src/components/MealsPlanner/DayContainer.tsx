@@ -3,7 +3,7 @@ import { Card, CardHeader, CardBody, Button } from '@nextui-org/react';
 import { LuPlus } from 'react-icons/lu';
 import { v4 as uuid } from 'uuid';
 import useMergedRef from '@react-hook/merged-ref';
-import { useDrop } from './useDragAndDrop';
+import { useDrop } from '../lib/dragAndDrop';
 import Typography from '../lib/Typography';
 import MealItem from './MealItem';
 

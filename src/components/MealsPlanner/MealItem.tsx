@@ -1,5 +1,5 @@
 import { Card, CardHeader } from '@nextui-org/react';
-import useDragAndDrop from './useDragAndDrop';
+import { useDrag } from '../lib/dragAndDrop';
 
 import type { MealItemData } from './types';
 
@@ -8,7 +8,7 @@ type Props = MealItemData & {
 };
 
 const MealItem = ({ label, onClick }: Props) => {
-  const { dragRef, isDragging } = useDragAndDrop({
+  const { dragRef, isDragging } = useDrag({
     scrollContainerId: 'scroll-container',
   });
 
