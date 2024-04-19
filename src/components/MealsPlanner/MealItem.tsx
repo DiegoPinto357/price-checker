@@ -9,6 +9,7 @@ type Props = MealItemData & {
 
 const MealItem = ({ label, onClick }: Props) => {
   const { dragRef, isDragging } = useDrag({
+    direction: 'y',
     scrollContainerId: 'scroll-container',
   });
 

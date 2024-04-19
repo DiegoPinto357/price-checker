@@ -6,7 +6,18 @@ import type { GestureDetail } from '@ionic/react';
 const AUTO_SCROLL_MARGIN = 60;
 const SCROLL_JUMP = 10;
 
+type StyleEntry = { property: string; value: string | undefined };
+
+const dragStyle: StyleEntry[] = [
+  { property: 'position', value: 'static' },
+  { property: 'z-index', value: '100' },
+  { property: 'transition-duration', value: '0ms' },
+];
+
+const originalStyle: StyleEntry[] = [];
+
 type DragOptions = {
+  direction?: 'x' | 'y';
   scrollContainerId?: string;
 };
 
@@ -55,9 +66,15 @@ export const useDrag = (options?: DragOptions) => {
     }
 
     if (dragRef.current) {
-      // dragRef.current.removeAttribute('onmouseup');
-      dragRef.current.style.position = 'static';
-      dragRef.current.style.zIndex = '100';
+      const computedStyle = window.getComputedStyle(dragRef.current);
+      dragStyle.forEach(({ property, value }) => {
+        const currentValue = computedStyle.getPropertyValue(property);
+        originalStyle.push({
+          property,
+          value: currentValue,
+        });
+        dragRef.current?.style.setProperty(property, value || '');
+      });
     }
   }, []);
 
@@ -87,10 +104,13 @@ export const useDrag = (options?: DragOptions) => {
     }
 
     if (dragRef.current) {
-      // TODO reset original styles?
-      dragRef.current.style.position = 'unset';
-      dragRef.current.style.zIndex = 'unset';
-      dragRef.current.style.transform = 'unset';
+      dragRef.current?.style.setProperty('transform', 'unset');
+      setTimeout(() => {
+        originalStyle.forEach(({ property, value }) => {
+          dragRef.current?.style.setProperty(property, value || '');
+        });
+        originalStyle.length = 0;
+      }, 5);
     }
 
     setIsDragging(false);
@@ -102,7 +122,7 @@ export const useDrag = (options?: DragOptions) => {
         gestureName: 'drag-and-drop',
         el: dragRef.current,
         threshold: 0,
-        direction: 'y',
+        direction: options?.direction,
         passive: false,
         canStart,
         onStart,
@@ -112,7 +132,7 @@ export const useDrag = (options?: DragOptions) => {
 
       gesture.enable();
     }
-  }, [dragRef, canStart, onStart, onMove, onEnd]);
+  }, [options?.direction, dragRef, canStart, onStart, onMove, onEnd]);
 
   return {
     dragRef,
