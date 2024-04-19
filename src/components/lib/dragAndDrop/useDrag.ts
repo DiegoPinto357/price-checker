@@ -19,6 +19,7 @@ const originalStyle: StyleEntry[] = [];
 type DragOptions = {
   direction?: 'x' | 'y';
   scrollContainerId?: string;
+  data?: unknown;
 };
 
 export const useDrag = (options?: DragOptions) => {
@@ -92,29 +93,35 @@ export const useDrag = (options?: DragOptions) => {
     [autoscroll, initialScrollPosition]
   );
 
-  const onEnd = useCallback((ev: GestureDetail) => {
-    const dropElements = document.elementsFromPoint(ev.currentX, ev.currentY);
-    const dropElement = dropElements.filter(
-      element => element.attributes.getNamedItem('data-droppable')?.value
-    )[0];
-    const dropId = dropElement?.attributes.getNamedItem('data-drop-id')?.value;
-    if (dropId) {
-      const event = new CustomEvent('on-drop', { detail: dropId });
-      document.dispatchEvent(event);
-    }
-
-    if (dragRef.current) {
-      dragRef.current?.style.setProperty('transform', 'unset');
-      setTimeout(() => {
-        originalStyle.forEach(({ property, value }) => {
-          dragRef.current?.style.setProperty(property, value || '');
+  const onEnd = useCallback(
+    (ev: GestureDetail) => {
+      const dropElements = document.elementsFromPoint(ev.currentX, ev.currentY);
+      const dropElement = dropElements.filter(
+        element => element.attributes.getNamedItem('data-droppable')?.value
+      )[0];
+      const dropId =
+        dropElement?.attributes.getNamedItem('data-drop-id')?.value;
+      if (dropId) {
+        const event = new CustomEvent('on-drop', {
+          detail: { dropId, dragData: options?.data },
         });
-        originalStyle.length = 0;
-      }, 5);
-    }
+        document.dispatchEvent(event);
+      }
 
-    setIsDragging(false);
-  }, []);
+      if (dragRef.current) {
+        dragRef.current?.style.setProperty('transform', 'unset');
+        setTimeout(() => {
+          originalStyle.forEach(({ property, value }) => {
+            dragRef.current?.style.setProperty(property, value || '');
+          });
+          originalStyle.length = 0;
+        }, 5);
+      }
+
+      setIsDragging(false);
+    },
+    [options?.data]
+  );
 
   useEffect(() => {
     if (dragRef.current) {

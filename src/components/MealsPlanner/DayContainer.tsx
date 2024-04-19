@@ -23,7 +23,7 @@ const DayContainer = forwardRef<HTMLDivElement, Props>(
 
     const { dropRef } = useDrop({
       id: date,
-      onDrop: () => console.log('on drop', date),
+      onDrop: ({ dragData }) => console.log('on drop', date, dragData),
     });
 
     const mergedRef = useMergedRef(ref, dropRef);
@@ -58,6 +58,7 @@ const DayContainer = forwardRef<HTMLDivElement, Props>(
             {items.map(item => (
               <MealItem
                 key={uuid()}
+                date={date}
                 {...item}
                 onClick={() => onMealClick(item.label)}
               />

@@ -3,7 +3,7 @@ import { throttle } from 'lodash';
 
 type DropOptions = {
   id: string;
-  onDrop: () => void;
+  onDrop: ({ dragData }: { dragData: unknown }) => void;
 };
 
 export const useDrop = ({ id, onDrop }: DropOptions) => {
@@ -11,8 +11,8 @@ export const useDrop = ({ id, onDrop }: DropOptions) => {
 
   const handleOnDrop = useRef(
     throttle((ev: CustomEventInit) => {
-      if (ev.detail === id) {
-        onDrop();
+      if (ev.detail.dropId === id) {
+        onDrop(ev.detail.dragData);
       }
     }, 100)
   );

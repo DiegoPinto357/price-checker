@@ -4,13 +4,15 @@ import { useDrag } from '../lib/dragAndDrop';
 import type { MealItemData } from './types';
 
 type Props = MealItemData & {
+  date: string;
   onClick: () => void;
 };
 
-const MealItem = ({ label, onClick }: Props) => {
+const MealItem = ({ label, date, onClick }: Props) => {
   const { dragRef, isDragging } = useDrag({
     direction: 'y',
     scrollContainerId: 'scroll-container',
+    data: { date, label },
   });
 
   return (
