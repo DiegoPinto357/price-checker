@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useContext } from 'react';
 import { Card, CardHeader, CardBody, Button } from '@nextui-org/react';
 import { LuPlus } from 'react-icons/lu';
 import { v4 as uuid } from 'uuid';
@@ -6,8 +6,11 @@ import useMergedRef from '@react-hook/merged-ref';
 import { useDrop } from '../lib/dragAndDrop';
 import Typography from '../lib/Typography';
 import MealItem from './MealItem';
+import { MealsPlannerContext } from '../Context';
 
 import type { MealItemData } from './types';
+
+type DragData = MealItemData & { date: string };
 
 type Props = {
   date: string;
@@ -19,11 +22,17 @@ type Props = {
 
 const DayContainer = forwardRef<HTMLDivElement, Props>(
   ({ date, label, items, onAddButtonClick, onMealClick }, ref) => {
+    const { moveMeal } = useContext(MealsPlannerContext);
+
     const headerId = `day-container-title-${date}`;
 
     const { dropRef } = useDrop({
       id: date,
-      onDrop: ({ dragData }) => console.log('on drop', date, dragData),
+      onDrop: ({ dragData }: { dragData: DragData }) => {
+        if (date === dragData.date) return false;
+        moveMeal(dragData.label, dragData.date, date);
+        return true;
+      },
     });
 
     const mergedRef = useMergedRef(ref, dropRef);

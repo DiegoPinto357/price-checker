@@ -82,6 +82,7 @@ export const useDrag = (options?: DragOptions) => {
   const onMove = useCallback(
     (ev: GestureDetail) => {
       setIsDragging(true);
+
       const scroll = autoscroll(ev.currentY, initialScrollPosition);
       const currentY = ev.currentY;
       const deltaY = scroll + currentY - ev.startY;
@@ -95,6 +96,10 @@ export const useDrag = (options?: DragOptions) => {
 
   const onEnd = useCallback(
     (ev: GestureDetail) => {
+      const { deltaX, deltaY } = ev;
+      const moved = deltaX !== 0 || deltaY !== 0;
+      if (!moved) return;
+
       const dropElements = document.elementsFromPoint(ev.currentX, ev.currentY);
       const dropElement = dropElements.filter(
         element => element.attributes.getNamedItem('data-droppable')?.value
@@ -109,13 +114,10 @@ export const useDrag = (options?: DragOptions) => {
       }
 
       if (dragRef.current) {
-        dragRef.current?.style.setProperty('transform', 'unset');
-        setTimeout(() => {
-          originalStyle.forEach(({ property, value }) => {
-            dragRef.current?.style.setProperty(property, value || '');
-          });
-          originalStyle.length = 0;
-        }, 5);
+        originalStyle.forEach(({ property, value }) => {
+          dragRef.current?.style.setProperty(property, value || '');
+        });
+        originalStyle.length = 0;
       }
 
       setIsDragging(false);
@@ -140,6 +142,14 @@ export const useDrag = (options?: DragOptions) => {
       gesture.enable();
     }
   }, [options?.direction, dragRef, canStart, onStart, onMove, onEnd]);
+
+  useEffect(() => {
+    document.addEventListener('on-drop-refused', () => {
+      if (dragRef.current) {
+        dragRef.current?.style.setProperty('transform', 'unset');
+      }
+    });
+  }, []);
 
   return {
     dragRef,

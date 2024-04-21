@@ -1,21 +1,21 @@
 import { useEffect, useRef } from 'react';
-import { throttle } from 'lodash';
 
-type DropOptions = {
+type DropOptions<T> = {
   id: string;
-  onDrop: ({ dragData }: { dragData: unknown }) => void;
+  onDrop: ({ dragData }: { dragData: T }) => boolean;
 };
 
-export const useDrop = ({ id, onDrop }: DropOptions) => {
+export const useDrop = <T>({ id, onDrop }: DropOptions<T>) => {
   const dropRef = useRef<HTMLDivElement>(null);
 
-  const handleOnDrop = useRef(
-    throttle((ev: CustomEventInit) => {
-      if (ev.detail.dropId === id) {
-        onDrop(ev.detail.dragData);
+  const handleOnDrop = useRef((ev: CustomEventInit) => {
+    if (ev.detail.dropId === id) {
+      if (!onDrop({ dragData: ev.detail.dragData })) {
+        const event = new CustomEvent('on-drop-refused');
+        document.dispatchEvent(event);
       }
-    }, 100)
-  );
+    }
+  });
 
   useEffect(() => {
     if (dropRef) {
