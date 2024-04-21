@@ -32,6 +32,14 @@ const findHandleElement = (
   return undefined;
 };
 
+const getDropIdByPosition = (x: number, y: number) => {
+  const dropElements = document.elementsFromPoint(x, y);
+  const dropElement = dropElements.filter(
+    element => element.attributes.getNamedItem('data-droppable')?.value
+  )[0];
+  return dropElement?.attributes.getNamedItem('data-drop-id')?.value;
+};
+
 type DragOptions = {
   direction?: 'x' | 'y';
   scrollContainerId?: string;
@@ -135,12 +143,7 @@ export const useDrag = (options?: DragOptions) => {
       const moved = deltaX !== 0 || deltaY !== 0;
       if (!moved) return;
 
-      const dropElements = document.elementsFromPoint(ev.currentX, ev.currentY);
-      const dropElement = dropElements.filter(
-        element => element.attributes.getNamedItem('data-droppable')?.value
-      )[0];
-      const dropId =
-        dropElement?.attributes.getNamedItem('data-drop-id')?.value;
+      const dropId = getDropIdByPosition(ev.currentX, ev.currentY);
       if (dropId) {
         const event = new CustomEvent(EVENTS.ON_DROP, {
           detail: { dropId, dragData: options?.data },
