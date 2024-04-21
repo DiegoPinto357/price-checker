@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { createGesture } from '@ionic/react';
+import { EVENTS } from './contants';
 
 import type { GestureDetail } from '@ionic/react';
 
@@ -83,15 +84,19 @@ export const useDrag = (options?: DragOptions) => {
     (ev: GestureDetail) => {
       setIsDragging(true);
 
-      const scroll = autoscroll(ev.currentY, initialScrollPosition);
-      const currentY = ev.currentY;
-      const deltaY = scroll + currentY - ev.startY;
+      const deltaX = options?.direction !== 'y' ? ev.currentX - ev.startX : 0;
+
+      let deltaY = 0;
+      if (options?.direction !== 'x') {
+        const scroll = autoscroll(ev.currentY, initialScrollPosition);
+        deltaY = scroll + ev.currentY - ev.startY;
+      }
 
       if (dragRef.current) {
-        dragRef.current.style.transform = `translateY(${deltaY}px)`;
+        dragRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
       }
     },
-    [autoscroll, initialScrollPosition]
+    [autoscroll, initialScrollPosition, options?.direction]
   );
 
   const onEnd = useCallback(
@@ -107,7 +112,7 @@ export const useDrag = (options?: DragOptions) => {
       const dropId =
         dropElement?.attributes.getNamedItem('data-drop-id')?.value;
       if (dropId) {
-        const event = new CustomEvent('on-drop', {
+        const event = new CustomEvent(EVENTS.ON_DROP, {
           detail: { dropId, dragData: options?.data },
         });
         document.dispatchEvent(event);
@@ -144,7 +149,7 @@ export const useDrag = (options?: DragOptions) => {
   }, [options?.direction, dragRef, canStart, onStart, onMove, onEnd]);
 
   useEffect(() => {
-    document.addEventListener('on-drop-refused', () => {
+    document.addEventListener(EVENTS.ON_DROP_REFUSED, () => {
       if (dragRef.current) {
         dragRef.current?.style.setProperty('transform', 'unset');
       }

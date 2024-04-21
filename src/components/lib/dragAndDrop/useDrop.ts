@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { EVENTS } from './contants';
 
 type DropOptions<T> = {
   id: string;
@@ -11,7 +12,7 @@ export const useDrop = <T>({ id, onDrop }: DropOptions<T>) => {
   const handleOnDrop = useRef((ev: CustomEventInit) => {
     if (ev.detail.dropId === id) {
       if (!onDrop({ dragData: ev.detail.dragData })) {
-        const event = new CustomEvent('on-drop-refused');
+        const event = new CustomEvent(EVENTS.ON_DROP_REFUSED);
         document.dispatchEvent(event);
       }
     }
@@ -25,8 +26,7 @@ export const useDrop = <T>({ id, onDrop }: DropOptions<T>) => {
   }, [dropRef, id]);
 
   useEffect(() => {
-    const eventName = 'on-drop';
-    document.addEventListener(eventName, handleOnDrop.current);
+    document.addEventListener(EVENTS.ON_DROP, handleOnDrop.current);
   }, [id, onDrop, handleOnDrop]);
 
   return {
