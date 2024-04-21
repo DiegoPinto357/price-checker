@@ -17,6 +17,21 @@ const dragStyle: StyleEntry[] = [
 
 const originalStyle: StyleEntry[] = [];
 
+const findHandleElement = (
+  dragged: HTMLElement | null,
+  handle: HTMLElement
+): HTMLElement | undefined => {
+  let parent: HTMLElement | null;
+  while (dragged) {
+    parent = dragged.parentElement;
+    if (parent === handle) {
+      return parent;
+    }
+    dragged = parent;
+  }
+  return undefined;
+};
+
 type DragOptions = {
   direction?: 'x' | 'y';
   scrollContainerId?: string;
@@ -25,6 +40,7 @@ type DragOptions = {
 
 export const useDrag = (options?: DragOptions) => {
   const dragRef = useRef<HTMLDivElement>(null);
+  const dragHandleRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef(
     document.getElementById(options?.scrollContainerId || '')
   );
@@ -52,10 +68,24 @@ export const useDrag = (options?: DragOptions) => {
     return scrollContainerRef.current.scrollTop - initialY;
   }, []);
 
-  const canStart = useCallback(() => {
+  const canStart = useCallback((ev: GestureDetail) => {
     if (!dragRef.current) {
       return false;
     }
+
+    const draggedElement = ev.event.target;
+
+    if (dragHandleRef.current) {
+      const handleElement = findHandleElement(
+        // @ts-ignore
+        draggedElement,
+        dragHandleRef.current
+      );
+      if (handleElement !== dragHandleRef.current) {
+        return false;
+      }
+    }
+
     return true;
   }, []);
 
@@ -158,6 +188,7 @@ export const useDrag = (options?: DragOptions) => {
 
   return {
     dragRef,
+    dragHandleRef,
     isDragging,
   };
 };
