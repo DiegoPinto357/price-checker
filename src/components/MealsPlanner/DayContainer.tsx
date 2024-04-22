@@ -1,5 +1,5 @@
 import { forwardRef, useContext } from 'react';
-import { Card, CardHeader, CardBody, Button } from '@nextui-org/react';
+import { Card, CardHeader, CardBody, Chip, Button } from '@nextui-org/react';
 import { LuPlus } from 'react-icons/lu';
 import { v4 as uuid } from 'uuid';
 import useMergedRef from '@react-hook/merged-ref';
@@ -9,6 +9,7 @@ import MealItem from './MealItem';
 import { MealsPlannerContext } from '../Context';
 
 import type { MealItemData } from './types';
+import { isToday } from '../../libs/date';
 
 type DragData = MealItemData & { date: string };
 
@@ -50,6 +51,11 @@ const DayContainer = forwardRef<HTMLDivElement, Props>(
           <div className="flex justify-between items-center w-full">
             <Typography id={headerId} variant="h4" className="font-medium m-0">
               {label}
+              {isToday(date) ? (
+                <Chip color="primary" size="sm" variant="flat" className="ml-2">
+                  Hoje
+                </Chip>
+              ) : null}
             </Typography>
             <Button
               aria-label="add"

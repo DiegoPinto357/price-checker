@@ -133,6 +133,17 @@ describe('MealsPlanner', () => {
     await verifyLoadedData(MEALS_FILES.may.data, { notInTheDocument: true });
   });
 
+  it('renders the "Hoje" chip on today list item', async () => {
+    await setupFiles();
+
+    render(<Meals />);
+
+    const todayContainer = screen.getByRole('group', {
+      name: 'Quinta-feira, 7 de mar. Hoje', // Mock is UTC 0:00
+    });
+    expect(todayContainer).toBeInTheDocument();
+  });
+
   it('adds month at the top of the list and removes the last one when user scrolls to top', async () => {
     render(<Meals />);
 
