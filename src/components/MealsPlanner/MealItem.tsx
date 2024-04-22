@@ -27,7 +27,10 @@ const MealItem = ({ label, date, onClick }: Props) => {
     >
       <CardHeader>
         <div className="flex justify-between items-center w-full">
-          {label}
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 ml-1 rounded-full bg-secondary" />
+            {label}
+          </div>
           <div ref={dragHandleRef}>
             <RiDraggable className="w-6 h-6 text-gray-600" />
           </div>
