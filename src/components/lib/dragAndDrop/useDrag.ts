@@ -32,25 +32,41 @@ const findHandleElement = (
   return undefined;
 };
 
-const getDropIdByPosition = (x: number, y: number) => {
+const getDropElementByPosition = (x: number, y: number) => {
   const dropElements = document.elementsFromPoint(x, y);
-  const dropElement = dropElements.filter(
+  return dropElements.filter(
     element => element.attributes.getNamedItem('data-droppable')?.value
   )[0];
-  return dropElement?.attributes.getNamedItem('data-drop-id')?.value;
+};
+
+const getDropIndex = (rects: DOMRect[], y: number) => {
+  let index = 0;
+  rects.some(rect => {
+    const itemThresholdPosition = rect.top + rect.height / 2;
+    if (y < itemThresholdPosition) return true;
+    index++;
+    return false;
+  });
+  return index;
 };
 
 type DragOptions = {
   direction?: 'x' | 'y';
   scrollContainerId?: string;
+  sortable?: boolean;
   data?: unknown;
 };
 
-export const useDrag = (options?: DragOptions) => {
+export const useDrag = ({
+  direction,
+  scrollContainerId,
+  sortable,
+  data,
+}: DragOptions) => {
   const dragRef = useRef<HTMLDivElement>(null);
   const dragHandleRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef(
-    document.getElementById(options?.scrollContainerId || '')
+    document.getElementById(scrollContainerId || '')
   );
 
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -122,10 +138,10 @@ export const useDrag = (options?: DragOptions) => {
     (ev: GestureDetail) => {
       setIsDragging(true);
 
-      const deltaX = options?.direction !== 'y' ? ev.currentX - ev.startX : 0;
+      const deltaX = direction !== 'y' ? ev.currentX - ev.startX : 0;
 
       let deltaY = 0;
-      if (options?.direction !== 'x') {
+      if (direction !== 'x') {
         const scroll = autoscroll(ev.currentY, initialScrollPosition);
         deltaY = scroll + ev.currentY - ev.startY;
       }
@@ -134,7 +150,7 @@ export const useDrag = (options?: DragOptions) => {
         dragRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
       }
     },
-    [autoscroll, initialScrollPosition, options?.direction]
+    [autoscroll, initialScrollPosition, direction]
   );
 
   const onEnd = useCallback(
@@ -143,10 +159,27 @@ export const useDrag = (options?: DragOptions) => {
       const moved = deltaX !== 0 || deltaY !== 0;
       if (!moved) return;
 
-      const dropId = getDropIdByPosition(ev.currentX, ev.currentY);
+      const dropElement = getDropElementByPosition(ev.currentX, ev.currentY);
+
+      let sortData: { index: number } | undefined = undefined;
+
+      if (sortable && dragRef.current) {
+        const sortableItemsOnDropArea = Array.from(
+          dropElement.querySelectorAll('[data-sortable="true"]')
+        ).filter(item => item !== dragRef.current);
+        const itemsBoudingRect = sortableItemsOnDropArea.map(item =>
+          item.getBoundingClientRect()
+        );
+        // TODO implement sorting on x axis
+        const dropIndex = getDropIndex(itemsBoudingRect, ev.currentY);
+        sortData = { index: dropIndex };
+      }
+
+      const dropId =
+        dropElement?.attributes.getNamedItem('data-drop-id')?.value;
       if (dropId) {
         const event = new CustomEvent(EVENTS.ON_DROP, {
-          detail: { dropId, dragData: options?.data },
+          detail: { dropId, dragData: data, sortData },
         });
         document.dispatchEvent(event);
       }
@@ -160,7 +193,7 @@ export const useDrag = (options?: DragOptions) => {
 
       setIsDragging(false);
     },
-    [options?.data]
+    [data, sortable]
   );
 
   useEffect(() => {
@@ -169,7 +202,7 @@ export const useDrag = (options?: DragOptions) => {
         gestureName: 'drag-and-drop',
         el: dragRef.current,
         threshold: 0,
-        direction: options?.direction,
+        direction,
         passive: false,
         canStart,
         onStart,
@@ -179,15 +212,21 @@ export const useDrag = (options?: DragOptions) => {
 
       gesture.enable();
     }
-  }, [options?.direction, dragRef, canStart, onStart, onMove, onEnd]);
+  }, [direction, dragRef, canStart, onStart, onMove, onEnd]);
 
   useEffect(() => {
+    if (dragRef) {
+      if (sortable) {
+        dragRef.current?.setAttribute('data-sortable', 'true');
+      }
+    }
+
     document.addEventListener(EVENTS.ON_DROP_REFUSED, () => {
       if (dragRef.current) {
         dragRef.current?.style.setProperty('transform', 'unset');
       }
     });
-  }, []);
+  }, [sortable]);
 
   return {
     dragRef,

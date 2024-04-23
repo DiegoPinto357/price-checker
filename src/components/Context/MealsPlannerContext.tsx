@@ -16,7 +16,13 @@ type MealsPlannerContextType = {
   loadMeals: (dates: { month: number; year: number }[]) => void;
   addMeal: (date: string, newMeal: MealItemData) => void;
   updateMeal: (date: string, mealEdit: ItemEdit) => void;
-  moveMeal: (name: string, originDate: string, destinyDate: string) => void;
+  moveMeal: (
+    name: string,
+    originDate: string,
+    destinyDate: string,
+    index?: number
+  ) => void;
+  sortMeal: (date: string, name: string, newIndex: number) => void;
 };
 
 export const MealsPlannerContext = createContext<MealsPlannerContextType>(
@@ -105,11 +111,16 @@ export const MealsPlannerContextProvider = ({
       }
 
       saveMonthFile(currentMeals, month);
-      return items;
+      return items; //FIXME create new object to update the state
     });
   };
 
-  const moveMeal = (name: string, originDate: string, destinyDate: string) => {
+  const moveMeal = (
+    name: string,
+    originDate: string,
+    destinyDate: string,
+    index?: number
+  ) => {
     setItems(currentMeals => {
       const originDay = currentMeals[originDate];
       const meal = originDay.find(item => item.label === name);
@@ -119,6 +130,12 @@ export const MealsPlannerContextProvider = ({
       const destinyDay = currentMeals[destinyDate]
         ? [...currentMeals[destinyDate], meal]
         : [meal];
+
+      if (typeof index === 'number') {
+        const mealIndex = destinyDay.length - 1;
+        destinyDay.splice(mealIndex, 1);
+        destinyDay.splice(index, 0, meal);
+      }
 
       const newItems = {
         ...currentMeals,
@@ -140,9 +157,39 @@ export const MealsPlannerContextProvider = ({
     });
   };
 
+  const sortMeal = (date: string, name: string, newIndex: number) => {
+    setItems(currentMeals => {
+      const dateMeals = currentMeals[date];
+      const meal = dateMeals.find(item => item.label === name);
+
+      if (meal) {
+        const mealIndex = dateMeals.indexOf(meal);
+        dateMeals.splice(mealIndex, 1);
+        dateMeals.splice(newIndex, 0, meal);
+      }
+
+      const { month } = splitDate(date);
+      const newItems = {
+        ...currentMeals,
+        [date]: dateMeals,
+      };
+
+      saveMonthFile(newItems, month);
+
+      return newItems;
+    });
+  };
+
   return (
     <MealsPlannerContext.Provider
-      value={{ meals: items, loadMeals, addMeal, updateMeal, moveMeal }}
+      value={{
+        meals: items,
+        loadMeals,
+        addMeal,
+        updateMeal,
+        moveMeal,
+        sortMeal,
+      }}
     >
       {children}
     </MealsPlannerContext.Provider>

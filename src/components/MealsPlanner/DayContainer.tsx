@@ -23,15 +23,28 @@ type Props = {
 
 const DayContainer = forwardRef<HTMLDivElement, Props>(
   ({ date, label, items, onAddButtonClick, onMealClick }, ref) => {
-    const { moveMeal } = useContext(MealsPlannerContext);
+    const { moveMeal, sortMeal } = useContext(MealsPlannerContext);
 
     const headerId = `day-container-title-${date}`;
 
     const { dropRef } = useDrop({
       id: date,
-      onDrop: ({ dragData }: { dragData: DragData }) => {
-        if (date === dragData.date) return false;
-        moveMeal(dragData.label, dragData.date, date);
+      onDrop: ({
+        dragData,
+        sortData,
+      }: {
+        dragData: DragData;
+        sortData: { index: number };
+      }) => {
+        if (date === dragData.date) {
+          if (sortData) {
+            sortMeal(date, dragData.label, sortData.index);
+            return true;
+          }
+          return false;
+        }
+
+        moveMeal(dragData.label, dragData.date, date, sortData?.index);
         return true;
       },
     });

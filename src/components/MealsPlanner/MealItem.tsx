@@ -13,6 +13,7 @@ const MealItem = ({ label, date, onClick }: Props) => {
   const { dragRef, dragHandleRef, isDragging } = useDrag({
     direction: 'y',
     scrollContainerId: 'scroll-container',
+    sortable: true,
     data: { date, label },
   });
 
