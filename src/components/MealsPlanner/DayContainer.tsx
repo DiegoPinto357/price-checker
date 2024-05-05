@@ -4,12 +4,12 @@ import { LuPlus } from 'react-icons/lu';
 import { v4 as uuid } from 'uuid';
 import useMergedRef from '@react-hook/merged-ref';
 import { useDrop } from '../lib/dragAndDrop';
+import { isToday } from '../../libs/date';
 import Typography from '../lib/Typography';
 import MealItem from './MealItem';
 import { MealsPlannerContext } from '../Context';
 
 import type { MealItemData } from './types';
-import { isToday } from '../../libs/date';
 
 type DragData = MealItemData & { date: string };
 

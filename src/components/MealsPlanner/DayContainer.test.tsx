@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import { screen } from '@testing-library/react';
+import MockDate from 'mockdate';
 import { createRender } from '../testUtils';
 import { triggerOnDrop } from '../lib/dragAndDrop/__mocks__/useDrop';
 import DayContainer from './DayContainer';
@@ -10,6 +11,8 @@ vi.mock('react', async () => ({
 }));
 
 vi.mock('../lib/dragAndDrop/useDrop');
+
+MockDate.set('2024-03-08');
 
 const render = createRender({ mealsPlannerProviderEnabled: true });
 
@@ -22,8 +25,11 @@ const meals = [
 ];
 
 describe('DayContainer', () => {
-  it('renders provided meals', () => {
+  beforeEach(() => {
     vi.mocked(useContext).mockImplementation(() => ({}));
+  });
+
+  it('renders provided meals', () => {
     render(
       <DayContainer
         date={date}
@@ -37,6 +43,25 @@ describe('DayContainer', () => {
     meals.forEach(meal =>
       expect(screen.getByText(meal.label)).toBeInTheDocument()
     );
+  });
+
+  it('renders the "Hoje" chip on today list item', () => {
+    const label = 'Quinta-feira, 7 de mar.';
+
+    render(
+      <DayContainer
+        date="2024-3-7"
+        label={label}
+        items={meals}
+        onAddButtonClick={vi.fn()}
+        onMealClick={vi.fn()}
+      />
+    );
+
+    const todayContainer = screen.getByRole('group', {
+      name: `${label} Hoje`, // Mock is UTC 0:00
+    });
+    expect(todayContainer).toBeInTheDocument();
   });
 
   it('adds meal dropped from another day', () => {
