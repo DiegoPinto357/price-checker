@@ -11,6 +11,9 @@ export default defineConfig({
   server: {
     port: 5174,
   },
+  optimizeDeps: {
+    exclude: ['userData/*', 'userData-sandbox/*'],
+  },
   test: {
     globals: true,
     environment: 'jsdom',
