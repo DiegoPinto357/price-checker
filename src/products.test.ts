@@ -1,7 +1,7 @@
 import fs from 'fs';
 import md5 from 'md5';
 import { storage, database } from './proxies';
-import { saveProducts } from './products';
+import { saveProducts, getProductsListFromLocal } from './products';
 import nfData from '../mockData/nf/nfData.json';
 import remoteIndexFile from '../mockData/products/remoteIndex.json';
 
@@ -324,6 +324,31 @@ describe('products', () => {
           hash: '97b9ccdbb33fc756336af07f61e6300b',
         },
         ...expectedResult,
+      });
+    });
+  });
+
+  describe('getProductsListFromLocal', () => {
+    it('gets the list of all products', async () => {
+      const productsList = await getProductsListFromLocal();
+      expect(productsList).toHaveLength(20);
+      productsList.forEach(product => {
+        expect(product).toEqual(
+          expect.objectContaining({
+            code: expect.any(String),
+            description: expect.any(String),
+            history: expect.arrayContaining([
+              expect.objectContaining({
+                amount: expect.any(Number),
+                date: expect.any(String),
+                nfKey: expect.any(String),
+                totalValue: expect.any(Number),
+                unit: expect.any(String),
+                value: expect.any(Number),
+              }),
+            ]),
+          })
+        );
       });
     });
   });

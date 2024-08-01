@@ -240,3 +240,16 @@ export const saveProducts = async (products: Product[], nfData: Nf) => {
     saveProductsOnRemote(mappedProducts),
   ]);
 };
+
+const isProductHistory = (
+  item: ProductHistory | undefined
+): item is ProductHistory => {
+  return !!item;
+};
+
+export const getProductsListFromLocal = async () => {
+  const localIndex = await createStorageIndex('/products/index.csv');
+  const ids = localIndex.getEntries().map(([id]) => id);
+  const items = (await getProductsFromLocal(ids)).filter(isProductHistory);
+  return items.sort((a, b) => a.description.localeCompare(b.description));
+};
