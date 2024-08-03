@@ -2,6 +2,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 
+vi.mock('./Products', () => <div>Products</div>);
+
 describe('App', () => {
   it('renders each module for each selected tab', async () => {
     render(<App />);
