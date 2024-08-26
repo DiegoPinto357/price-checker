@@ -11,7 +11,6 @@ import ShoppingList from './ShoppingList';
 import Recipes from './Recipes';
 import NFScanner from './NFScanner';
 import Products from './Products';
-// import '../proxies/dropbox';
 
 const debugProducts = false;
 
