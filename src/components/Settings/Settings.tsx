@@ -15,23 +15,17 @@ const Settings = () => {
 
   return (
     <div data-testid="settings">
-      <Typography className="mx-4" variant="h1">
-        Configurações
-      </Typography>
+      <Typography variant="h2">Debug</Typography>
 
-      <div className="mx-4">
-        <Typography variant="h2">Debug</Typography>
+      <Button
+        className="w-full md:w-1/3"
+        color="primary"
+        onPress={handleSyncButtonClick}
+      >
+        Sincronizar Banco de Dados
+      </Button>
 
-        <Button
-          className="w-full md:w-1/3"
-          color="primary"
-          onPress={handleSyncButtonClick}
-        >
-          Sincronizar Banco de Dados
-        </Button>
-
-        {isLoading && <Loader />}
-      </div>
+      {isLoading && <Loader />}
     </div>
   );
 };

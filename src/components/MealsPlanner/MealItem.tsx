@@ -12,7 +12,7 @@ type Props = MealItemData & {
 const MealItem = ({ label, date, onClick }: Props) => {
   const { dragRef, dragHandleRef, isDragging } = useDrag({
     direction: 'y',
-    scrollContainerId: 'scroll-container',
+    scrollContainerId: 'meals-planner',
     sortable: true,
     data: { date, label },
   });

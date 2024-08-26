@@ -60,7 +60,7 @@ const DayContainer = forwardRef<HTMLDivElement, Props>(
         role="group"
         aria-labelledby={headerId}
       >
-        <CardHeader className="rounded-none bg-gray-100 py-2">
+        <CardHeader className="rounded-none bg-gray-100 px-4 py-2">
           <div className="flex justify-between items-center w-full">
             <Typography id={headerId} variant="h4" className="font-medium m-0">
               {label}
@@ -82,7 +82,7 @@ const DayContainer = forwardRef<HTMLDivElement, Props>(
           </div>
         </CardHeader>
         {items && items.length ? (
-          <CardBody className="flex flex-col gap-3 overflow-visible">
+          <CardBody className="flex flex-col gap-3 overflow-visible px-4">
             {items.map(item => (
               <MealItem
                 key={uuid()}

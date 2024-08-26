@@ -1,5 +1,4 @@
 import { useContext, useCallback } from 'react';
-import Typography from '../lib/Typography';
 import ProductList from './ProductList';
 import ProductSearch from './ProductSearch';
 import { ShoppingListContext } from '../Context';
@@ -51,13 +50,7 @@ const ShoppingList = () => {
   }, [items, setItems]);
 
   return (
-    <div
-      data-testid="shopping-list"
-      className="flex flex-col justify-between h-full"
-    >
-      <Typography className="mx-4" variant="h1">
-        Lista de Compras
-      </Typography>
+    <div data-testid="shopping-list">
       <ProductList
         items={items}
         onItemChange={handleListItemChange}

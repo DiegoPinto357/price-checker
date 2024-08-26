@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import { AxiosError } from 'axios'; // TODO migrate to HttpError
 import { Button } from '@nextui-org/react';
 import { IoCameraOutline } from 'react-icons/io5';
-import Typography from '../lib/Typography';
 import ErrorMessage from '../lib/ErrorMessage';
 import Loader from '../lib/Loader';
 import QrCodeReader from './QrCodeReader';
@@ -116,12 +115,7 @@ const NFScanner = () => {
       {contentPage === 'qr-reader' ? (
         <QrCodeReader onClose={handleQrCodeReaderClose} />
       ) : (
-        <>
-          <Typography className="mx-4" variant="h1">
-            Nota Fiscal
-          </Typography>
-          {renderContentPage(contentPage)}{' '}
-        </>
+        <>{renderContentPage(contentPage)} </>
       )}
       {isLoading && <Loader />}
     </div>

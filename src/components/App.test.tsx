@@ -15,18 +15,17 @@ describe('App', () => {
       name: 'shopping list',
     });
     await userEvent.click(shoppingListTab);
-    // TODO get elements by heading text
     content = screen.getByTestId('shopping-list');
+    expect(content).toBeInTheDocument();
+
+    const settingsTab = screen.getByRole('tab', { name: 'recipes' });
+    await userEvent.click(settingsTab);
+    content = screen.getByTestId('recipes');
     expect(content).toBeInTheDocument();
 
     const nfScannerTab = screen.getByRole('tab', { name: 'nf scanner' });
     await userEvent.click(nfScannerTab);
     content = screen.getByTestId('qr-scanner');
-    expect(content).toBeInTheDocument();
-
-    const settingsTab = screen.getByRole('tab', { name: 'settings' });
-    await userEvent.click(settingsTab);
-    content = screen.getByTestId('settings');
     expect(content).toBeInTheDocument();
 
     const mealsTab = screen.getByRole('tab', {

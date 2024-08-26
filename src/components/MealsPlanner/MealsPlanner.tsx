@@ -15,7 +15,6 @@ import {
 } from '../../libs/date';
 import { toCapitalCase } from '../../libs/string';
 import Observer from '../lib/Observer';
-import Typography from '../lib/Typography';
 import { MealsPlannerContext } from '../Context';
 import PlannerDayList from './PlannerDayList';
 
@@ -112,27 +111,19 @@ const MealsPlanner = () => {
   }, [loadMeals]);
 
   return (
-    <div
+    <ScrollShadow
       data-testid="meals-planner"
-      className="flex flex-col justify-between h-full relative"
+      id="meals-planner"
+      className="overflow-y-scroll overflow-x-visible"
+      ref={scrollRef}
     >
-      <Typography className="mx-4" variant="h1">
-        Planejamento
-      </Typography>
-      <ScrollShadow
-        data-testid="scroll-container"
-        id="scroll-container"
-        className="overflow-y-scroll overflow-x-visible"
-        ref={scrollRef}
-      >
-        <Observer data-testid="observer-top" onIntersection={addDaysOnTop} />
-        <PlannerDayList days={days} />
-        <Observer
-          data-testid="observer-bottom"
-          onIntersection={addDaysOnBottom}
-        />
-      </ScrollShadow>
-    </div>
+      <Observer data-testid="observer-top" onIntersection={addDaysOnTop} />
+      <PlannerDayList days={days} />
+      <Observer
+        data-testid="observer-bottom"
+        onIntersection={addDaysOnBottom}
+      />
+    </ScrollShadow>
   );
 };
 

@@ -1,16 +1,17 @@
 import { Tabs, Tab } from '@nextui-org/react';
-// import { IoPizzaOutline } from 'react-icons/io5';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { PiShoppingCart } from 'react-icons/pi';
+import { IoPizzaOutline } from 'react-icons/io5';
 import { BsQrCodeScan } from 'react-icons/bs';
-import { GoGear } from 'react-icons/go';
 import ContextProvider from './Context';
+import MainContent from './MainContent';
 import MealsPlanner from './MealsPlanner';
 import NodejsLoader from './NodejsLoader';
 import ShoppingList from './ShoppingList';
+import Recipes from './Recipes';
 import NFScanner from './NFScanner';
-import Settings from './Settings';
 import Products from './Products';
+// import '../proxies/dropbox';
 
 const debugProducts = false;
 
@@ -42,7 +43,9 @@ const App = () => {
               aria-label="meals planner"
               title={<IoCalendarOutline className={iconClass} />}
             >
-              <MealsPlanner />
+              <MainContent title="Planejamento">
+                <MealsPlanner />
+              </MainContent>
             </Tab>
 
             <Tab
@@ -50,7 +53,19 @@ const App = () => {
               aria-label="shopping list"
               title={<PiShoppingCart className={iconClass} />}
             >
-              <ShoppingList />
+              <MainContent title="Lista de Compras">
+                <ShoppingList />
+              </MainContent>
+            </Tab>
+
+            <Tab
+              key="recipes"
+              aria-label="recipes"
+              title={<IoPizzaOutline className={iconClass} />}
+            >
+              <MainContent title="Receitas">
+                <Recipes />
+              </MainContent>
             </Tab>
 
             <Tab
@@ -58,15 +73,9 @@ const App = () => {
               aria-label="nf scanner"
               title={<BsQrCodeScan className={iconClass} />}
             >
-              <NFScanner />
-            </Tab>
-
-            <Tab
-              key="settings"
-              aria-label="settings"
-              title={<GoGear className={iconClass} />}
-            >
-              <Settings />
+              <MainContent title="Nota Fiscal">
+                <NFScanner />
+              </MainContent>
             </Tab>
           </Tabs>
         </div>
