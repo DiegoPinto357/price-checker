@@ -50,7 +50,7 @@ const ShoppingList = () => {
   }, [items, setItems]);
 
   return (
-    <div data-testid="shopping-list">
+    <div data-testid="shopping-list" className="flex flex-col h-full">
       <ProductList
         items={items}
         onItemChange={handleListItemChange}

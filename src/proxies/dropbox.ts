@@ -24,12 +24,3 @@ export default {
   readDir,
   readFile,
 };
-
-const { entries } = await readDir('/Obsidian/Pessoal/Receitas');
-const recipes = entries.filter(entry => entry['.tag'] === 'file');
-console.log({ recipes });
-
-const file = await readFile(
-  '/Obsidian/Pessoal/Receitas/Bolo de chocolate sem glúten.md'
-);
-console.log([file]);

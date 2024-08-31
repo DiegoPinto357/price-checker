@@ -31,7 +31,7 @@ const App = () => {
               tabList: 'rounded-none',
               tab: 'overflow-hidden h-16',
               tabContent: 'overflow-hidden h-16 m-auto pt-3',
-              panel: 'relative overflow-y-scroll grow py-4 px-0',
+              panel: 'relative overflow-auto h-full py-4 px-0',
             }}
             color="primary"
             fullWidth

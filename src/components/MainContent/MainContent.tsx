@@ -21,7 +21,7 @@ const MainContent = ({ title, children }: Props) => {
         <Typography variant="h1">{title}</Typography>
       </div>
 
-      {children}
+      <div className="overflow-hidden h-full">{children}</div>
 
       <ContentModal view={view} isOpen={isOpen} onClose={onClose} />
     </div>

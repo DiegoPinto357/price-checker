@@ -114,7 +114,7 @@ const MealsPlanner = () => {
     <ScrollShadow
       data-testid="meals-planner"
       id="meals-planner"
-      className="overflow-y-scroll overflow-x-visible"
+      className="overflow-y-scroll overflow-x-visible h-full"
       ref={scrollRef}
     >
       <Observer data-testid="observer-top" onIntersection={addDaysOnTop} />
