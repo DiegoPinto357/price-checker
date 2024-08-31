@@ -1,20 +1,13 @@
-import { useEffect, useState } from 'react';
-import dropbox from '../../proxies/dropbox';
+import { useGetRecipesList } from './useGetRecipesList';
 
 const Recipes = () => {
-  const [recipes, setRecipes] = useState<string[]>([]);
+  const { data } = useGetRecipesList();
 
-  // TODO create custom hook/ use react query
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      const { entries } = await dropbox.readDir('/Obsidian/Pessoal/Receitas');
-      setRecipes(
-        entries.filter(entry => entry['.tag'] === 'file').map(file => file.name)
-      );
-    };
+  if (!data) {
+    return null;
+  }
 
-    fetchRecipes();
-  }, []);
+  const recipes = data.map(file => file.name.split('.')[0]);
 
   return (
     <div data-testid="recipes">
