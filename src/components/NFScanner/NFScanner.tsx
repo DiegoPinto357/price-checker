@@ -110,7 +110,10 @@ const NFScanner = () => {
   );
 
   return (
-    <div data-testid="qr-scanner" className="flex flex-col h-full">
+    <div
+      data-testid="qr-scanner"
+      className="flex flex-col h-full overflow-y-scroll"
+    >
       {/* TODO refactor conditional rendering */}
       {contentPage === 'qr-reader' ? (
         <QrCodeReader onClose={handleQrCodeReaderClose} />
