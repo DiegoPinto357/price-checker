@@ -20,16 +20,6 @@ export const formatDateToLocaleString = (date: Date) =>
       new Date().getFullYear() === date.getFullYear() ? undefined : 'numeric',
   });
 
-export const isToday = (dateString: string) => {
-  const date = new Date(dateString);
-  const today = new Date();
-  return (
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear()
-  );
-};
-
 export const getRelativeMonthAndYear = (
   {
     date,
