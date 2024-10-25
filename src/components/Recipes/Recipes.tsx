@@ -1,21 +1,25 @@
 import { useGetRecipesList } from './useGetRecipesList';
+import RecipeCard from './RecipeCard';
 
 const Recipes = () => {
   const { data } = useGetRecipesList();
 
+  // TODO add loading spinner
   if (!data) {
     return null;
   }
 
-  const recipes = data.map(file => file.name.split('.')[0]);
+  const recipes = data.map(file => ({
+    id: file.id,
+    name: file.name.split('.')[0],
+  }));
 
+  // TODO add filter button o toolbar
   return (
-    <div data-testid="recipes">
-      <ul>
-        {recipes.map(recipe => (
-          <li key={recipe}>{recipe}</li>
-        ))}
-      </ul>
+    <div data-testid="recipes" className="overflow-y-scroll h-full p-4">
+      {recipes.map(({ id, name }) => (
+        <RecipeCard key={id} id={id} name={name} onClick={console.log} />
+      ))}
     </div>
   );
 };

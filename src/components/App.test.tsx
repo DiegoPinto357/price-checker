@@ -8,31 +8,31 @@ describe('App', () => {
   it('renders each module for each selected tab', async () => {
     render(<App />);
 
-    let content = screen.getByTestId('meals-planner');
+    let content = await screen.findByTestId('meals-planner');
     expect(content).toBeInTheDocument();
 
     const shoppingListTab = screen.getByRole('tab', {
       name: 'shopping list',
     });
     await userEvent.click(shoppingListTab);
-    content = screen.getByTestId('shopping-list');
+    content = await screen.findByTestId('shopping-list');
     expect(content).toBeInTheDocument();
 
-    const settingsTab = screen.getByRole('tab', { name: 'recipes' });
-    await userEvent.click(settingsTab);
-    content = screen.getByTestId('recipes');
+    const recipesTab = screen.getByRole('tab', { name: 'recipes' });
+    await userEvent.click(recipesTab);
+    content = await screen.findByTestId('recipes');
     expect(content).toBeInTheDocument();
 
     const nfScannerTab = screen.getByRole('tab', { name: 'nf scanner' });
     await userEvent.click(nfScannerTab);
-    content = screen.getByTestId('qr-scanner');
+    content = await screen.findByTestId('qr-scanner');
     expect(content).toBeInTheDocument();
 
     const mealsTab = screen.getByRole('tab', {
       name: 'meals planner',
     });
     await userEvent.click(mealsTab);
-    content = screen.getByTestId('meals-planner');
+    content = await screen.findByTestId('meals-planner');
     expect(content).toBeInTheDocument();
   });
 });
