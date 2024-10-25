@@ -12,7 +12,8 @@ vi.mock('react', async () => ({
 
 vi.mock('../lib/dragAndDrop/useDrop');
 
-MockDate.set('2024-03-08');
+const today = '2024-03-08';
+MockDate.set(today);
 
 const render = createRender({ mealsPlannerProviderEnabled: true });
 
@@ -35,6 +36,7 @@ describe('DayContainer', () => {
         date={date}
         label=""
         items={meals}
+        today={today}
         onAddButtonClick={vi.fn()}
         onMealClick={vi.fn()}
       />
@@ -50,9 +52,10 @@ describe('DayContainer', () => {
 
     render(
       <DayContainer
-        date="2024-3-7"
+        date={today}
         label={label}
         items={meals}
+        today={today}
         onAddButtonClick={vi.fn()}
         onMealClick={vi.fn()}
       />
@@ -73,6 +76,7 @@ describe('DayContainer', () => {
         date={date}
         label=""
         items={meals}
+        today={today}
         onAddButtonClick={vi.fn()}
         onMealClick={vi.fn()}
       />
@@ -99,6 +103,7 @@ describe('DayContainer', () => {
         date={date}
         label=""
         items={meals}
+        today={today}
         onAddButtonClick={vi.fn()}
         onMealClick={vi.fn()}
       />

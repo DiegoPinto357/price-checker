@@ -1,5 +1,5 @@
 import { useContext, useRef, useState, useEffect, useCallback } from 'react';
-import { isToday } from '../../libs/date';
+import { formatDateToYYYYMMDD, isToday } from '../../libs/date';
 import EditModal from '../lib/EditModal';
 import AddMealModal from './AddMealModal';
 import DayContainer from './DayContainer';
@@ -63,6 +63,8 @@ const PlannerDayList = ({ days }: Props) => {
     [selectedDate, updateMeal]
   );
 
+  const today = formatDateToYYYYMMDD(new Date());
+
   return (
     <>
       {days.map(({ date, label }) => (
@@ -72,6 +74,7 @@ const PlannerDayList = ({ days }: Props) => {
           date={date}
           label={label}
           items={meals[date]}
+          today={today}
           onAddButtonClick={() => handleAddButtonClick(date)}
           onMealClick={mealName => handleMealClick(date, mealName)}
         />
