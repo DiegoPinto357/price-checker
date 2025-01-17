@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import MockDate from 'mockdate';
 import { createRender } from '../testUtils';
 import { triggerIntersectionOnInstance } from '../lib/__mocks__/Observer';
@@ -96,7 +96,9 @@ describe('MealsPlanner', () => {
   it('renders a 3 month list of days', async () => {
     await setupFiles();
 
-    render(<Meals />);
+    await act(async () => {
+      render(<Meals />);
+    });
 
     const dayContainers = screen.getAllByRole('group');
     expect(dayContainers).toHaveLength(29 + 31 + 30);

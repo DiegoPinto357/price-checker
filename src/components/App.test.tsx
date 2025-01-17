@@ -11,24 +11,24 @@ describe('App', () => {
     let content = await screen.findByTestId('meals-planner');
     expect(content).toBeInTheDocument();
 
-    const shoppingListTab = screen.getByRole('tab', {
+    const shoppingListTab = await screen.findByRole('tab', {
       name: 'shopping list',
     });
     await userEvent.click(shoppingListTab);
     content = await screen.findByTestId('shopping-list');
     expect(content).toBeInTheDocument();
 
-    const recipesTab = screen.getByRole('tab', { name: 'recipes' });
+    const recipesTab = await screen.findByRole('tab', { name: 'recipes' });
     await userEvent.click(recipesTab);
     content = await screen.findByTestId('recipes');
     expect(content).toBeInTheDocument();
 
-    const nfScannerTab = screen.getByRole('tab', { name: 'nf scanner' });
+    const nfScannerTab = await screen.findByRole('tab', { name: 'nf scanner' });
     await userEvent.click(nfScannerTab);
     content = await screen.findByTestId('qr-scanner');
     expect(content).toBeInTheDocument();
 
-    const mealsTab = screen.getByRole('tab', {
+    const mealsTab = await screen.findByRole('tab', {
       name: 'meals planner',
     });
     await userEvent.click(mealsTab);
