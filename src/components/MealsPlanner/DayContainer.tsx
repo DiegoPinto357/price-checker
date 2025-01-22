@@ -75,7 +75,7 @@ const DayContainer = forwardRef<HTMLDivElement, Props>(
               variant="light"
               size="sm"
               isIconOnly
-              onClick={onAddButtonClick}
+              onPress={onAddButtonClick}
             >
               <LuPlus className="w-6 h-6 text-gray-600" />
             </Button>
