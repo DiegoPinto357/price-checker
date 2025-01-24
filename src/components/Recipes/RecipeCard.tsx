@@ -12,7 +12,7 @@ const RecipeCard = ({ id, name, onClick }: Props) => {
   const tags = ['sem-gluten', 'molho'];
   // const tags: string[] = [];
 
-  const hasTags = tags.length > 0;
+  const hasTags = false; // tags.length > 0;
 
   return (
     // use same style as day container?
