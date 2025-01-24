@@ -1,4 +1,5 @@
 import { CheckboxGroup, Checkbox } from '@nextui-org/react';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 import type { ItemEdit } from '../lib/EditModal';
 import type { ShoppingListItem } from './types';
@@ -36,12 +37,13 @@ const ProductListGroup = ({
           key={`${item.name}-${item.checked}`}
           className={`max-w-none w-full ml-0 px-4 ${bgColor}`}
           value={item.name}
-          onChange={e =>
+          onChange={async e => {
             onItemChange({
               name: item.name,
               checked: e.currentTarget.checked,
-            })
-          }
+            });
+            await Haptics.impact({ style: ImpactStyle.Light });
+          }}
           onContextMenu={e => onItemContextMenu(e, item.name)}
         >
           {item.name}

@@ -4,6 +4,7 @@ import { createRender } from '../testUtils';
 import { storage } from '../../proxies';
 import ShoppingList from '.';
 
+vi.mock('@capacitor/haptics');
 vi.mock('../../proxies/storage');
 
 type MockStorage = typeof storage & { clearFiles: () => void };
