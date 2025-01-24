@@ -1,12 +1,12 @@
+import Loader from '../lib/Loader';
 import { useGetRecipesList } from './useGetRecipesList';
 import RecipeCard from './RecipeCard';
 
 const Recipes = () => {
   const { data } = useGetRecipesList();
 
-  // TODO add loading spinner
   if (!data) {
-    return null;
+    return <Loader fullScreen={false} opaque />;
   }
 
   const recipes = data.map(file => ({
