@@ -7,6 +7,9 @@ export default defineConfig({
   publicDir: '../static',
   server: {
     port: 5174,
+    watch: {
+      ignored: ['/android/**'],
+    },
   },
   optimizeDeps: {
     exclude: ['userData/*', 'userData-sandbox/*'],
