@@ -1,4 +1,6 @@
 import { useContext, useCallback } from 'react';
+import ToolbarContainer from '../ToolbarContainer';
+import ContentContainer from '../ContentContainer';
 import ProductList from './ProductList';
 import ProductSearch from './ProductSearch';
 import { ShoppingListContext } from '../Context';
@@ -50,14 +52,21 @@ const ShoppingList = () => {
   }, [items, setItems]);
 
   return (
-    <div data-testid="shopping-list" className="flex flex-col h-full">
-      <ProductList
-        items={items}
-        onItemChange={handleListItemChange}
-        onDeleteSelectedItems={handleDeleteSelectedItems}
-      />
-      <ProductSearch onAddItem={addItem} />
-    </div>
+    <>
+      <ToolbarContainer title="Lista de Compras" />
+
+      <ContentContainer
+        data-testid="shopping-list"
+        className="flex flex-col h-full"
+      >
+        <ProductList
+          items={items}
+          onItemChange={handleListItemChange}
+          onDeleteSelectedItems={handleDeleteSelectedItems}
+        />
+        <ProductSearch onAddItem={addItem} />
+      </ContentContainer>
+    </>
   );
 };
 

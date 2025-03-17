@@ -4,6 +4,8 @@ import { Button } from '@nextui-org/react';
 import { IoCameraOutline } from 'react-icons/io5';
 import ErrorMessage from '../lib/ErrorMessage';
 import Loader from '../lib/Loader';
+import ToolbarContainer from '../ToolbarContainer';
+import ContentContainer from '../ContentContainer';
 import QrCodeReader from './QrCodeReader';
 import QrResults from './QrResults';
 import { getNfData, saveNf } from '../../nfs';
@@ -110,18 +112,22 @@ const NFScanner = () => {
   );
 
   return (
-    <div
-      data-testid="qr-scanner"
-      className="flex flex-col h-full overflow-y-scroll"
-    >
-      {/* TODO refactor conditional rendering */}
-      {contentPage === 'qr-reader' ? (
-        <QrCodeReader onClose={handleQrCodeReaderClose} />
-      ) : (
-        <>{renderContentPage(contentPage)} </>
-      )}
-      {isLoading && <Loader />}
-    </div>
+    <>
+      <ToolbarContainer title="Nota Fiscal" />
+
+      <ContentContainer
+        data-testid="qr-scanner"
+        className="flex flex-col h-full overflow-y-scroll"
+      >
+        {/* TODO refactor conditional rendering */}
+        {contentPage === 'qr-reader' ? (
+          <QrCodeReader onClose={handleQrCodeReaderClose} />
+        ) : (
+          <>{renderContentPage(contentPage)} </>
+        )}
+        {isLoading && <Loader />}
+      </ContentContainer>
+    </>
   );
 };
 

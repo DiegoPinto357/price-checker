@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Divider, Button } from '@nextui-org/react';
+import { Divider, Button, ScrollShadow } from '@nextui-org/react';
 import { MdOutlineDeleteSweep } from 'react-icons/md';
 import Typography from '../lib/Typography';
 import ConfirmDialog from '../lib/ConfirmDialog';
@@ -58,7 +58,7 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
   );
 
   return (
-    <div className="overflow-y-scroll mb-2 pt-2 flex-1">
+    <ScrollShadow className="overflow-y-scroll mb-2 pt-2 flex-1">
       {unselectedItems.length ? (
         <ProductListGroup
           data-testid="unselected-items-group"
@@ -106,7 +106,7 @@ const ProductList = ({ items, onItemChange, onDeleteSelectedItems }: Props) => {
         itemName={selectedItem}
         onClose={handleEditItemDialogClose}
       />
-    </div>
+    </ScrollShadow>
   );
 };
 

@@ -5,7 +5,7 @@ import { PiShoppingCart } from 'react-icons/pi';
 import { IoPizzaOutline } from 'react-icons/io5';
 import { BsQrCodeScan } from 'react-icons/bs';
 import ContextProvider from './Context';
-import MainContent from './MainContent';
+import MainContainer from './MainContainer';
 import MealsPlanner from './MealsPlanner';
 import NodejsLoader from './NodejsLoader';
 import ShoppingList from './ShoppingList';
@@ -53,9 +53,9 @@ const App = () => {
                 aria-label="meals planner"
                 title={<IoCalendarOutline className={iconClass} />}
               >
-                <MainContent title="Planejamento">
+                <MainContainer>
                   <MealsPlanner />
-                </MainContent>
+                </MainContainer>
               </Tab>
 
               <Tab
@@ -63,9 +63,9 @@ const App = () => {
                 aria-label="shopping list"
                 title={<PiShoppingCart className={iconClass} />}
               >
-                <MainContent title="Lista de Compras">
+                <MainContainer>
                   <ShoppingList />
-                </MainContent>
+                </MainContainer>
               </Tab>
 
               <Tab
@@ -73,9 +73,9 @@ const App = () => {
                 aria-label="recipes"
                 title={<IoPizzaOutline className={iconClass} />}
               >
-                <MainContent title="Receitas">
+                <MainContainer>
                   <Recipes />
-                </MainContent>
+                </MainContainer>
               </Tab>
 
               <Tab
@@ -83,9 +83,9 @@ const App = () => {
                 aria-label="nf scanner"
                 title={<BsQrCodeScan className={iconClass} />}
               >
-                <MainContent title="Nota Fiscal">
+                <MainContainer>
                   <NFScanner />
-                </MainContent>
+                </MainContainer>
               </Tab>
             </Tabs>
           </div>

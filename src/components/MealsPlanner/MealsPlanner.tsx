@@ -16,6 +16,8 @@ import {
 import { toCapitalCase } from '../../libs/string';
 import Observer from '../lib/Observer';
 import { MealsPlannerContext } from '../Context';
+import ToolbarContainer from '../ToolbarContainer';
+import ContentContainer from '../ContentContainer';
 import PlannerDayList from './PlannerDayList';
 
 import type { DayContainerData } from './PlannerDayList';
@@ -111,19 +113,24 @@ const MealsPlanner = () => {
   }, [loadMeals]);
 
   return (
-    <ScrollShadow
-      data-testid="meals-planner"
-      id="meals-planner"
-      className="overflow-y-scroll overflow-x-visible h-full"
-      ref={scrollRef}
-    >
-      <Observer data-testid="observer-top" onIntersection={addDaysOnTop} />
-      <PlannerDayList days={days} />
-      <Observer
-        data-testid="observer-bottom"
-        onIntersection={addDaysOnBottom}
-      />
-    </ScrollShadow>
+    <>
+      <ToolbarContainer title="Planejamento" />
+
+      <ContentContainer data-testid="meals-planner">
+        <ScrollShadow
+          id="meals-planner"
+          className="overflow-y-scroll overflow-x-visible h-full"
+          ref={scrollRef}
+        >
+          <Observer data-testid="observer-top" onIntersection={addDaysOnTop} />
+          <PlannerDayList days={days} />
+          <Observer
+            data-testid="observer-bottom"
+            onIntersection={addDaysOnBottom}
+          />
+        </ScrollShadow>
+      </ContentContainer>
+    </>
   );
 };
 
