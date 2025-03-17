@@ -1,5 +1,5 @@
 import { PropsWithChildren } from 'react';
-import Menu from './MainContainer/Menu';
+import Menu from './Menu';
 import Typography from './lib/Typography';
 
 type Props = PropsWithChildren & {
