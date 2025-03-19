@@ -8,9 +8,11 @@ type Props = PropsWithChildren & {
 
 const ToolbarContainer = ({ title, children }: Props) => (
   <div className="flex gap-3 mx-4">
-    <Menu />
-    <Typography variant="h1">{title}</Typography>
-    {children}
+    <div className="flex gap-3 w-full">
+      <Menu />
+      <Typography variant="h1">{title}</Typography>
+    </div>
+    <div className="flex gap-2">{children}</div>
   </div>
 );
 
