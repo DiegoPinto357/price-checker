@@ -34,7 +34,7 @@
     "capacitor-nodejs": "https://github.com/hampoelz/capacitor-nodejs/releases/download/v1.0.0-beta.6/capacitor-nodejs.tgz",
     "dropbox": "^10.34.0",
     "fastify": "^4.15.0",
-    "framer-motion": "^10.16.4",
+    "framer-motion": "^11.18.2",
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
     "react": "^18.2.0",
