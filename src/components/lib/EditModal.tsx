@@ -7,7 +7,7 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from '@nextui-org/react';
+} from '@heroui/react';
 import ConfirmDialog from './ConfirmDialog';
 
 import type { KeyboardEvent } from 'react';

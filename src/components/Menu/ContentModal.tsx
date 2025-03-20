@@ -5,7 +5,7 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from '@nextui-org/react';
+} from '@heroui/react';
 import Typography from '../lib/Typography';
 import Settings from '../Settings';
 

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Autocomplete, AutocompleteItem, Button } from '@nextui-org/react';
+import { Autocomplete, AutocompleteItem, Button } from '@heroui/react';
 import { LuPlus } from 'react-icons/lu';
 
 import type { KeyboardEvent } from 'react';

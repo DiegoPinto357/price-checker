@@ -4,7 +4,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalFooter,
-} from '@nextui-org/react';
+} from '@heroui/react';
 
 export type ConfirmDialogUserAction = 'close' | 'cancel' | 'accept';
 

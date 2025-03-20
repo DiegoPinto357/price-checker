@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { AxiosError } from 'axios'; // TODO migrate to HttpError
-import { Button } from '@nextui-org/react';
+import { Button } from '@heroui/react';
 import { IoCameraOutline } from 'react-icons/io5';
 import ErrorMessage from '../lib/ErrorMessage';
 import Loader from '../lib/Loader';

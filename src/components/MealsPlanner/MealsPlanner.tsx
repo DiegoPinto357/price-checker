@@ -6,7 +6,7 @@ import {
   useEffect,
   useMemo,
 } from 'react';
-import { ScrollShadow } from '@nextui-org/react';
+import { ScrollShadow } from '@heroui/react';
 import {
   formatDateToYYYYMMDD,
   formatDateToLocaleString,

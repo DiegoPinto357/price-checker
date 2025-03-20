@@ -5,8 +5,8 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-} from '@nextui-org/react';
-import { useDisclosure } from '@nextui-org/react';
+  useDisclosure,
+} from '@heroui/react';
 import { LuMenu } from 'react-icons/lu';
 import { GoGear } from 'react-icons/go';
 import ContentModal from './ContentModal';

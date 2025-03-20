@@ -7,7 +7,7 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from '@nextui-org/react';
+} from '@heroui/react';
 
 import type { KeyboardEvent } from 'react';
 

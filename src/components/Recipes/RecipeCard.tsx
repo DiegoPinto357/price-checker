@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardBody, Chip } from '@nextui-org/react';
+import { Card, CardHeader, CardBody, Chip } from '@heroui/react';
 
 type Props = {
   id: string;

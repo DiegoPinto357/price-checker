@@ -7,7 +7,7 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from '@nextui-org/react';
+} from '@heroui/react';
 
 import type { KeyboardEvent } from 'react';
 
@@ -31,6 +31,7 @@ const TextInputModal = ({ isOpen, title, inputLabel, onClose }: Props) => {
 
   const handleInputKeyPress = useCallback(
     (e: KeyboardEvent) => {
+      console.log('handleInputKeyPress');
       if (e.key === 'Enter') {
         onClose(value);
       }
@@ -38,9 +39,17 @@ const TextInputModal = ({ isOpen, title, inputLabel, onClose }: Props) => {
     [onClose, value]
   );
 
+  console.log({ isOpen });
+
   return (
     <>
-      <Modal isOpen={isOpen} onClose={() => onClose()}>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => {
+          console.log('on close');
+          return onClose();
+        }}
+      >
         <ModalContent>
           <ModalHeader>{title}</ModalHeader>
           <ModalBody>

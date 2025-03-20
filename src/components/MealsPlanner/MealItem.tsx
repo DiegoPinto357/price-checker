@@ -1,4 +1,4 @@
-import { Card, CardHeader } from '@nextui-org/react';
+import { Card, CardHeader } from '@heroui/react';
 import { RiDraggable } from 'react-icons/ri';
 import { useDrag } from '../lib/dragAndDrop';
 

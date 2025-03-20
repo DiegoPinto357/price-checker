@@ -1,4 +1,4 @@
-import { Button } from '@nextui-org/react';
+import { Button } from '@heroui/react';
 import ItemsList from './ItemsList';
 import { Product } from '../../types';
 export interface QrResultsProps {

@@ -1,5 +1,5 @@
 import { forwardRef, useContext } from 'react';
-import { Card, CardHeader, CardBody, Chip, Button } from '@nextui-org/react';
+import { Card, CardHeader, CardBody, Chip, Button } from '@heroui/react';
 import { LuPlus } from 'react-icons/lu';
 import { v4 as uuid } from 'uuid';
 import useMergedRef from '@react-hook/merged-ref';
