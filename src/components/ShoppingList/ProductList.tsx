@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Divider, Button, ScrollShadow } from '@heroui/react';
+import { Divider, Button, ScrollShadow } from '@nextui-org/react';
 import { MdOutlineDeleteSweep } from 'react-icons/md';
 import Typography from '../lib/Typography';
 import ConfirmDialog from '../lib/ConfirmDialog';

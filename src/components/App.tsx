@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Tabs, Tab } from '@heroui/react';
+import { Tabs, Tab } from '@nextui-org/react';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { PiShoppingCart } from 'react-icons/pi';
 import { IoPizzaOutline } from 'react-icons/io5';

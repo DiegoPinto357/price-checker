@@ -1,4 +1,4 @@
-import { CheckboxGroup, Checkbox } from '@heroui/react';
+import { CheckboxGroup, Checkbox } from '@nextui-org/react';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 import type { ItemEdit } from '../lib/EditModal';

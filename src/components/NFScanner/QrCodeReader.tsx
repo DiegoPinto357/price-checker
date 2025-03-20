@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { Button } from '@heroui/react';
+import { Button } from '@nextui-org/react';
 import { IoClose } from 'react-icons/io5';
 
 export interface QrCodeReaderProps {

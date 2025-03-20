@@ -1,5 +1,5 @@
 import { twMerge } from 'tailwind-merge';
-import { Spinner } from '@heroui/react';
+import { Spinner } from '@nextui-org/react';
 
 type Props = {
   fullScreen?: boolean;

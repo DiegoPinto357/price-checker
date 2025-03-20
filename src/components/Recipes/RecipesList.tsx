@@ -1,4 +1,4 @@
-import { ScrollShadow } from '@heroui/react';
+import { ScrollShadow } from '@nextui-org/react';
 import Loader from '../lib/Loader';
 import { useGetRecipesList } from './useGetRecipesList';
 import RecipeCard from './RecipeCard';

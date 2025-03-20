@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LuPlus } from 'react-icons/lu';
-import { Button } from '@heroui/react';
+import { Button } from '@nextui-org/react';
 import ToolbarContainer from '../ToolbarContainer';
 import ContentContainer from '../ContentContainer';
 import RecipesList from './RecipesList';

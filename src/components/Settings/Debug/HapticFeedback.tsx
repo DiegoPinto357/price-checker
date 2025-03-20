@@ -1,5 +1,5 @@
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
-import { Button } from '@heroui/react';
+import { Button } from '@nextui-org/react';
 import Typography from '../../lib/Typography';
 
 const HapticFeedback = () => {

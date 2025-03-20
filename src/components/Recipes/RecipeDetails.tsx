@@ -1,4 +1,4 @@
-import { Button } from '@heroui/react';
+import { Button } from '@nextui-org/react';
 import Loader from '../lib/Loader';
 import { useGetRecipe } from './useGetRecipe';
 import Typography from '../lib/Typography';

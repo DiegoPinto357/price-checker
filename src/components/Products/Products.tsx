@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckboxGroup, Checkbox } from '@heroui/react';
+import { CheckboxGroup, Checkbox } from '@nextui-org/react';
 import Typography from '../lib/Typography';
 import PriceChart from './PriceChart';
 import { getProductsListFromLocal } from '../../products';
