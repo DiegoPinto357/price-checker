@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import ipc from '../../ipc';
 import { FindOptions, FindOneOptions, UpdateOneOptions } from './types';
 

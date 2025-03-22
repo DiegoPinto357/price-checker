@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import config from '../../nodejs/config.json';
 

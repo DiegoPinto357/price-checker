@@ -6,6 +6,7 @@ import ContentContainer from '../ContentContainer';
 import RecipesList from './RecipesList';
 import RecipeDetails from './RecipeDetails';
 import TextInputModal from '../lib/TextInputModal';
+import youtube from '../../proxies/youtube';
 
 import type { Recipe } from './types';
 
@@ -17,9 +18,13 @@ const Recipes = () => {
     setIsTextInputOpen(true);
   };
 
-  const handleTextInputClose = (value?: string) => {
+  const handleTextInputClose = async (value?: string) => {
     setIsTextInputOpen(false);
-    console.log(value);
+    if (value) {
+      console.log(value);
+      const videoData = await youtube.getVideoData(value);
+      console.log(videoData);
+    }
   };
 
   return (

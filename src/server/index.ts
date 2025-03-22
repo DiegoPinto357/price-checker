@@ -2,6 +2,7 @@ import fastify from 'fastify';
 import cors from '@fastify/cors';
 import storageRouter from './storage.router.js';
 import databaseRouter from './database.router.js';
+import youtubeRouter from './youtube.router.js';
 import nfParser from '../nodejs/nfParser.js';
 
 const app = fastify({
@@ -11,6 +12,7 @@ const app = fastify({
 app.register(cors);
 app.register(storageRouter);
 app.register(databaseRouter);
+app.register(youtubeRouter);
 
 app.setErrorHandler((error, _request, reply) => {
   console.error(error);
@@ -21,6 +23,7 @@ interface ItemsQuerystring {
   key: string;
 }
 
+// TODO move to router file
 app.get<{ Querystring: ItemsQuerystring }>(
   '/nf-data',
   async (request, reply) => {
