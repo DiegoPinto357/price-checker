@@ -16,6 +16,7 @@ export default async (app: FastifyInstance) => {
       } catch (error) {
         if (error instanceof Error) {
           console.log(error);
+          // TODO send bad request error if url is invalid
           reply.status(500).send(error);
         } else {
           reply.status(500).send('Unknown error');
