@@ -5,7 +5,8 @@ const { YoutubeTranscript } = require('youtube-transcript');
 
 const extractVideoId = url => {
   const regex =
-    /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S+)?$/;
+    /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=))|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S+)?$/;
+
   const match = url.match(regex);
   return match ? match[1] : null;
 };
