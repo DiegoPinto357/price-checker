@@ -22,7 +22,7 @@ Video data in JSON format:
   - **intro**: Free text introducing the recipe.  
   - **ingredients**: An array of objects, each containing:  
     - "name": The ingredient name, **capitalized** (first letter uppercase).  
-    - "quantity": The total quantity if mentioned.  
+    - "quantity": The total quantity if mentioned, written in **Portuguese (pt-BR)**.  
   - **steps**: An array of ordered steps for preparation.  
   - **tips**: An array of useful tips related to the recipe, extracted from the video.  
   - **outro**: Free text after the recipe.  
@@ -35,7 +35,7 @@ Video data in JSON format:
 - Extract **useful tips** about the recipe that may appear throughout the video and add them to the "tips" section.  
 - Remove any promotional or irrelevant content.  
 - The **JSON keys** must be in **English (en-US)**, but the **values** (title, intro, outro, ingredients, quantities, steps, tips) should be in **Portuguese (pt-BR)**.  
-- Return the **final result as a valid JSON object** with no additional text.  
+- Return **only** the JSON object, with no additional text, formatting, or code block markers. 
 
 ### JSON Output Format Example:  
 
