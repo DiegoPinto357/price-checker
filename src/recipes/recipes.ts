@@ -7,12 +7,9 @@ const createNewFromYoutubeVideo = async (videoURL: string) => {
 
   if (videoData) {
     const response = await openAi.createResponse({
-      input: extractRecipeFromVideo(
-        videoData.description,
-        videoData.transcript
-      ),
+      input: extractRecipeFromVideo(videoData),
     });
-    console.log(response);
+    return response?.output_text;
   }
 };
 

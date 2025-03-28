@@ -31,7 +31,7 @@ const Recipes = () => {
   };
 
   if (isLoading) {
-    return <Loader fullScreen={false} />;
+    return <Loader fullScreen={false} opaque />;
   }
 
   return (
