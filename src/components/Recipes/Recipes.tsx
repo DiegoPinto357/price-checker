@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { LuPlus } from 'react-icons/lu';
 import { Button } from '@nextui-org/react';
+import Loader from '../lib/Loader';
 import ToolbarContainer from '../ToolbarContainer';
 import ContentContainer from '../ContentContainer';
 import RecipesList from './RecipesList';
 import RecipeDetails from './RecipeDetails';
 import TextInputModal from '../lib/TextInputModal';
-import youtube from '../../proxies/youtube';
+import recipes from '../../recipes';
 
 import type { Recipe } from './types';
 
 const Recipes = () => {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isTextInputOpen, setIsTextInputOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleAddButtonPress = () => {
     setIsTextInputOpen(true);
@@ -21,11 +23,16 @@ const Recipes = () => {
   const handleTextInputClose = async (value?: string) => {
     setIsTextInputOpen(false);
     if (value) {
-      console.log(value);
-      const videoData = await youtube.getVideoData(value);
-      console.log(videoData);
+      setIsLoading(true);
+      const recipe = await recipes.createNewFromYoutubeVideo(value);
+      console.log(recipe);
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <Loader fullScreen={false} />;
+  }
 
   return (
     <>
