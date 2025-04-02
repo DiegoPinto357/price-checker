@@ -6,7 +6,7 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const createResponse = ({ input, instructions = '', model = 'gpt-4o' }) =>
+const createResponse = ({ input, instructions = '', model = 'gpt-4o-mini' }) =>
   client.responses.create({
     model,
     instructions,
