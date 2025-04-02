@@ -11,6 +11,6 @@
     "cheerio": "^1.0.0-rc.12",
     "openai": "^4.89.1",
     "youtube-transcript": "^1.2.1",
-    "ytdl-core": "npm:@distube/ytdl-core@^4.16.5"
+    "ytdl-core": "npm:@distube/ytdl-core@^4.16.6"
   }
 }
