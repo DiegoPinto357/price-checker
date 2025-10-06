@@ -2,6 +2,8 @@
 
 This is a quick reference for running the Playwright integration tests.
 
+> **Note:** These integration tests are for **local development only**. They are not run in CI/CD pipelines. CI runs only unit tests (`npm test`). Use these E2E tests locally to debug and test the NF Scanner feature.
+
 ## Prerequisites
 
 Just make sure you have dependencies installed:

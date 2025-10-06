@@ -2,6 +2,8 @@
 
 This document describes the Playwright integration test setup for the Price Checker application.
 
+> **Note:** These integration tests are for **local development only**. They are not run in CI/CD pipelines. The CI workflow (`test.yml`) only runs unit tests with Vitest. Use these E2E tests locally to debug the NF Scanner feature.
+
 ## Overview
 
 The Playwright setup enables end-to-end integration testing of the application, particularly focusing on the NF Scanner feature. The tests simulate the complete user flow from scanning a QR code to saving the fetched data.

@@ -2,6 +2,8 @@
 
 This directory contains end-to-end integration tests for the Price Checker application using Playwright.
 
+> **Note:** These integration tests are for **local development only**. They are not run in CI/CD pipelines. Use these tests locally to debug and test the NF Scanner feature.
+
 ## Setup
 
 The Playwright setup is already configured. The project is configured to use the system's Chrome browser by default, so browser installation is optional.
