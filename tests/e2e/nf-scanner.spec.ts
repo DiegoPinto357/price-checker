@@ -1,4 +1,10 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { 
+  mockQrCodeScanner, 
+  mockStorageAndDatabase, 
+  VALID_QR_CODE_URL,
+  MOCK_NF_DATA 
+} from './fixtures';
 
 /**
  * Integration test for NF Scanner feature.
@@ -10,84 +16,7 @@ import { test, expect, Page } from '@playwright/test';
  * - Mocks the QR code scanner using browser automation
  * - Uses real HTTP requests to fetch data from the backend server
  * - Mocks database operations through the backend API
- * 
- * Valid QR code URL for testing:
- * https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?p=43230693015006003210651210008545221815897062|2|1|1|F45F565F22E7784B638952FF47C3870F93E7212C
  */
-
-const VALID_QR_CODE_URL = 
-  'https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?p=43230693015006003210651210008545221815897062|2|1|1|F45F565F22E7784B638952FF47C3870F93E7212C';
-
-const VALID_NF_KEY = '43230693015006003210651210008545221815897062|2|1|1|F45F565F22E7784B638952FF47C3870F93E7212C';
-
-/**
- * Mock the BarcodeScanner component to simulate a QR code scan.
- * This is necessary because the actual barcode scanner requires a camera.
- */
-async function mockQrCodeScanner(page: Page, qrCodeData: string) {
-  await page.addInitScript((data) => {
-    // Mock the Capacitor BarcodeScanner API
-    (window as any).Capacitor = {
-      ...(window as any).Capacitor,
-      getPlatform: () => 'web',
-    };
-    
-    // Mock the BarcodeScanner module
-    const mockBarcodeScanner = {
-      checkPermission: async () => ({ granted: true }),
-      hideBackground: () => {},
-      showBackground: () => {},
-      stopScan: () => {},
-      startScan: async () => ({
-        hasContent: true,
-        content: data,
-      }),
-    };
-    
-    // Inject into window for module imports
-    (window as any).BarcodeScanner = mockBarcodeScanner;
-  }, qrCodeData);
-}
-
-/**
- * Mock storage and database operations.
- * In a real scenario, these would be mocked at the API level.
- */
-async function mockStorageAndDatabase(page: Page) {
-  await page.addInitScript(() => {
-    // Mock storage operations
-    const mockStorage = {
-      writeFile: async (path: string, data: any) => {
-        console.log(`[MOCK] Writing to storage: ${path}`, data);
-        return true;
-      },
-      readFile: async (path: string) => {
-        console.log(`[MOCK] Reading from storage: ${path}`);
-        return null;
-      },
-    };
-    
-    // Mock database operations
-    const mockDatabase = {
-      insertOne: async (db: string, collection: string, data: any) => {
-        console.log(`[MOCK] Inserting into ${db}.${collection}`, data);
-        return { insertedId: 'mock-id' };
-      },
-      findOne: async (db: string, collection: string, query: any) => {
-        console.log(`[MOCK] Finding one in ${db}.${collection}`, query);
-        return null;
-      },
-      find: async (db: string, collection: string, query: any) => {
-        console.log(`[MOCK] Finding in ${db}.${collection}`, query);
-        return [];
-      },
-    };
-    
-    // Store mocks on window for access
-    (window as any).__mockStorage = mockStorage;
-    (window as any).__mockDatabase = mockDatabase;
-  });
-}
 
 test.describe('NF Scanner Integration Test', () => {
   test.beforeEach(async ({ page }) => {
@@ -183,48 +112,12 @@ test.describe('NF Scanner Integration Test', () => {
     // This test validates that the fetched data is displayed in the UI
     // We'll need to mock the API response to ensure consistent data
     
-    const mockNfData = {
-      key: '43230693015006003210651210008545221815897062',
-      version: '2',
-      env: '1',
-      csc: '1',
-      hash: 'F45F565F22E7784B638952FF47C3870F93E7212C',
-      number: '854522',
-      series: '121',
-      date: '13/06/2023 20:19:31',
-      protocol: '143230954047438',
-      store: {
-        name: 'COMPANHIA ZAFFARI COMERCIO E INDUSTRIA',
-        cnpj: '93.015.006/0032-10',
-        incricaoEstadual: '0962638145',
-        address: 'AV IPIRANGA, 5200, JARDIM BOTANICO, PORTO ALEGRE, RS'
-      },
-      items: [
-        {
-          code: '7896333041307',
-          description: 'AG MINERAL TUTTIBLU S/GAS 5L',
-          amount: 2,
-          unit: 'UN',
-          value: 5.49,
-          totalValue: 10.98
-        },
-        {
-          code: '7896083800018',
-          description: 'AG SANITARIA QBOA 1L',
-          amount: 1,
-          unit: 'UN',
-          value: 4.49,
-          totalValue: 4.49
-        }
-      ]
-    };
-    
     // Intercept the API request and return mock data
     await page.route('**/nf-data*', route => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(mockNfData)
+        body: JSON.stringify(MOCK_NF_DATA)
       });
     });
     
@@ -253,7 +146,7 @@ test.describe('NF Scanner Integration Test', () => {
 
   test('should allow canceling after scanning', async ({ page }) => {
     // Mock the API response
-    const mockNfData = {
+    const simpleMockData = {
       key: '43230693015006003210651210008545221815897062',
       items: [
         {
@@ -271,7 +164,7 @@ test.describe('NF Scanner Integration Test', () => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(mockNfData)
+        body: JSON.stringify(simpleMockData)
       });
     });
     
