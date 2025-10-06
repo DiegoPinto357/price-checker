@@ -3,7 +3,7 @@ import MockDate from 'mockdate';
 import { createRender } from '../testUtils';
 import { triggerIntersectionOnInstance } from '../lib/__mocks__/Observer';
 import { storage } from '../../proxies';
-import Meals from '.';
+import MealsPlanner from '.';
 import { MealsRecord } from '../Context/MealsPlannerContext';
 
 vi.mock('../lib/Observer');
@@ -97,7 +97,7 @@ describe('MealsPlanner', () => {
     await setupFiles();
 
     await act(async () => {
-      render(<Meals />);
+      render(<MealsPlanner />);
     });
 
     const dayContainers = screen.getAllByRole('group');
@@ -114,7 +114,7 @@ describe('MealsPlanner', () => {
   });
 
   it('adds month at the top of the list and removes the last one when user scrolls to top', async () => {
-    render(<Meals />);
+    render(<MealsPlanner />);
 
     triggerIntersectionOnInstance['observer-top']();
 
@@ -130,7 +130,7 @@ describe('MealsPlanner', () => {
   });
 
   it('adds month at the bottom of the list and removes the first one when user scrolls to top', async () => {
-    render(<Meals />);
+    render(<MealsPlanner />);
 
     triggerIntersectionOnInstance['observer-bottom']();
 
