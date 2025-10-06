@@ -4,7 +4,11 @@ This directory contains end-to-end integration tests for the Price Checker appli
 
 ## Setup
 
-The Playwright setup is already configured. To install the browsers, run:
+The Playwright setup is already configured. The project is configured to use the system's Chrome browser by default, so browser installation is optional.
+
+### Optional: Install Playwright browsers
+
+If you want to use Playwright's bundled browsers instead of the system browser:
 
 ```bash
 npx playwright install chromium
@@ -15,6 +19,8 @@ Or install all browsers:
 ```bash
 npx playwright install
 ```
+
+**Note:** If you encounter download errors, the system's Chrome browser will be used automatically.
 
 ## Running Tests
 

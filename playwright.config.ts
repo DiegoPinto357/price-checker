@@ -36,14 +36,16 @@ export default defineConfig({
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-        // Use system's chromium if Playwright's is not installed
-        channel: process.env.CI ? undefined : 'chrome',
+        // Use 'chrome' channel to use system's Google Chrome
+        channel: 'chrome',
       },
     },
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: [
+  // Comment out webServer if you want to start servers manually
+  // or if running tests that don't require the app (like smoke tests)
+  webServer: process.env.SKIP_WEBSERVER ? undefined : [
     {
       command: 'npm run server',
       url: 'http://127.0.0.1:3002',
