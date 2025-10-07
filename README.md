@@ -53,6 +53,7 @@ price-checker is a cross-platform application built with React, Ionic React, and
 
 - Node.js and npm installed.
 - Android Studio installed for Android development and emulation.
+- MongoDB Atlas account with a cluster set up.
 
 ### Installation
 
@@ -65,6 +66,14 @@ price-checker is a cross-platform application built with React, Ionic React, and
    ```bash
    npm install
    ```
+3. Configure MongoDB connection:
+   - Create a `src/nodejs/env.json` file based on `src/nodejs/env.example.json`
+   - Replace `<username>`, `<password>`, and `<cluster>` with your MongoDB Atlas credentials
+   - Get your connection string from MongoDB Atlas dashboard:
+     1. Go to your cluster in MongoDB Atlas
+     2. Click "Connect"
+     3. Choose "Connect your application"
+     4. Copy the connection string and update the `MONGODB_URI` in `env.json`
 
 ## Running the Application
 
