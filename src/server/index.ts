@@ -1,6 +1,5 @@
 import fastify from 'fastify';
 import cors from '@fastify/cors';
-import storageRouter from './storage.router.js';
 import databaseRouter from './database.router.js';
 import youtubeRouter from './youtube.router.js';
 import openAiRouter from './openAi.router.js';
@@ -11,7 +10,6 @@ const app = fastify({
 });
 
 app.register(cors);
-app.register(storageRouter);
 app.register(databaseRouter);
 app.register(youtubeRouter);
 app.register(openAiRouter);
