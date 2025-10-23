@@ -1,13 +1,12 @@
 import axios from 'axios';
 import { Mock } from 'vitest';
+import { SERVER_HOST } from '../../config';
 import { Find, FindOne, Insert, InsertOne, UpdateOne } from './types';
 
 vi.mock('axios');
 
 const databaseName = 'products';
 const collectionName = 'items';
-
-const serverHost = 'http://127.0.0.1:3002';
 
 interface DatabaseProxy {
   find: Find;
@@ -35,7 +34,7 @@ describe('database proxy', () => {
     await databaseProxy.find(databaseName, collectionName, filter);
 
     expect(axios.post).toBeCalledTimes(1);
-    expect(axios.post).toBeCalledWith(`${serverHost}/database/find`, {
+    expect(axios.post).toBeCalledWith(`${SERVER_HOST}/database/find`, {
       databaseName,
       collectionName,
       filter,
@@ -50,7 +49,7 @@ describe('database proxy', () => {
     await databaseProxy.findOne(databaseName, collectionName, filter);
 
     expect(axios.post).toBeCalledTimes(1);
-    expect(axios.post).toBeCalledWith(`${serverHost}/database/findOne`, {
+    expect(axios.post).toBeCalledWith(`${SERVER_HOST}/database/findOne`, {
       databaseName,
       collectionName,
       filter,
@@ -69,7 +68,7 @@ describe('database proxy', () => {
     await databaseProxy.insert(databaseName, collectionName, documents);
 
     expect(axios.post).toBeCalledTimes(1);
-    expect(axios.post).toBeCalledWith(`${serverHost}/database/insert`, {
+    expect(axios.post).toBeCalledWith(`${SERVER_HOST}/database/insert`, {
       databaseName,
       collectionName,
       documents,
@@ -84,7 +83,7 @@ describe('database proxy', () => {
     await databaseProxy.insertOne(databaseName, collectionName, document);
 
     expect(axios.post).toBeCalledTimes(1);
-    expect(axios.post).toBeCalledWith(`${serverHost}/database/insertOne`, {
+    expect(axios.post).toBeCalledWith(`${SERVER_HOST}/database/insertOne`, {
       databaseName,
       collectionName,
       document,
@@ -105,7 +104,7 @@ describe('database proxy', () => {
     );
 
     expect(axios.post).toBeCalledTimes(1);
-    expect(axios.post).toBeCalledWith(`${serverHost}/database/updateOne`, {
+    expect(axios.post).toBeCalledWith(`${SERVER_HOST}/database/updateOne`, {
       databaseName,
       collectionName,
       filter,
