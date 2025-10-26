@@ -6,6 +6,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './setupTest.ts',
     testTimeout: 10000,
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      'src/ipc.test.ts',
+    ],
     onConsoleLog(log) {
       if (
         log.includes(
