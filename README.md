@@ -105,10 +105,16 @@ npm run preview
 
 Before building for Android, configure the server connection:
 
-1. Edit `src/config/index.ts` to set the `SERVER_HOST` to your computer's local network IP address:
+1. Edit `src/config/index.ts` to set the remote server on your local network:
    ```typescript
-   export const SERVER_HOST = 'http://192.168.1.100:3002'; // Replace with your IP
+   // Set to your computer's local IP address
+   export const REMOTE_SERVER_HOST: string | null = 'http://192.168.1.100:3002';
+   
+   // Localhost fallback (automatically used if REMOTE_SERVER_HOST is null)
+   export const LOCALHOST_SERVER_HOST = 'http://127.0.0.1:3002';
    ```
+   - The app will try `REMOTE_SERVER_HOST` first, then fall back to `LOCALHOST_SERVER_HOST` if remote is null
+   - Set `REMOTE_SERVER_HOST` to `null` to always use localhost (useful for development)
    - Find your local IP address:
      - **Windows**: Run `ipconfig` and look for IPv4 Address
      - **Mac/Linux**: Run `ifconfig` or `ip addr` and look for your network interface
