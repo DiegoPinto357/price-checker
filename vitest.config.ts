@@ -6,6 +6,15 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './setupTest.ts',
     testTimeout: 10000,
+    // Exclude Playwright E2E tests from Vitest
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/cypress/**',
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*',
+      '**/tests/e2e/**', // Exclude Playwright E2E tests
+    ],
     onConsoleLog(log) {
       if (
         log.includes(

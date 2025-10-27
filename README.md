@@ -45,7 +45,8 @@ price-checker is a cross-platform application built with React, Ionic React, and
 - Fastify backend server for API and data handling.
 - React Query for efficient data fetching and caching.
 - TailwindCSS for utility-first styling.
-- Testing with Vitest and Testing Library.
+- Testing with Vitest and Testing Library for unit tests.
+- Playwright for end-to-end integration testing.
 
 ## Setup Instructions
 
@@ -135,7 +136,9 @@ Architecture and storage design diagrams are available in the `docs/` folder:
 
 ## Testing
 
-Run unit and integration tests:
+### Unit and Integration Tests
+
+Run unit and integration tests with Vitest:
 
 ```bash
 npm run test
@@ -146,6 +149,30 @@ Run tests with interactive UI:
 ```bash
 npm run test:ui
 ```
+
+### E2E Tests with Playwright
+
+The project now includes Playwright for end-to-end integration testing, particularly for the NF Scanner feature.
+
+Run E2E tests:
+
+```bash
+npm run test:e2e
+```
+
+Run E2E tests in interactive UI mode:
+
+```bash
+npm run test:e2e:ui
+```
+
+Debug E2E tests:
+
+```bash
+npm run test:e2e:debug
+```
+
+For detailed information about the Playwright setup, including test coverage, debugging tips, and troubleshooting, see [PLAYWRIGHT_SETUP.md](./PLAYWRIGHT_SETUP.md).
 
 ## Contributing
 
