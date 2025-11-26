@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { SERVER_HOST } from '../../config';
+import { getServerHost } from '../../config';
 import { FindOptions, FindOneOptions, UpdateOneOptions } from './types';
 
 const find = async <T>(
@@ -9,7 +9,8 @@ const find = async <T>(
   options?: FindOptions<T>
 ): Promise<T[]> => {
   try {
-    const { data } = await axios.post(`${SERVER_HOST}/database/find`, {
+    const serverHost = await getServerHost();
+    const { data } = await axios.post(`${serverHost}/database/find`, {
       databaseName,
       collectionName,
       filter,
@@ -28,7 +29,8 @@ const findOne = async <T>(
   options?: FindOneOptions<T>
 ): Promise<T | null> => {
   try {
-    const { data } = await axios.post(`${SERVER_HOST}/database/findOne`, {
+    const serverHost = await getServerHost();
+    const { data } = await axios.post(`${serverHost}/database/findOne`, {
       databaseName,
       collectionName,
       filter,
@@ -46,7 +48,8 @@ const insert = async <T>(
   documents: T[]
 ) => {
   try {
-    const { data } = await axios.post(`${SERVER_HOST}/database/insert`, {
+    const serverHost = await getServerHost();
+    const { data } = await axios.post(`${serverHost}/database/insert`, {
       databaseName,
       collectionName,
       documents,
@@ -63,7 +66,8 @@ const insertOne = async <T>(
   document: T
 ): Promise<{ insertedId: string } | undefined> => {
   try {
-    const { data } = await axios.post(`${SERVER_HOST}/database/insertOne`, {
+    const serverHost = await getServerHost();
+    const { data } = await axios.post(`${serverHost}/database/insertOne`, {
       databaseName,
       collectionName,
       document,
@@ -85,7 +89,8 @@ const updateOne = async <T>(
   | undefined
 > => {
   try {
-    const { data } = await axios.post(`${SERVER_HOST}/database/updateOne`, {
+    const serverHost = await getServerHost();
+    const { data } = await axios.post(`${serverHost}/database/updateOne`, {
       databaseName,
       collectionName,
       filter,

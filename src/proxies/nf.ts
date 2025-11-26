@@ -1,9 +1,10 @@
 import axios from 'axios';
-import { SERVER_HOST } from '../config';
+import { getServerHost } from '../config';
 import { Nf } from '../types';
 
 const getNfData = async (key: string): Promise<Nf> => {
-  const { data } = await axios.get(`${SERVER_HOST}/nf-data`, {
+  const serverHost = await getServerHost();
+  const { data } = await axios.get(`${serverHost}/nf-data`, {
     params: { key },
   });
   return data;
