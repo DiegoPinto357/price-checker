@@ -1,10 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "exclude": [
-    "src/**/*.test.ts",
-    "src/ipc.ts",
-    "src/proxies/database/databaseIpc.ts",
-    "src/proxies/youtube/youtubeIpc.ts",
-    "src/proxies/openAi/openAiIpc.ts"
+    "src/**/*.test.ts"
   ]
 }
