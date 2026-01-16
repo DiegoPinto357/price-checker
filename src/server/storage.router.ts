@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import storage from '../nodejs/services/storage.js';
+import storage from './services/storage.service';
 
 export default async (app: FastifyInstance) => {
   interface WriteFileBody {

@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import openAi from '../nodejs/services/openAi.js';
+import openAi from './services/openAi.service';
 
 export default async (app: FastifyInstance) => {
   type CreateResponseBody = {

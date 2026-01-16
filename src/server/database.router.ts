@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import database from '../nodejs/services/database.js';
+import database from './services/database.service';
 
 export default async (app: FastifyInstance) => {
   interface DefaultBody {

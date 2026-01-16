@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import youtube from '../nodejs/services/youtube.js';
+import youtube from './services/youtube.service';
 
 export default async (app: FastifyInstance) => {
   type VideoDataQuery = {
