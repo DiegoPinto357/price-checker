@@ -1,11 +1,11 @@
 import axios from 'axios';
+import { getServerHost } from '../../config';
 
 import type { VideoData } from './types';
 
-const serverHost = 'http://127.0.0.1:3002';
-
 const getVideoData = async (videoURL: string) => {
   try {
+    const serverHost = await getServerHost();
     const { data } = await axios.get<VideoData>(
       `${serverHost}/youtube/video-data`,
       {

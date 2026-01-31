@@ -1,39 +1,43 @@
 import fastify from 'fastify';
 import cors from '@fastify/cors';
-import databaseRouter from './database.router.js';
-import youtubeRouter from './youtube.router.js';
-import openAiRouter from './openAi.router.js';
-import nfParser from '../nodejs/nfParser.js';
+import { loadEnv } from './utils/loadEnv';
+import { loadConfig } from './config';
+import configRouter from './config.router';
+import databaseRouter from './database.router';
+import youtubeRouter from './youtube.router';
+import openAiRouter from './openAi.router';
+import nfRouter from './nf.router';
+import storageRouter from './storage.router';
+
+loadEnv();
+loadConfig();
 
 const app = fastify({
   logger: true,
+  connectionTimeout: 60000,
 });
 
 app.register(cors);
+app.register(configRouter);
 app.register(databaseRouter);
 app.register(youtubeRouter);
 app.register(openAiRouter);
+app.register(nfRouter);
+app.register(storageRouter);
+
+app.get('/health', async (_request, reply) => {
+  reply.send({ status: 'ok' });
+});
 
 app.setErrorHandler((error, _request, reply) => {
   console.error(error);
   reply.status(500).send(error);
 });
 
-interface ItemsQuerystring {
-  key: string;
-}
+const host = process.env.ANDROID ? '0.0.0.0' : '127.0.0.1';
+const port = process.env.PORT ? parseInt(process.env.PORT) : 3002;
 
-// TODO move to router file
-app.get<{ Querystring: ItemsQuerystring }>(
-  '/nf-data',
-  async (request, reply) => {
-    const { key } = request.query;
-    const items = await nfParser(key);
-    reply.send(items);
-  }
-);
-
-app.listen({ port: 3002 }, (err, address) => {
+app.listen({ port, host }, (err, address) => {
   if (err) throw err;
   console.log(`Server is now listening on ${address}`);
 });

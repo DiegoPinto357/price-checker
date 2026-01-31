@@ -7,7 +7,6 @@ import { BsQrCodeScan } from 'react-icons/bs';
 import ContextProvider from './Context';
 import MainContainer from './MainContainer';
 import MealsPlanner from './MealsPlanner';
-import NodejsLoader from './NodejsLoader';
 import ShoppingList from './ShoppingList';
 import Recipes from './Recipes';
 import NFScanner from './NFScanner';
@@ -30,8 +29,6 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ContextProvider>
-        <NodejsLoader />
-
         {debugProducts ? (
           <Products />
         ) : (

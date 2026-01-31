@@ -1,11 +1,11 @@
 import axios from 'axios';
+import { getServerHost } from '../../config';
 
 import type { CreateResponseParams, OpenAiResponse } from './types';
 
-const serverHost = 'http://127.0.0.1:3002';
-
 const createResponse = async (params: CreateResponseParams) => {
   try {
+    const serverHost = await getServerHost();
     const { data } = await axios.post<OpenAiResponse>(
       `${serverHost}/openai/create-response`,
       params

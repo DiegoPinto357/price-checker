@@ -1,7 +1,6 @@
 import axios from 'axios';
+import { getServerHost } from '../../config';
 import { FindOptions, FindOneOptions, UpdateOneOptions } from './types';
-
-const serverHost = 'http://127.0.0.1:3002';
 
 const find = async <T>(
   databaseName: string,
@@ -10,6 +9,7 @@ const find = async <T>(
   options?: FindOptions<T>
 ): Promise<T[]> => {
   try {
+    const serverHost = await getServerHost();
     const { data } = await axios.post(`${serverHost}/database/find`, {
       databaseName,
       collectionName,
@@ -29,6 +29,7 @@ const findOne = async <T>(
   options?: FindOneOptions<T>
 ): Promise<T | null> => {
   try {
+    const serverHost = await getServerHost();
     const { data } = await axios.post(`${serverHost}/database/findOne`, {
       databaseName,
       collectionName,
@@ -47,6 +48,7 @@ const insert = async <T>(
   documents: T[]
 ) => {
   try {
+    const serverHost = await getServerHost();
     const { data } = await axios.post(`${serverHost}/database/insert`, {
       databaseName,
       collectionName,
@@ -64,6 +66,7 @@ const insertOne = async <T>(
   document: T
 ): Promise<{ insertedId: string } | undefined> => {
   try {
+    const serverHost = await getServerHost();
     const { data } = await axios.post(`${serverHost}/database/insertOne`, {
       databaseName,
       collectionName,
@@ -86,6 +89,7 @@ const updateOne = async <T>(
   | undefined
 > => {
   try {
+    const serverHost = await getServerHost();
     const { data } = await axios.post(`${serverHost}/database/updateOne`, {
       databaseName,
       collectionName,

@@ -1,0 +1,5 @@
+- [ ] Is storage service still needed in the server
+- [ ] Remove nodejs folder
+- [ ] Organize server feiles by domain
+- [ ] Convert interfaces to types
+- [ ] Remove config logs from test

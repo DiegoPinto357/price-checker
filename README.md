@@ -32,7 +32,7 @@ price-checker is a cross-platform application built with React, Ionic React, and
   - Barcode scanning via `@capacitor-community/barcode-scanner`.
   - Filesystem access for local data storage.
   - Haptic feedback for enhanced user experience.
-- Uses CapacitorNodeJS plugin for Node.js integration within the mobile app.
+- Connects to a backend server on the local network for data processing.
 - Android-specific resources and configurations are located in the `android/` directory.
 - Supports running on Android emulators and physical devices with provided npm scripts.
 
@@ -103,18 +103,43 @@ npm run preview
 
 ### Android Platform
 
-- Open Android project in Android Studio:
-  ```bash
-  npm run android:project
-  ```
-- Run on Android emulator (Pixel 6 API 31):
-  ```bash
-  npm run android:sim
-  ```
-- Run on connected Android device:
-  ```bash
-  npm run android
-  ```
+Before building for Android, configure the server connection:
+
+1. Edit `src/config/index.ts` to set the remote server on your local network:
+   ```typescript
+   // Set to your computer's local IP address
+   export const REMOTE_SERVER_HOST: string | null = 'http://192.168.1.100:3002';
+   
+   // Localhost fallback (automatically used if REMOTE_SERVER_HOST is null)
+   export const LOCALHOST_SERVER_HOST = 'http://127.0.0.1:3002';
+   ```
+   - The app will try `REMOTE_SERVER_HOST` first, then fall back to `LOCALHOST_SERVER_HOST` if remote is null
+   - Set `REMOTE_SERVER_HOST` to `null` to always use localhost (useful for development)
+   - Find your local IP address:
+     - **Windows**: Run `ipconfig` and look for IPv4 Address
+     - **Mac/Linux**: Run `ifconfig` or `ip addr` and look for your network interface
+   - Make sure your mobile device is on the same network as your computer
+   - Ensure the backend server is running on your computer with `npm run server`
+
+2. Build the app for Android:
+   ```bash
+   npm run build-app
+   ```
+
+3. Open Android project in Android Studio:
+   ```bash
+   npm run android:project
+   ```
+
+4. Run on Android emulator (Pixel 6 API 31):
+   ```bash
+   npm run android:sim
+   ```
+
+5. Run on connected Android device:
+   ```bash
+   npm run android
+   ```
 
 ## Project Structure Overview
 

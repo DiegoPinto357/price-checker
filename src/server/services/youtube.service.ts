@@ -1,9 +1,8 @@
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-var-requires */
-const ytdl = require('ytdl-core');
-const { YoutubeTranscript } = require('youtube-transcript');
+import { YoutubeTranscript } from 'youtube-transcript';
+// @ts-expect-error - ytdl-core has incorrect type definitions
+import ytdl from 'ytdl-core';
 
-const extractVideoId = url => {
+const extractVideoId = (url: string): string | null => {
   const regex =
     /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=))|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S+)?$/;
 
@@ -11,10 +10,14 @@ const extractVideoId = url => {
   return match ? match[1] : null;
 };
 
-const parseTranscript = transcript =>
+type TranscriptItem = {
+  text: string;
+};
+
+const parseTranscript = (transcript: TranscriptItem[]): string =>
   transcript.map(({ text }) => text).join(' ');
 
-const getVideoData = async url => {
+export const getVideoData = async (url: string) => {
   const videoId = extractVideoId(url);
 
   if (!videoId) {
@@ -30,6 +33,6 @@ const getVideoData = async url => {
   };
 };
 
-module.exports = {
+export default {
   getVideoData,
 };

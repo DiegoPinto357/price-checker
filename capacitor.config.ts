@@ -5,11 +5,6 @@ const config: CapacitorConfig = {
   appName: 'price-checker',
   webDir: 'dist',
   bundledWebRuntime: false,
-  plugins: {
-    CapacitorNodeJS: {
-      nodeDir: 'nodejs',
-    },
-  },
 };
 
 export default config;

@@ -1,16 +1,20 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
-import config from '../../nodejs/config.json';
+import { getServerConfig } from '../serverConfig';
 
-const userDataFolder = config.sandboxMode
-  ? '/PriceChecker-sandbox'
-  : '/PriceChecker';
+const getUserDataFolder = async () => {
+  const config = await getServerConfig();
+  return config.sandboxMode ? '/PriceChecker-sandbox' : '/PriceChecker';
+};
 
-const getFullPath = (filename: string) => `${userDataFolder}${filename}`;
+const getFullPath = async (filename: string) => {
+  const userDataFolder = await getUserDataFolder();
+  return `${userDataFolder}${filename}`;
+};
 
 const readFile = async <T>(filename: string) => {
   try {
     const { data } = await Filesystem.readFile({
-      path: getFullPath(filename),
+      path: await getFullPath(filename),
       directory: Directory.Documents,
       encoding: Encoding.UTF8,
     });
@@ -24,7 +28,7 @@ const readFile = async <T>(filename: string) => {
 
 const writeFile = async <T>(filename: string, data: T) =>
   Filesystem.writeFile({
-    path: getFullPath(filename), // TODO improve path join
+    path: await getFullPath(filename), // TODO improve path join
     data: typeof data === 'string' ? data : JSON.stringify(data, null, 2),
     directory: Directory.Documents,
     encoding: Encoding.UTF8,

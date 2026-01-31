@@ -1,22 +1,29 @@
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-var-requires */
-const axios = require('axios');
-const cheerio = require('cheerio');
+import axios from 'axios';
+import * as cheerio from 'cheerio';
 
 const baseUrl =
   'https://www.sefaz.rs.gov.br/ASP/AAE_ROOT/NFE/SAT-WEB-NFE-NFC_QRCODE_1.asp?p=';
 
-const formatDecimal = value => value.replace('.', '').replace(',', '.');
+const formatDecimal = (value: string): string =>
+  value.replace('.', '').replace(',', '.');
 
-const getPage = async key => {
+const getPage = async (key: string): Promise<string> => {
   const url = `${baseUrl}${key}`;
-  const { data } = await axios.get(url, {
+  const { data } = await axios.get<string>(url, {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   });
   return data;
 };
 
-const parseQrCode = key => {
+interface QrCodeData {
+  key: string;
+  version: string;
+  env: string;
+  csc: string;
+  hash: string;
+}
+
+const parseQrCode = (key: string): QrCodeData => {
   const items = key.split('|');
   return {
     key: items[0],
@@ -27,31 +34,70 @@ const parseQrCode = key => {
   };
 };
 
-const parseStoreData = raw => {
+type StoreData = {
+  cnpj: string;
+  incricaoEstadual: string;
+};
+
+const parseStoreData = (raw: string): StoreData => {
   const rawArray = raw.split('\n');
+  const ieMatch = rawArray[3].match(/:\s(\d+)/);
   return {
     cnpj: rawArray[2].trim(),
-    incricaoEstadual: rawArray[3].match(/:\s(\d+)/)[1],
+    incricaoEstadual: ieMatch ? ieMatch[1] : '',
   };
 };
 
-const parseStoreAddress = raw => {
+const parseStoreAddress = (raw: string): string => {
   return raw.replace(/\n(\s+)/gm, ' ');
 };
 
-const parseMetadata = raw => {
-  const items = raw.split('\n');
-
-  const number = items[1].match(/:\s([^]\d*)/)[1];
-  const series = items[2].match(/:\s([^]\d*)/)[1];
-  const date = items[3].match(/:\s([^]*)/)[1];
-
-  return { number, series, date };
+type Metadata = {
+  number: string;
+  series: string;
+  date: string;
 };
 
-const parseProtocol = raw => raw.match(/:\s([^]\d*)/)[1];
+const parseMetadata = (raw: string): Metadata => {
+  const items = raw.split('\n');
 
-const parsePage = page => {
+  const numberMatch = items[1].match(/:\s([^]\d*)/);
+  const seriesMatch = items[2].match(/:\s([^]\d*)/);
+  const dateMatch = items[3].match(/:\s([^]*)/);
+
+  return {
+    number: numberMatch ? numberMatch[1] : '',
+    series: seriesMatch ? seriesMatch[1] : '',
+    date: dateMatch ? dateMatch[1] : '',
+  };
+};
+
+const parseProtocol = (raw: string): string => {
+  const match = raw.match(/:\s([^]\d*)/);
+  return match ? match[1] : '';
+};
+
+type Store = StoreData & {
+  name: string;
+  address: string;
+};
+
+type Item = {
+  code: string;
+  description: string;
+  amount: number;
+  unit: string;
+  value: number;
+  totalValue: number;
+};
+
+type PageData = Metadata & {
+  protocol: string;
+  store: Store;
+  items: Item[];
+};
+
+const parsePage = (page: string): PageData => {
   const $ = cheerio.load(page);
 
   const storeTable = $(
@@ -64,7 +110,7 @@ const parsePage = page => {
   const storeAddressRaw = $($(storeTable).find('td')[3]).text();
   const storeAddress = parseStoreAddress(storeAddressRaw);
 
-  const store = { name: storeName, ...storeData, address: storeAddress };
+  const store: Store = { name: storeName, ...storeData, address: storeAddress };
 
   const infoTable = $(
     '#respostaWS > tbody > tr > td > table > tbody > tr:nth-child(3) > td > table > tbody > tr > td > table > tbody > tr:nth-child(3) > td > table > tbody'
@@ -79,12 +125,12 @@ const parsePage = page => {
   const itemsTable = $(
     '#respostaWS > tbody > tr > td > table > tbody > tr:nth-child(3) > td > table > tbody > tr > td > table > tbody > tr:nth-child(5) > td > table > tbody > tr'
   );
-  const items = [];
+  const items: Item[] = [];
 
   itemsTable.each((index, element) => {
     if (index === 0) return;
 
-    const item = {
+    const item: Item = {
       code: $($(element).find('td')[0]).text(),
       description: $($(element).find('td')[1]).text(),
       amount: +formatDecimal($($(element).find('td')[2]).text()),
@@ -98,9 +144,13 @@ const parsePage = page => {
   return { ...metadata, protocol, store, items };
 };
 
-module.exports = async key => {
+export type NfData = QrCodeData & PageData;
+
+export const parseNf = async (key: string): Promise<NfData> => {
   const page = await getPage(key);
   const qrCode = parseQrCode(key);
   const pageData = parsePage(page);
   return { ...qrCode, ...pageData };
 };
+
+export default parseNf;
