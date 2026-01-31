@@ -2,6 +2,7 @@ import fastify from 'fastify';
 import cors from '@fastify/cors';
 import { loadEnv } from './utils/loadEnv';
 import { loadConfig } from './config';
+import configRouter from './config.router';
 import databaseRouter from './database.router';
 import youtubeRouter from './youtube.router';
 import openAiRouter from './openAi.router';
@@ -17,6 +18,7 @@ const app = fastify({
 });
 
 app.register(cors);
+app.register(configRouter);
 app.register(databaseRouter);
 app.register(youtubeRouter);
 app.register(openAiRouter);
