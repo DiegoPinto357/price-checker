@@ -5,8 +5,9 @@ import { nextui } from '@nextui-org/react';
 export default {
   content: [
     'index.html',
-    'src/**/*.{js,ts,jsx,tsx}',
-    '!src/nodejs/node_modules',
+    'src/**/*.{jsx,tsx}', // Only scan component files, not all TS files
+    '!src/server/**', // Exclude server
+    '!src/**/*.test.{ts,tsx}', // Exclude tests
     'node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
