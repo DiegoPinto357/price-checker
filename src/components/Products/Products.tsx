@@ -25,12 +25,9 @@ const Products = () => {
     fetchProducts();
   }, []);
 
-  // const product = products[32];
   const selectedProducts = products
     .filter(({ code }) => selectedProductsIds.includes(code))
     .map(({ description, history }) => mapData(description, history));
-
-  console.log(selectedProducts);
 
   return (
     <div>

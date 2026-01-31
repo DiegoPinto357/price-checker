@@ -1,6 +1,7 @@
 import youtube from '../proxies/youtube';
 import openAi from '../proxies/openAi';
 import extractRecipeFromVideo from './prompts/extractRecipeFromVideo';
+import logger from '../libs/logger';
 
 import type { Recipe } from './types';
 
@@ -17,7 +18,7 @@ const createNewFromYoutubeVideo = async (videoURL: string) => {
     });
 
     if (response?.output_text) {
-      console.log(response.output_text);
+      logger.log(response.output_text);
       return JSON.parse(preprocessOutput(response.output_text)) as Recipe;
     }
   }

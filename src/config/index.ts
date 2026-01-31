@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Capacitor } from '@capacitor/core';
+import logger from '../libs/logger';
 
 // Configuration for the app
 // REMOTE_SERVER_HOST: Server on local network (set to your computer's IP)
@@ -32,27 +33,27 @@ const isServerReachable = async (host: string): Promise<boolean> => {
  * Results are cached after first check to avoid repeated health checks.
  */
 export const getServerHost = async (): Promise<string> => {
-  console.log('[config] Detecting server host...');
+  logger.log('[config] Detecting server host...');
   // Return cached result if available
   if (cachedServerHost) {
-    console.log(`[config] Using cached server host: ${cachedServerHost}`);
+    logger.log(`[config] Using cached server host: ${cachedServerHost}`);
     return cachedServerHost;
   }
 
   // Detect platform using Capacitor
   const platform = Capacitor.getPlatform();
-  console.log(`[config] Detected platform: ${platform}`);
+  logger.log(`[config] Detected platform: ${platform}`);
   if (platform === 'android') {
     // Use Android emulator host for localhost
     const androidReachable = await isServerReachable(ANDROID_EMULATOR_HOST);
     if (androidReachable) {
       cachedServerHost = ANDROID_EMULATOR_HOST;
-      console.log(
+      logger.log(
         `[config] Using Android emulator host: ${ANDROID_EMULATOR_HOST}`
       );
       return cachedServerHost;
     }
-    console.log(
+    logger.log(
       `[config] Android emulator host unreachable, falling back to other hosts`
     );
   }
@@ -62,17 +63,17 @@ export const getServerHost = async (): Promise<string> => {
     const remoteReachable = await isServerReachable(REMOTE_SERVER_HOST);
     if (remoteReachable) {
       cachedServerHost = REMOTE_SERVER_HOST;
-      console.log(`[config] Using remote server: ${REMOTE_SERVER_HOST}`);
+      logger.log(`[config] Using remote server: ${REMOTE_SERVER_HOST}`);
       return cachedServerHost;
     }
-    console.log(
+    logger.log(
       `[config] Remote server unreachable, falling back to localhost`
     );
   }
 
   // Fall back to localhost
   cachedServerHost = LOCALHOST_SERVER_HOST;
-  console.log(`[config] Using localhost server: ${LOCALHOST_SERVER_HOST}`);
+  logger.log(`[config] Using localhost server: ${LOCALHOST_SERVER_HOST}`);
   return cachedServerHost;
 };
 

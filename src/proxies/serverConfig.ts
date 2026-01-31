@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getServerHost } from '../config';
+import logger from '../libs/logger';
 
 type ServerConfig = {
   sandboxMode: boolean;
@@ -16,10 +17,11 @@ export const getServerConfig = async (): Promise<ServerConfig> => {
     const serverHost = await getServerHost();
     const response = await axios.get<ServerConfig>(`${serverHost}/config`);
     cachedConfig = response.data;
-    console.log('[serverConfig] Fetched config from server:', cachedConfig);
+    console.log({ cachedConfig });
+    logger.log('[serverConfig] Fetched config from server:', cachedConfig);
     return cachedConfig;
   } catch (error) {
-    console.error('[serverConfig] Failed to fetch config from server:', error);
+    logger.error('[serverConfig] Failed to fetch config from server:', error);
     cachedConfig = { sandboxMode: false };
     return cachedConfig;
   }

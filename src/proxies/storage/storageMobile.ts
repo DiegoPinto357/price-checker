@@ -1,5 +1,6 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { getServerConfig } from '../serverConfig';
+import logger from '../../libs/logger';
 
 const getUserDataFolder = async () => {
   const config = await getServerConfig();
@@ -22,7 +23,7 @@ const readFile = async <T>(filename: string) => {
     const fileExtension = filename.split('.')[1];
     return (fileExtension === 'json' ? JSON.parse(data as string) : data) as T;
   } catch (e) {
-    console.log(`${filename} file not found.`);
+    logger.log(`${filename} file not found.`);
   }
 };
 

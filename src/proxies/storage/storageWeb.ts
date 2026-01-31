@@ -1,10 +1,12 @@
+import logger from '../../libs/logger';
+
 const writeFile = async <T>(filename: string, data: T) => {
   try {
     const fileContent =
       typeof data === 'string' ? data : JSON.stringify(data, null, 2);
     localStorage.setItem(filename, fileContent);
   } catch (error) {
-    console.error(`Error writing file ${filename} to localStorage:`, error);
+    logger.error(`Error writing file ${filename} to localStorage:`, error);
     throw error;
   }
 };
@@ -21,7 +23,7 @@ const readFile = async <T>(filename: string) => {
       ? JSON.parse(fileContent)
       : fileContent) as T;
   } catch (error) {
-    console.error(`Error reading file ${filename} from localStorage:`, error);
+    logger.error(`Error reading file ${filename} from localStorage:`, error);
     return undefined;
   }
 };

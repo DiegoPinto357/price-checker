@@ -25,7 +25,7 @@ type IndexEntry = [string, IndexData];
 
 const getMissingFiles = async (
   localIndex: Awaited<ReturnType<typeof createStorageIndex>>,
-  remoteIndex: IndexEntry[]
+  remoteIndex: IndexEntry[],
 ) => {
   const conflictingFiles = new Set<string>();
 
@@ -118,11 +118,6 @@ const syncProducts = async () => {
   const { missingLocalFiles, missingRemoteFiles, conflictingFiles } =
     await getMissingFiles(localIndex, remoteIndex);
 
-  // console.dir(
-  //   { missingLocalFiles, missingRemoteFiles, conflictingFiles },
-  //   { depth: null }
-  // );
-
   if (missingLocalFiles.length) {
     await pullProductsFromRemote(missingLocalFiles);
   }
@@ -144,10 +139,8 @@ const syncNfs = async () => {
 
   const { missingLocalFiles, missingRemoteFiles } = await getMissingFiles(
     localIndex,
-    remoteIndex
+    remoteIndex,
   );
-
-  // console.dir({ missingLocalFiles, missingRemoteFiles }, { depth: null });
 
   if (missingLocalFiles.length) {
     await pullNfsFromRemote(missingLocalFiles);
